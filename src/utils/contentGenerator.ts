@@ -10,6 +10,41 @@ export function generateContent(input: PropertyInput): GeneratedContent {
   const ewaText = ewaIncluded ? 'EWA included' : 'EWA not included';
   const ewaTextAR = ewaIncluded ? 'شامل الكهرباء والماء' : 'غير شامل الكهرباء والماء';
 
+  const hasBedrooms = bedrooms && bedrooms.trim() !== '';
+  const hasBathrooms = bathrooms && bathrooms.trim() !== '';
+  
+  const bedroomsBathroomsEN = hasBedrooms && hasBathrooms 
+    ? `• ${bedrooms} Bedrooms | ${bathrooms} Bathrooms`
+    : hasBedrooms 
+      ? `• ${bedrooms} Bedrooms`
+      : hasBathrooms 
+        ? `• ${bathrooms} Bathrooms`
+        : '';
+
+  const bedroomsBathroomsAR = hasBedrooms && hasBathrooms 
+    ? `• ${bedrooms} غرف نوم | ${bathrooms} حمامات`
+    : hasBedrooms 
+      ? `• ${bedrooms} غرف نوم`
+      : hasBathrooms 
+        ? `• ${bathrooms} حمامات`
+        : '';
+
+  const bedroomsBathroomsShortEN = hasBedrooms && hasBathrooms 
+    ? `${bedrooms} BR | ${bathrooms} BA | `
+    : hasBedrooms 
+      ? `${bedrooms} BR | `
+      : hasBathrooms 
+        ? `${bathrooms} BA | `
+        : '';
+
+  const bedroomsBathroomsShortAR = hasBedrooms && hasBathrooms 
+    ? `${bedrooms} غرف نوم | ${bathrooms} حمام | `
+    : hasBedrooms 
+      ? `${bedrooms} غرف نوم | `
+      : hasBathrooms 
+        ? `${bathrooms} حمام | `
+        : '';
+
   // Property Finder English
   const propertyFinderEN = `
 ${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${location}
@@ -17,7 +52,7 @@ ${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${lo
 This exceptional ${propertyType?.toLowerCase()} presents an outstanding opportunity for ${category?.toLowerCase()} purposes. Located in the prestigious area of ${location}, this property offers ${size} sqm of premium living space.
 
 Property Highlights:
-• ${bedrooms} Bedrooms | ${bathrooms} Bathrooms
+${bedroomsBathroomsEN}
 • Total Area: ${size} sqm
 • ${furnishingStatus}
 • ${ewaText}
@@ -30,7 +65,7 @@ ${uniqueSellingPoints ? `What Makes This Property Special:\n${uniqueSellingPoint
 Price: ${currency} ${Number(price).toLocaleString()}
 
 Contact us today to schedule a viewing and discover your perfect property in ${location}.
-  `.trim();
+  `.trim().replace(/\n\n\n/g, '\n\n');
 
   // Property Finder Arabic
   const propertyFinderAR = `
@@ -39,7 +74,7 @@ ${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاست
 ${getArabicPropertyType(propertyType)} استثنائية توفر فرصة رائعة لأغراض ${getArabicCategory(category)}. تقع في منطقة ${location} المرموقة، وتوفر هذه العقار ${size} متر مربع من المساحة المعيشية الفاخرة.
 
 مميزات العقار:
-• ${bedrooms} غرف نوم | ${bathrooms} حمامات
+${bedroomsBathroomsAR}
 • المساحة الإجمالية: ${size} متر مربع
 • ${getArabicFurnishing(furnishingStatus)}
 • ${ewaTextAR}
@@ -52,13 +87,13 @@ ${uniqueSellingPoints ? `ما يميز هذا العقار:\n${uniqueSellingPoin
 السعر: ${Number(price).toLocaleString()} ${currency}
 
 تواصل معنا اليوم لحجز موعد معاينة واكتشف عقارك المثالي في ${location}.
-  `.trim();
+  `.trim().replace(/\n\n\n/g, '\n\n');
 
   // Instagram English
   const instagramEN = `
 🏠 ${propertyType?.toUpperCase()} FOR ${category === 'Investment' ? 'INVESTMENT' : 'SALE'} 📍 ${location}
 
-✨ ${bedrooms} BR | ${bathrooms} BA | ${size} sqm
+✨ ${bedroomsBathroomsShortEN}${size} sqm
 💰 ${currency} ${Number(price).toLocaleString()}
 
 ${amenities.slice(0, 4).map(a => `✅ ${a}`).join('\n')}
@@ -73,7 +108,7 @@ ${uniqueSellingPoints ? `💎 ${uniqueSellingPoints.split('.')[0]}` : ''}
   const instagramAR = `
 🏠 ${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'} 📍 ${location}
 
-✨ ${bedrooms} غرف نوم | ${bathrooms} حمام | ${size} م²
+✨ ${bedroomsBathroomsShortAR}${size} م²
 💰 ${Number(price).toLocaleString()} ${currency}
 
 ${amenities.slice(0, 4).map(a => `✅ ${getArabicAmenity(a)}`).join('\n')}
@@ -85,17 +120,38 @@ ${uniqueSellingPoints ? `💎 ${uniqueSellingPoints.split('.')[0]}` : ''}
   `.trim();
 
   // Website English
+  const bedroomsLineEN = hasBedrooms ? `- Bedrooms: ${bedrooms}` : '';
+  const bathroomsLineEN = hasBathrooms ? `- Bathrooms: ${bathrooms}` : '';
+  const bedroomsLineAR = hasBedrooms ? `- غرف النوم: ${bedrooms}` : '';
+  const bathroomsLineAR = hasBathrooms ? `- الحمامات: ${bathrooms}` : '';
+  
+  const descriptionEN = hasBedrooms && hasBathrooms 
+    ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bedrooms} spacious bedrooms and ${bathrooms} modern bathrooms.`
+    : hasBedrooms 
+      ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bedrooms} spacious bedrooms.`
+      : hasBathrooms 
+        ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bathrooms} modern bathrooms.`
+        : `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters.`;
+
+  const descriptionAR = hasBedrooms && hasBathrooms 
+    ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع ويضم ${bedrooms} غرف نوم واسعة و${bathrooms} حمامات عصرية.`
+    : hasBedrooms 
+      ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع ويضم ${bedrooms} غرف نوم واسعة.`
+      : hasBathrooms 
+        ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع ويضم ${bathrooms} حمامات عصرية.`
+        : `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع.`;
+
   const websiteEN = `
 ${propertyType} in ${location} | ${category} Property
 
-Discover this remarkable ${propertyType?.toLowerCase()} situated in ${location}, one of the most sought-after locations in the region. This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bedrooms} spacious bedrooms and ${bathrooms} modern bathrooms.
+Discover this remarkable ${propertyType?.toLowerCase()} situated in ${location}, one of the most sought-after locations in the region. ${descriptionEN}
 
 Key Features:
 - Property Type: ${propertyType}
 - Category: ${category}
 - Size: ${size} sqm
-- Bedrooms: ${bedrooms}
-- Bathrooms: ${bathrooms}
+${bedroomsLineEN}
+${bathroomsLineEN}
 - Furnishing: ${furnishingStatus}
 - Utilities: ${ewaText}
 
@@ -107,20 +163,20 @@ ${uniqueSellingPoints ? `Special Features: ${uniqueSellingPoints}` : ''}
 Listed at ${currency} ${Number(price).toLocaleString()}, this property represents excellent value for those seeking quality ${category?.toLowerCase()} real estate in ${location}.
 
 Contact our team today for more information or to arrange a private viewing.
-  `.trim();
+  `.trim().replace(/\n\n\n/g, '\n\n').replace(/^\n/gm, '');
 
   // Website Arabic
   const websiteAR = `
 ${getArabicPropertyType(propertyType)} في ${location} | عقار ${getArabicCategory(category)}
 
-اكتشف هذا ${getArabicPropertyType(propertyType)} الرائع الواقع في ${location}، إحدى أكثر المناطق المرغوبة في المنطقة. يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع ويضم ${bedrooms} غرف نوم واسعة و${bathrooms} حمامات عصرية.
+اكتشف هذا ${getArabicPropertyType(propertyType)} الرائع الواقع في ${location}، إحدى أكثر المناطق المرغوبة في المنطقة. ${descriptionAR}
 
 المواصفات الرئيسية:
 - نوع العقار: ${getArabicPropertyType(propertyType)}
 - الفئة: ${getArabicCategory(category)}
 - المساحة: ${size} متر مربع
-- غرف النوم: ${bedrooms}
-- الحمامات: ${bathrooms}
+${bedroomsLineAR}
+${bathroomsLineAR}
 - التأثيث: ${getArabicFurnishing(furnishingStatus)}
 - المرافق: ${ewaTextAR}
 
@@ -132,7 +188,7 @@ ${uniqueSellingPoints ? `مميزات خاصة: ${uniqueSellingPoints}` : ''}
 مدرج بسعر ${Number(price).toLocaleString()} ${currency}، يمثل هذا العقار قيمة ممتازة لمن يبحث عن عقار ${getArabicCategory(category)} عالي الجودة في ${location}.
 
 تواصل مع فريقنا اليوم للحصول على مزيد من المعلومات أو لترتيب معاينة خاصة.
-  `.trim();
+  `.trim().replace(/\n\n\n/g, '\n\n').replace(/^\n/gm, '');
 
   return {
     propertyFinderEN,
