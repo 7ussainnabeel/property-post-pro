@@ -68,14 +68,36 @@ Contact us today to schedule a viewing and discover your perfect property in ${l
   `.trim().replace(/\n\n\n/g, '\n\n');
 
   // Property Finder Arabic
-  const propertyFinderAR = `
-${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'} في ${location}
+  const locationAR = getArabicLocation(location);
+  const priceAR = formatArabicPrice(price, currency);
+  const sizeAR = toArabicNumerals(size);
+  const bedroomsAR = toArabicNumerals(bedrooms);
+  const bathroomsAR = toArabicNumerals(bathrooms);
 
-${getArabicPropertyType(propertyType)} استثنائية توفر فرصة رائعة لأغراض ${getArabicCategory(category)}. تقع في منطقة ${location} المرموقة، وتوفر هذه العقار ${size} متر مربع من المساحة المعيشية الفاخرة.
+  const bedroomsBathroomsARArabic = hasBedrooms && hasBathrooms 
+    ? `• ${bedroomsAR} غرف نوم | ${bathroomsAR} حمامات`
+    : hasBedrooms 
+      ? `• ${bedroomsAR} غرف نوم`
+      : hasBathrooms 
+        ? `• ${bathroomsAR} حمامات`
+        : '';
+
+  const bedroomsBathroomsShortARArabic = hasBedrooms && hasBathrooms 
+    ? `${bedroomsAR} غرف نوم | ${bathroomsAR} حمام | `
+    : hasBedrooms 
+      ? `${bedroomsAR} غرف نوم | `
+      : hasBathrooms 
+        ? `${bathroomsAR} حمام | `
+        : '';
+
+  const propertyFinderAR = `
+${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'} في ${locationAR}
+
+${getArabicPropertyType(propertyType)} استثنائية توفر فرصة رائعة لأغراض ${getArabicCategory(category)}. تقع في منطقة ${locationAR} المرموقة، وتوفر هذه العقار ${sizeAR} متر مربع من المساحة المعيشية الفاخرة.
 
 مميزات العقار:
-${bedroomsBathroomsAR}
-• المساحة الإجمالية: ${size} متر مربع
+${bedroomsBathroomsARArabic}
+• المساحة الإجمالية: ${sizeAR} متر مربع
 • ${getArabicFurnishing(furnishingStatus)}
 • ${ewaTextAR}
 
@@ -84,9 +106,9 @@ ${amenities.map(a => `• ${getArabicAmenity(a)}`).join('\n')}
 
 ${uniqueSellingPoints ? `ما يميز هذا العقار:\n${uniqueSellingPoints}` : ''}
 
-السعر: ${Number(price).toLocaleString()} ${currency}
+السعر: ${priceAR}
 
-تواصل معنا اليوم لحجز موعد معاينة واكتشف عقارك المثالي في ${location}.
+تواصل معنا اليوم لحجز موعد معاينة واكتشف عقارك المثالي في ${locationAR}.
   `.trim().replace(/\n\n\n/g, '\n\n');
 
   // Instagram English
@@ -106,17 +128,17 @@ ${uniqueSellingPoints ? `💎 ${uniqueSellingPoints.split('.')[0]}` : ''}
 
   // Instagram Arabic
   const instagramAR = `
-🏠 ${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'} 📍 ${location}
+🏠 ${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'} 📍 ${locationAR}
 
-✨ ${bedroomsBathroomsShortAR}${size} م²
-💰 ${Number(price).toLocaleString()} ${currency}
+✨ ${bedroomsBathroomsShortARArabic}${sizeAR} م²
+💰 ${priceAR}
 
 ${amenities.slice(0, 4).map(a => `✅ ${getArabicAmenity(a)}`).join('\n')}
 
 ${uniqueSellingPoints ? `💎 ${uniqueSellingPoints.split('.')[0]}` : ''}
 
 📩 راسلنا للمزيد من التفاصيل!
-#عقارات #${location.replace(/\s/g, '')} #عقار_للبيع #استثمار_عقاري
+#عقارات #${locationAR.replace(/\s/g, '')} #عقار_للبيع #استثمار_عقاري
   `.trim();
 
   // Website English
@@ -134,12 +156,15 @@ ${uniqueSellingPoints ? `💎 ${uniqueSellingPoints.split('.')[0]}` : ''}
         : `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters.`;
 
   const descriptionAR = hasBedrooms && hasBathrooms 
-    ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع ويضم ${bedrooms} غرف نوم واسعة و${bathrooms} حمامات عصرية.`
+    ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bedroomsAR} غرف نوم واسعة و${bathroomsAR} حمامات عصرية.`
     : hasBedrooms 
-      ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع ويضم ${bedrooms} غرف نوم واسعة.`
+      ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bedroomsAR} غرف نوم واسعة.`
       : hasBathrooms 
-        ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع ويضم ${bathrooms} حمامات عصرية.`
-        : `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${size} متر مربع.`;
+        ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bathroomsAR} حمامات عصرية.`
+        : `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع.`;
+
+  const bedroomsLineARArabic = hasBedrooms ? `- غرف النوم: ${bedroomsAR}` : '';
+  const bathroomsLineARArabic = hasBathrooms ? `- الحمامات: ${bathroomsAR}` : '';
 
   const websiteEN = `
 ${propertyType} in ${location} | ${category} Property
@@ -167,16 +192,16 @@ Contact our team today for more information or to arrange a private viewing.
 
   // Website Arabic
   const websiteAR = `
-${getArabicPropertyType(propertyType)} في ${location} | عقار ${getArabicCategory(category)}
+${getArabicPropertyType(propertyType)} في ${locationAR} | عقار ${getArabicCategory(category)}
 
-اكتشف هذا ${getArabicPropertyType(propertyType)} الرائع الواقع في ${location}، إحدى أكثر المناطق المرغوبة في المنطقة. ${descriptionAR}
+اكتشف هذا ${getArabicPropertyType(propertyType)} الرائع الواقع في ${locationAR}، إحدى أكثر المناطق المرغوبة في المنطقة. ${descriptionAR}
 
 المواصفات الرئيسية:
 - نوع العقار: ${getArabicPropertyType(propertyType)}
 - الفئة: ${getArabicCategory(category)}
-- المساحة: ${size} متر مربع
-${bedroomsLineAR}
-${bathroomsLineAR}
+- المساحة: ${sizeAR} متر مربع
+${bedroomsLineARArabic}
+${bathroomsLineARArabic}
 - التأثيث: ${getArabicFurnishing(furnishingStatus)}
 - المرافق: ${ewaTextAR}
 
@@ -185,7 +210,7 @@ ${amenities.map(a => getArabicAmenity(a)).join('، ')}
 
 ${uniqueSellingPoints ? `مميزات خاصة: ${uniqueSellingPoints}` : ''}
 
-مدرج بسعر ${Number(price).toLocaleString()} ${currency}، يمثل هذا العقار قيمة ممتازة لمن يبحث عن عقار ${getArabicCategory(category)} عالي الجودة في ${location}.
+مدرج بسعر ${priceAR}، يمثل هذا العقار قيمة ممتازة لمن يبحث عن عقار ${getArabicCategory(category)} عالي الجودة في ${locationAR}.
 
 تواصل مع فريقنا اليوم للحصول على مزيد من المعلومات أو لترتيب معاينة خاصة.
   `.trim().replace(/\n\n\n/g, '\n\n').replace(/^\n/gm, '');
@@ -256,4 +281,87 @@ function getArabicAmenity(amenity: string): string {
     'Terrace': 'تراس',
   };
   return amenities[amenity] || amenity;
+}
+
+function toArabicNumerals(num: string | number): string {
+  const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return String(num).replace(/[0-9]/g, (d) => arabicNumerals[parseInt(d)]);
+}
+
+function formatArabicPrice(price: string, currency: string): string {
+  const formattedNumber = Number(price).toLocaleString();
+  const arabicNumber = toArabicNumerals(formattedNumber);
+  const currencyMap: Record<string, string> = {
+    'BHD': 'دينار بحريني',
+    'USD': 'دولار أمريكي',
+    'AED': 'درهم إماراتي',
+    'SAR': 'ريال سعودي',
+  };
+  return `${arabicNumber} ${currencyMap[currency] || currency}`;
+}
+
+function getArabicLocation(location: string): string {
+  const locations: Record<string, string> = {
+    // Bahrain
+    'Juffair': 'الجفير',
+    'Manama': 'المنامة',
+    'Seef': 'السيف',
+    'Riffa': 'الرفاع',
+    'Muharraq': 'المحرق',
+    'Amwaj Islands': 'جزر أمواج',
+    'Amwaj': 'أمواج',
+    'Budaiya': 'البديع',
+    'Hamala': 'الهملة',
+    'Saar': 'سار',
+    'Janabiya': 'الجنبية',
+    'Tubli': 'توبلي',
+    'Isa Town': 'مدينة عيسى',
+    'Hamad Town': 'مدينة حمد',
+    'Busaiteen': 'البسيتين',
+    'Hidd': 'الحد',
+    'Diyar Al Muharraq': 'ديار المحرق',
+    'Bahrain Bay': 'خليج البحرين',
+    'Sanabis': 'السنابس',
+    'Adliya': 'العدلية',
+    'Hoora': 'الحورة',
+    'Gudaibiya': 'القضيبية',
+    'Zinj': 'الزنج',
+    'Salmaniya': 'السلمانية',
+    'Diplomatic Area': 'المنطقة الدبلوماسية',
+    // UAE
+    'Dubai': 'دبي',
+    'Abu Dhabi': 'أبوظبي',
+    'Sharjah': 'الشارقة',
+    'Ajman': 'عجمان',
+    'Downtown Dubai': 'وسط دبي',
+    'Dubai Marina': 'مرسى دبي',
+    'Palm Jumeirah': 'نخلة جميرا',
+    'JBR': 'جي بي آر',
+    'Business Bay': 'الخليج التجاري',
+    // Saudi Arabia
+    'Riyadh': 'الرياض',
+    'Jeddah': 'جدة',
+    'Dammam': 'الدمام',
+    'Khobar': 'الخبر',
+    'Mecca': 'مكة المكرمة',
+    'Medina': 'المدينة المنورة',
+    // General
+    'City Center': 'وسط المدينة',
+    'Waterfront': 'الواجهة البحرية',
+  };
+  
+  // Check for exact match first
+  if (locations[location]) {
+    return locations[location];
+  }
+  
+  // Check for partial matches (case insensitive)
+  const lowerLocation = location.toLowerCase();
+  for (const [eng, ar] of Object.entries(locations)) {
+    if (lowerLocation.includes(eng.toLowerCase())) {
+      return location.replace(new RegExp(eng, 'i'), ar);
+    }
+  }
+  
+  return location;
 }
