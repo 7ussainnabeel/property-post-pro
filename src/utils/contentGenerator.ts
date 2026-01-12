@@ -46,13 +46,21 @@ export function generateContent(input: PropertyInput): GeneratedContent {
         : '';
 
   // Property Finder English
+  const titleEN = hasBedrooms && hasBathrooms 
+    ? `${bedrooms}-Bedroom ${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${location} | ${size} SQM | ${furnishingStatus}`
+    : hasBedrooms 
+      ? `${bedrooms}-Bedroom ${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${location} | ${size} SQM | ${furnishingStatus}`
+      : `${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${location} | ${size} SQM | ${furnishingStatus}`;
+
   const propertyFinderEN = `
+${titleEN}
+
 PROPERTY DETAILS
 
-Property Type: ${propertyType}
-Category: ${category}
-Location: ${location}
-Purpose: ${category === 'Investment' ? 'Investment Opportunity' : 'For Sale'}
+🏠 Property Type: ${propertyType}
+📋 Category: ${category}
+📍 Location: ${location}
+🎯 Purpose: ${category === 'Investment' ? 'Investment Opportunity' : 'For Sale'}
 
 DESCRIPTION
 
@@ -60,17 +68,17 @@ We are pleased to present this distinguished ${propertyType?.toLowerCase()} loca
 
 PROPERTY SPECIFICATIONS
 
-Built-up Area: ${size} sqm${hasBedrooms ? `\nBedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\nBathrooms: ${bathrooms}` : ''}
-Furnishing Status: ${furnishingStatus}
-Utilities: ${ewaText}
+📐 Built-up Area: ${size} sqm${hasBedrooms ? `\n🛏️ Bedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\n🚿 Bathrooms: ${bathrooms}` : ''}
+🛋️ Furnishing Status: ${furnishingStatus}
+${ewaIncluded ? '⚡💧 Utilities: EWA Included!' : '🔌 Utilities: EWA Not Included'}
 
 AMENITIES & FEATURES
-${amenities.map(a => `• ${a}`).join('\n')}
-${uniqueSellingPoints ? `\nADDITIONAL HIGHLIGHTS\n${uniqueSellingPoints}` : ''}
+${amenities.map(a => `${getAmenityEmoji(a)} ${a}`).join('\n')}
+${uniqueSellingPoints ? `\n💎 ADDITIONAL HIGHLIGHTS\n${uniqueSellingPoints}` : ''}
 
 PRICING
 
-Asking Price: ${currency} ${Number(price).toLocaleString()}
+💰 Asking Price: ${currency} ${Number(price).toLocaleString()}
 
 For further information, property viewings, or to discuss this opportunity, please contact our property consultants at your earliest convenience.
   `.trim().replace(/\n\n\n/g, '\n\n');
@@ -99,12 +107,14 @@ For further information, property viewings, or to discuss this opportunity, plea
         : '';
 
   const propertyFinderAR = `
+${getArabicPropertyType(propertyType)} ${hasBedrooms ? `${bedroomsAR} غرف نوم` : ''} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'} في ${locationAR} | ${sizeAR} متر مربع | ${getArabicFurnishing(furnishingStatus)}
+
 تفاصيل العقار
 
-نوع العقار: ${getArabicPropertyType(propertyType)}
-الفئة: ${getArabicCategory(category)}
-الموقع: ${locationAR}
-الغرض: ${category === 'Investment' ? 'فرصة استثمارية' : 'للبيع'}
+🏠 نوع العقار: ${getArabicPropertyType(propertyType)}
+📋 الفئة: ${getArabicCategory(category)}
+📍 الموقع: ${locationAR}
+🎯 الغرض: ${category === 'Investment' ? 'فرصة استثمارية' : 'للبيع'}
 
 الوصف
 
@@ -112,49 +122,55 @@ For further information, property viewings, or to discuss this opportunity, plea
 
 مواصفات العقار
 
-المساحة المبنية: ${sizeAR} متر مربع${hasBedrooms ? `\nغرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\nالحمامات: ${bathroomsAR}` : ''}
-حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}
-المرافق: ${ewaTextAR}
+📐 المساحة المبنية: ${sizeAR} متر مربع${hasBedrooms ? `\n🛏️ غرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\n🚿 الحمامات: ${bathroomsAR}` : ''}
+🛋️ حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}
+${ewaIncluded ? '⚡💧 المرافق: شامل الكهرباء والماء!' : '🔌 المرافق: غير شامل الكهرباء والماء'}
 
 المرافق والخدمات
-${amenities.map(a => `• ${getArabicAmenity(a)}`).join('\n')}
-${uniqueSellingPoints ? `\nمميزات إضافية\n${uniqueSellingPoints}` : ''}
+${amenities.map(a => `${getAmenityEmoji(a)} ${getArabicAmenity(a)}`).join('\n')}
+${uniqueSellingPoints ? `\n💎 مميزات إضافية\n${uniqueSellingPoints}` : ''}
 
 السعر
 
-السعر المطلوب: ${priceAR}
+💰 السعر المطلوب: ${priceAR}
 
 للمزيد من المعلومات أو لترتيب موعد معاينة أو لمناقشة هذه الفرصة، يرجى التواصل مع مستشاري العقارات لدينا في أقرب وقت ممكن.
   `.trim().replace(/\n\n\n/g, '\n\n');
 
   // Instagram English
   const instagramEN = `
-🏠 ${propertyType?.toUpperCase()} FOR ${category === 'Investment' ? 'INVESTMENT' : 'SALE'} 📍 ${location}
+🏠 ${propertyType?.toUpperCase()} FOR ${category === 'Investment' ? 'INVESTMENT' : 'SALE'}
 
-✨ ${bedroomsBathroomsShortEN}${size} sqm
+📍 Location: ${location}${hasBedrooms ? `\n🛏️ ${bedrooms} Bedrooms` : ''}${hasBathrooms ? `\n🚿 ${bathrooms} Bathrooms` : ''}
+📐 Size: ${size} SQM
+🛋️ ${furnishingStatus}
+${ewaIncluded ? '⚡💧 EWA Included!' : ''}
 💰 ${currency} ${Number(price).toLocaleString()}
 
-${amenities.slice(0, 4).map(a => `✅ ${a}`).join('\n')}
-
-${uniqueSellingPoints ? `💎 ${uniqueSellingPoints.split('.')[0]}` : ''}
+💎 Highlights:
+${amenities.slice(0, 5).map(a => `${getAmenityEmoji(a)} ${a}`).join('\n')}
+${uniqueSellingPoints ? `\n🌟 ${uniqueSellingPoints.split('.')[0]}` : ''}
 
 📩 DM us for more details!
-#RealEstate #${location.replace(/\s/g, '')} #PropertyForSale #${propertyType?.replace(/\s/g, '')} #LuxuryLiving
+#RealEstate #${location.replace(/\s/g, '')} #PropertyForSale #${propertyType?.replace(/\s/g, '')} #LuxuryLiving #Bahrain
   `.trim();
 
   // Instagram Arabic
   const instagramAR = `
-🏠 ${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'} 📍 ${locationAR}
+🏠 ${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'}
 
-✨ ${bedroomsBathroomsShortARArabic}${sizeAR} م²
+📍 الموقع: ${locationAR}${hasBedrooms ? `\n🛏️ ${bedroomsAR} غرف نوم` : ''}${hasBathrooms ? `\n🚿 ${bathroomsAR} حمامات` : ''}
+📐 المساحة: ${sizeAR} م²
+🛋️ ${getArabicFurnishing(furnishingStatus)}
+${ewaIncluded ? '⚡💧 شامل الكهرباء والماء!' : ''}
 💰 ${priceAR}
 
-${amenities.slice(0, 4).map(a => `✅ ${getArabicAmenity(a)}`).join('\n')}
-
-${uniqueSellingPoints ? `💎 ${uniqueSellingPoints.split('.')[0]}` : ''}
+💎 المميزات:
+${amenities.slice(0, 5).map(a => `${getAmenityEmoji(a)} ${getArabicAmenity(a)}`).join('\n')}
+${uniqueSellingPoints ? `\n🌟 ${uniqueSellingPoints.split('.')[0]}` : ''}
 
 📩 راسلنا للمزيد من التفاصيل!
-#عقارات #${locationAR.replace(/\s/g, '')} #عقار_للبيع #استثمار_عقاري
+#عقارات #${locationAR.replace(/\s/g, '')} #عقار_للبيع #استثمار_عقاري #البحرين
   `.trim();
 
   // Website English
@@ -239,6 +255,27 @@ ${uniqueSellingPoints ? `مميزات خاصة: ${uniqueSellingPoints}` : ''}
     websiteEN,
     websiteAR,
   };
+}
+
+function getAmenityEmoji(amenity: string): string {
+  const emojiMap: Record<string, string> = {
+    'Swimming Pool': '🏊‍♂️',
+    'Gym': '🏋️',
+    'Parking': '🚗',
+    'Security': '🔒',
+    'Garden': '🌳',
+    'Balcony': '🪟',
+    'Central AC': '❄️',
+    'Maid Room': '👤',
+    'Storage': '📦',
+    'Elevator': '🛗',
+    'Sea View': '🌅',
+    'City View': '🏙️',
+    'Private Pool': '🏊',
+    'Smart Home': '📱',
+    'Terrace': '🌿',
+  };
+  return emojiMap[amenity] || '🔸';
 }
 
 function getArabicPropertyType(type: string | undefined): string {
