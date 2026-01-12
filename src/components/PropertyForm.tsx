@@ -46,20 +46,23 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     uniqueSellingPoints: '',
   });
 
-  // Auto-generate with debouncing
+  // Auto-generate with debouncing - only once when minimum data is entered
   useEffect(() => {
     // Check if we have minimum required fields
     const hasMinimumData = formData.propertyType && formData.category && formData.location;
     
+    // Don't generate if already loading or no minimum data
     if (!hasMinimumData || isLoading) return;
 
-    // Debounce the generation by 1 second
+    // Debounce the generation by 1.5 seconds
     const timeoutId = setTimeout(() => {
       onGenerate(formData);
-    }, 1000);
+    }, 1500);
 
     return () => clearTimeout(timeoutId);
-  }, [formData, isLoading]); // Trigger whenever form data changes
+    // Only trigger on formData changes, not isLoading to prevent loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

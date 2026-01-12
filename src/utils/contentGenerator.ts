@@ -47,24 +47,32 @@ export function generateContent(input: PropertyInput): GeneratedContent {
 
   // Property Finder English
   const propertyFinderEN = `
-${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${location}
+PROPERTY DETAILS
 
-This exceptional ${propertyType?.toLowerCase()} presents an outstanding opportunity for ${category?.toLowerCase()} purposes. Located in the prestigious area of ${location}, this property offers ${size} sqm of premium living space.
+Property Type: ${propertyType}
+Category: ${category}
+Location: ${location}
+Purpose: ${category === 'Investment' ? 'Investment Opportunity' : 'For Sale'}
 
-Property Highlights:
-${bedroomsBathroomsEN}
-• Total Area: ${size} sqm
-• ${furnishingStatus}
-• ${ewaText}
+DESCRIPTION
 
-Features & Amenities:
+We are pleased to present this distinguished ${propertyType?.toLowerCase()} located in the prime area of ${location}. This property represents an exceptional ${category?.toLowerCase()} opportunity, offering ${size} square meters of thoughtfully designed space.
+
+PROPERTY SPECIFICATIONS
+
+Built-up Area: ${size} sqm${hasBedrooms ? `\nBedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\nBathrooms: ${bathrooms}` : ''}
+Furnishing Status: ${furnishingStatus}
+Utilities: ${ewaText}
+
+AMENITIES & FEATURES
 ${amenities.map(a => `• ${a}`).join('\n')}
+${uniqueSellingPoints ? `\nADDITIONAL HIGHLIGHTS\n${uniqueSellingPoints}` : ''}
 
-${uniqueSellingPoints ? `What Makes This Property Special:\n${uniqueSellingPoints}` : ''}
+PRICING
 
-Price: ${currency} ${Number(price).toLocaleString()}
+Asking Price: ${currency} ${Number(price).toLocaleString()}
 
-Contact us today to schedule a viewing and discover your perfect property in ${location}.
+For further information, property viewings, or to discuss this opportunity, please contact our property consultants at your earliest convenience.
   `.trim().replace(/\n\n\n/g, '\n\n');
 
   // Property Finder Arabic
@@ -91,24 +99,32 @@ Contact us today to schedule a viewing and discover your perfect property in ${l
         : '';
 
   const propertyFinderAR = `
-${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'} في ${locationAR}
+تفاصيل العقار
 
-${getArabicPropertyType(propertyType)} استثنائية توفر فرصة رائعة لأغراض ${getArabicCategory(category)}. تقع في منطقة ${locationAR} المرموقة، وتوفر هذه العقار ${sizeAR} متر مربع من المساحة المعيشية الفاخرة.
+نوع العقار: ${getArabicPropertyType(propertyType)}
+الفئة: ${getArabicCategory(category)}
+الموقع: ${locationAR}
+الغرض: ${category === 'Investment' ? 'فرصة استثمارية' : 'للبيع'}
 
-مميزات العقار:
-${bedroomsBathroomsARArabic}
-• المساحة الإجمالية: ${sizeAR} متر مربع
-• ${getArabicFurnishing(furnishingStatus)}
-• ${ewaTextAR}
+الوصف
 
-المرافق والخدمات:
+يسرنا أن نقدم لكم هذا ${getArabicPropertyType(propertyType)} المتميز الواقع في المنطقة الرئيسية ${locationAR}. يمثل هذا العقار فرصة ${getArabicCategory(category)}ة استثنائية، حيث يوفر ${sizeAR} متر مربع من المساحة المصممة بعناية.
+
+مواصفات العقار
+
+المساحة المبنية: ${sizeAR} متر مربع${hasBedrooms ? `\nغرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\nالحمامات: ${bathroomsAR}` : ''}
+حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}
+المرافق: ${ewaTextAR}
+
+المرافق والخدمات
 ${amenities.map(a => `• ${getArabicAmenity(a)}`).join('\n')}
+${uniqueSellingPoints ? `\nمميزات إضافية\n${uniqueSellingPoints}` : ''}
 
-${uniqueSellingPoints ? `ما يميز هذا العقار:\n${uniqueSellingPoints}` : ''}
+السعر
 
-السعر: ${priceAR}
+السعر المطلوب: ${priceAR}
 
-تواصل معنا اليوم لحجز موعد معاينة واكتشف عقارك المثالي في ${locationAR}.
+للمزيد من المعلومات أو لترتيب موعد معاينة أو لمناقشة هذه الفرصة، يرجى التواصل مع مستشاري العقارات لدينا في أقرب وقت ممكن.
   `.trim().replace(/\n\n\n/g, '\n\n');
 
   // Instagram English
