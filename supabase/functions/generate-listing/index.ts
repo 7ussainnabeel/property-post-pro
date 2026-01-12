@@ -40,18 +40,28 @@ serve(async (req) => {
 
 IMPORTANT RULES:
 1. For Instagram captions: Use emojis strategically, keep it catchy and engaging with a clear call-to-action
-2. For Property Finder: Use structured, detailed, professional descriptions
+2. For Property Finder: Use structured, detailed, professional descriptions optimized with Property Finder SEO keywords
 3. For other websites: Use SEO-friendly, comprehensive descriptions
 4. Always translate locations to Arabic properly (e.g., Manama = المنامة, Riffa = الرفاع, Juffair = الجفير)
 5. Convert all numbers to Arabic numerals (٠١٢٣٤٥٦٧٨٩) in Arabic versions
 6. If bedrooms or bathrooms are not provided (empty string), DO NOT mention them at all
 7. Include relevant trending Bahrain real estate hashtags for Instagram posts
 
+PROPERTY FINDER KEYWORDS (use relevant ones naturally in the description):
+- Property Types: Villa, Apartment, Flat, Studio, Penthouse, Duplex, Townhouse, Compound, Whole Building, Bulk Units, Land, Commercial, Retail, Office, Shop, Warehouse, Factory, Farm, Labor Camp
+- Features: Furnished, Semi Furnished, Unfurnished, Balcony, Sea View, City View, Garden View, Pool View, Private Pool, Shared Pool, Gym, Parking, Covered Parking, Security, CCTV, Concierge, Maid's Room, Driver's Room, Storage, Laundry, Built-in Wardrobes, Central AC, Split AC, Kitchen Appliances, Upgraded, Renovated, Brand New, Ready to Move, High Floor, Low Floor, Corner Unit, End Unit
+- Amenities: Swimming Pool, Gymnasium, Children's Play Area, BBQ Area, Clubhouse, Tennis Court, Basketball Court, Squash Court, Sauna, Steam Room, Jacuzzi, Spa, Reception, Lobby, Elevator, Service Elevator, Backup Generator, Water Tank, Landscaped Garden, Rooftop Terrace, Private Beach Access, Beach Access, Marina Access, Golf Course View, Waterfront, Seafront
+- Location Terms: Prime Location, Strategic Location, Central Location, Accessible Location, Near Schools, Near Hospital, Near Mall, Near Metro, Near Public Transport, Near Mosque, Near Beach, Near Highway, Gated Community, Family Community, Expatriate Community
+- Condition: Well Maintained, Excellent Condition, Good Condition, Needs Renovation, Under Construction, Off Plan, Completed, Move-in Ready, Vacant, Tenanted, Rented, Investment Property
+- Payment Terms: Negotiable, Flexible Payment, Monthly Payment, Yearly Payment, Multiple Cheques, EWA Included, Exclusive, Direct from Owner, No Commission, Freehold, Leasehold
+- Size Terms: Spacious, Cozy, Compact, Large, Extra Large, Open Plan, Split Level, Loft Style, High Ceiling
+- Arabic Keywords: فيلا, شقة, استوديو, بنتهاوس, دوبلكس, تاون هاوس, مفروشة, شبه مفروشة, غير مفروشة, إطلالة بحرية, إطلالة على المدينة, مسبح خاص, موقف سيارات, أمن, صالة رياضية, حديقة, قريب من المدارس, قريب من المستشفى, موقع متميز, جاهز للسكن, ممتاز, واسع
+
 For Instagram hashtags, include a mix of:
 - General: #BahrainRealEstate #BahrainProperty #PropertyBahrain #RealEstateBahrain
 - Location-specific based on the property location
 - Property type specific hashtags
-- Trending hashtags like #LuxuryLiving #DreamHome #InvestInBahrain #BahrainHomes
+- Trending hashtags like #LuxuryLiving #DreamHome #InvestInBahrain #BahrainHomes #BahrainForSale #BahrainForRent #PropertyForSale #PropertyForRent #RealEstateAgent #BahrainLuxury #GulfRealEstate #MiddleEastProperty
 
 Respond ONLY with valid JSON in this exact format:
 {
