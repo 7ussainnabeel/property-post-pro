@@ -37,7 +37,8 @@ const LAND_CLASSIFICATIONS: { value: LandClassification; label: string }[] = [
 const COMMON_AMENITIES = [
   'Swimming Pool', 'Gym', 'Parking', 'Security', 'Garden',
   'Balcony', 'Central AC', 'Maid Room', 'Storage', 'Elevator',
-  'Sea View', 'City View', 'Private Pool', 'Smart Home', 'Terrace'
+  'Sea View', 'City View', 'Private Pool', 'Smart Home', 'Terrace',
+  'Hospital', 'Mosque', 'Airport'
 ];
 
 interface PropertyFormProps {
