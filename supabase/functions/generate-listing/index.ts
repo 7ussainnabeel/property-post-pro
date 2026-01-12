@@ -8,7 +8,6 @@ const corsHeaders = {
 interface PropertyInput {
   propertyType: string;
   category: string;
-  type: string;
   location: string;
   size: string;
   bedrooms: string;
@@ -19,6 +18,7 @@ interface PropertyInput {
   amenities: string[];
   ewaIncluded: boolean;
   uniqueSellingPoints: string;
+  landClassification: string;
 }
 
 serve(async (req) => {
@@ -40,12 +40,19 @@ serve(async (req) => {
 
 IMPORTANT RULES:
 1. For Instagram captions: Use emojis strategically, keep it catchy and engaging with a clear call-to-action
-2. For Property Finder: Use structured, detailed, professional descriptions optimized with Property Finder SEO keywords
+2. For Property Finder: Generate BOTH a catchy title (max 100 chars) AND a detailed description optimized with Property Finder SEO keywords
 3. For other websites: Use SEO-friendly, comprehensive descriptions
 4. Always translate locations to Arabic properly (e.g., Manama = المنامة, Riffa = الرفاع, Juffair = الجفير)
 5. Convert all numbers to Arabic numerals (٠١٢٣٤٥٦٧٨٩) in Arabic versions
 6. If bedrooms or bathrooms are not provided (empty string), DO NOT mention them at all
 7. Include relevant trending Bahrain real estate hashtags for Instagram posts
+8. If land classification is provided, include it in the description (e.g., "RA - Residential A zone")
+
+LAND CLASSIFICATIONS:
+- RA, RB, RC, RD: Residential zones (A is highest density)
+- BA, BB, BC, BD: Business zones
+- CA, CB: Commercial zones
+- IA, IB: Industrial zones
 
 PROPERTY FINDER KEYWORDS (use relevant ones naturally in the description):
 - Property Types: Villa, Apartment, Flat, Studio, Penthouse, Duplex, Townhouse, Compound, Whole Building, Bulk Units, Land, Commercial, Retail, Office, Shop, Warehouse, Factory, Farm, Labor Camp
@@ -65,6 +72,8 @@ For Instagram hashtags, include a mix of:
 
 Respond ONLY with valid JSON in this exact format:
 {
+  "propertyFinderTitleEN": "Catchy English title for Property Finder (max 100 chars)",
+  "propertyFinderTitleAR": "Arabic title for Property Finder (max 100 chars)",
   "propertyFinderEN": "English Property Finder description",
   "propertyFinderAR": "Arabic Property Finder description",
   "instagramEN": "English Instagram caption with emojis and hashtags",
@@ -77,9 +86,9 @@ Respond ONLY with valid JSON in this exact format:
 
 Property Type: ${property.propertyType}
 Category: ${property.category}
-Type: ${property.type}
 Location: ${property.location}
 Size: ${property.size} sqm
+${property.landClassification ? `Land Classification: ${property.landClassification}` : ''}
 ${property.bedrooms ? `Bedrooms: ${property.bedrooms}` : ''}
 ${property.bathrooms ? `Bathrooms: ${property.bathrooms}` : ''}
 Price: ${property.price} ${property.currency}
@@ -88,7 +97,7 @@ Amenities: ${property.amenities.join(', ')}
 EWA Included: ${property.ewaIncluded ? 'Yes' : 'No'}
 Unique Selling Points: ${property.uniqueSellingPoints}
 
-Generate professional, attractive content that highlights the property's best features. Make the Instagram captions engaging with relevant emojis and include the latest trending Bahrain real estate hashtags.`;
+Generate professional, attractive content that highlights the property's best features. Include a catchy Property Finder title and detailed description. Make the Instagram captions engaging with relevant emojis and include the latest trending Bahrain real estate hashtags.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

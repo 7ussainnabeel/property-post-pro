@@ -46,17 +46,32 @@ export function GeneratedContent({ content }: GeneratedContentProps) {
 
         <TabsContent value="propertyfinder" className="mt-6 space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <OutputCard
-              title="English Version"
-              content={content.propertyFinderEN}
-              icon={<FileText className="w-4 h-4 text-primary" />}
-            />
-            <OutputCard
-              title="Arabic Version"
-              content={content.propertyFinderAR}
-              icon={<FileText className="w-4 h-4 text-primary" />}
-              isRTL
-            />
+            <div className="space-y-4">
+              <OutputCard
+                title="English Title"
+                content={content.propertyFinderTitleEN}
+                icon={<FileText className="w-4 h-4 text-primary" />}
+              />
+              <OutputCard
+                title="English Description"
+                content={content.propertyFinderEN}
+                icon={<FileText className="w-4 h-4 text-primary" />}
+              />
+            </div>
+            <div className="space-y-4">
+              <OutputCard
+                title="Arabic Title"
+                content={content.propertyFinderTitleAR}
+                icon={<FileText className="w-4 h-4 text-primary" />}
+                isRTL
+              />
+              <OutputCard
+                title="Arabic Description"
+                content={content.propertyFinderAR}
+                icon={<FileText className="w-4 h-4 text-primary" />}
+                isRTL
+              />
+            </div>
           </div>
         </TabsContent>
 
