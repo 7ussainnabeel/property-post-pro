@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PropertyInput, PropertyCategory, PropertyType, FurnishingStatus } from '@/types/property';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -47,9 +46,24 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     uniqueSellingPoints: '',
   });
 
+  // Auto-generate with debouncing
+  useEffect(() => {
+    // Check if we have minimum required fields
+    const hasMinimumData = formData.propertyType && formData.category && formData.location;
+    
+    if (!hasMinimumData || isLoading) return;
+
+    // Debounce the generation by 1 second
+    const timeoutId = setTimeout(() => {
+      onGenerate(formData);
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData, isLoading]); // Trigger whenever form data changes
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onGenerate(formData);
+    // Form submission is now handled automatically, but keep this for accessibility
   };
 
   const toggleAmenity = (amenity: string) => {
@@ -276,24 +290,13 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             />
           </div>
 
-          {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="w-full h-12 text-base font-semibold gradient-gold text-navy shadow-gold hover:opacity-90 transition-opacity"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <span className="w-5 h-5 border-2 border-navy/30 border-t-navy rounded-full animate-spin" />
-                Generating Content...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                Generate Listings
-              </span>
-            )}
-          </Button>
+          {/* Auto-generation indicator */}
+          {isLoading && (
+            <div className="flex items-center justify-center gap-2 p-4 bg-secondary/10 rounded-lg">
+              <span className="w-5 h-5 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin" />
+              <span className="text-sm font-medium text-secondary">Generating listings automatically...</span>
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>
