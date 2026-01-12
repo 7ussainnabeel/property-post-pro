@@ -48,6 +48,36 @@ IMPORTANT RULES:
 7. Include relevant trending Bahrain real estate hashtags for Instagram posts
 8. If land classification is provided, include it in the description (e.g., "RA - Residential A zone")
 
+EMOJI USAGE RULES (VERY IMPORTANT):
+- NEVER use ✅ checkmarks in any description
+- Use descriptive emojis that represent each feature/word:
+  📍 for Location
+  📏 or 📐 for Size
+  🛏️ for Bedrooms
+  🚿 for Bathrooms
+  🌟 for Brand New/Highlights
+  🚗 for Strategic location/Access
+  💎 for Key Features/Highlights
+  🛋️ for Furnished/Semi-Furnished
+  🔌 or ⚡️ for Electricity
+  💧 for Water/EWA
+  🏊‍♂️ for Pool
+  🌳 for Garden
+  📱 for Smart Home
+  🛗 for Elevator
+  🏙️ for City View
+  🌅 for Sea View/Sunset
+  👨‍👩‍👧‍👦 for Family/Maid's Room
+  📦 for Storage
+  💪 for Gym
+  🔒 for Security
+  🅿️ for Parking
+  💰 for Price/Rent
+  🏠 for Property Type
+  🏢 for Building/Apartment
+  🏡 for Villa
+  📞 for Contact/Call to Action
+
 LAND CLASSIFICATIONS:
 - RA, RB, RC, RD: Residential zones (A is highest density)
 - BA, BB, BC, BD: Business zones
