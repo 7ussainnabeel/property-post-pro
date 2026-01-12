@@ -45,7 +45,7 @@ IMPORTANT RULES:
 4. Always translate locations to Arabic properly (e.g., Manama = المنامة, Riffa = الرفاع, Juffair = الجفير)
 5. Convert all numbers to Arabic numerals (٠١٢٣٤٥٦٧٨٩) in Arabic versions
 6. If bedrooms or bathrooms are not provided (empty string), DO NOT mention them at all
-7. Include relevant trending Bahrain real estate hashtags for Instagram posts
+7. Include relevant trending Bahrain real estate hashtags for Instagram posts, always include Carlton Real Estate branded hashtags like #CarltonRealEstate #CarltonBahrain #CarltonProperties #CarltonHomes #TeamCarlton
 8. If land classification is provided, include it in the description (e.g., "RA - Residential A zone")
 
 EMOJI USAGE RULES (VERY IMPORTANT):
