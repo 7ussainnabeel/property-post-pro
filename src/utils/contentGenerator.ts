@@ -248,6 +248,8 @@ ${uniqueSellingPoints ? `مميزات خاصة: ${uniqueSellingPoints}` : ''}
   `.trim().replace(/\n\n\n/g, '\n\n').replace(/^\n/gm, '');
 
   return {
+    propertyFinderTitleEN: `${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale/Rent'} in ${location}`,
+    propertyFinderTitleAR: `${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع/للإيجار'} في ${locationAR}`,
     propertyFinderEN,
     propertyFinderAR,
     instagramEN,

@@ -17,6 +17,8 @@ export type PropertyType =
 
 export type FurnishingStatus = 'Furnished' | 'Semi-Furnished' | 'Unfurnished';
 
+export type LandClassification = 'RA' | 'RB' | 'RC' | 'RD' | 'BA' | 'BB' | 'BC' | 'BD' | 'CA' | 'CB' | 'IA' | 'IB' | '';
+
 export interface PropertyInput {
   propertyType: PropertyType | '';
   category: PropertyCategory | '';
@@ -30,9 +32,12 @@ export interface PropertyInput {
   amenities: string[];
   ewaIncluded: boolean;
   uniqueSellingPoints: string;
+  landClassification: LandClassification;
 }
 
 export interface GeneratedContent {
+  propertyFinderTitleEN: string;
+  propertyFinderTitleAR: string;
   propertyFinderEN: string;
   propertyFinderAR: string;
   instagramEN: string;

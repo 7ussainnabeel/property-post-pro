@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PropertyInput, PropertyCategory, PropertyType, FurnishingStatus } from '@/types/property';
+import { PropertyInput, PropertyCategory, PropertyType, FurnishingStatus, LandClassification } from '@/types/property';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X } from 'lucide-react';
+import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X, Layers } from 'lucide-react';
 
 const PROPERTY_TYPES: PropertyType[] = [
   'Land', 'Villa', 'Apartment', 'Office', 'Shop', 'Store', 
@@ -18,6 +18,21 @@ const PROPERTY_TYPES: PropertyType[] = [
 const CATEGORIES: PropertyCategory[] = ['Residential', 'Commercial', 'Investment'];
 
 const FURNISHING_OPTIONS: FurnishingStatus[] = ['Furnished', 'Semi-Furnished', 'Unfurnished'];
+
+const LAND_CLASSIFICATIONS: { value: LandClassification; label: string }[] = [
+  { value: 'RA', label: 'RA - Residential A' },
+  { value: 'RB', label: 'RB - Residential B' },
+  { value: 'RC', label: 'RC - Residential C' },
+  { value: 'RD', label: 'RD - Residential D' },
+  { value: 'BA', label: 'BA - Business A' },
+  { value: 'BB', label: 'BB - Business B' },
+  { value: 'BC', label: 'BC - Business C' },
+  { value: 'BD', label: 'BD - Business D' },
+  { value: 'CA', label: 'CA - Commercial A' },
+  { value: 'CB', label: 'CB - Commercial B' },
+  { value: 'IA', label: 'IA - Industrial A' },
+  { value: 'IB', label: 'IB - Industrial B' },
+];
 
 const COMMON_AMENITIES = [
   'Swimming Pool', 'Gym', 'Parking', 'Security', 'Garden',
@@ -44,6 +59,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     amenities: [],
     ewaIncluded: false,
     uniqueSellingPoints: '',
+    landClassification: '',
   });
 
   // Auto-generate with debouncing - only once when minimum data is entered
@@ -130,6 +146,29 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
               </Select>
             </div>
           </div>
+
+          {/* Land Classification (shown for Land types) */}
+          {(formData.propertyType === 'Land' || formData.propertyType === 'Land Planning') && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Layers className="w-4 h-4 text-muted-foreground" />
+                Land Classification
+              </Label>
+              <Select
+                value={formData.landClassification}
+                onValueChange={(value: LandClassification) => setFormData(prev => ({ ...prev, landClassification: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select classification" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LAND_CLASSIFICATIONS.map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Location & Size */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
