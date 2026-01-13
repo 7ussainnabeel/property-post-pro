@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PropertyInput, PropertyCategory, PropertyType, FurnishingStatus, LandClassification } from '@/types/property';
+import { PropertyInput, PropertyCategory, PropertyType, FurnishingStatus, LandClassification, ListingType } from '@/types/property';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -48,6 +48,7 @@ interface PropertyFormProps {
 
 export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
   const [formData, setFormData] = useState<PropertyInput>({
+    listingType: 'Sale',
     propertyType: '',
     category: '',
     location: '',
@@ -109,6 +110,35 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Listing Type - Sale or Rent */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Listing Type</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="listingType"
+                  value="Sale"
+                  checked={formData.listingType === 'Sale'}
+                  onChange={(e) => setFormData(prev => ({ ...prev, listingType: e.target.value as ListingType }))}
+                  className="w-4 h-4 text-primary focus:ring-primary focus:ring-2"
+                />
+                <span className="text-sm font-medium">For Sale</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="listingType"
+                  value="Rent"
+                  checked={formData.listingType === 'Rent'}
+                  onChange={(e) => setFormData(prev => ({ ...prev, listingType: e.target.value as ListingType }))}
+                  className="w-4 h-4 text-primary focus:ring-primary focus:ring-2"
+                />
+                <span className="text-sm font-medium">For Rent</span>
+              </label>
+            </div>
+          </div>
+
           {/* Property Type & Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -210,34 +240,36 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
           )}
 
-          {/* Bedrooms & Bathrooms */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Bed className="w-4 h-4 text-muted-foreground" />
-                Bedrooms
-              </Label>
-              <Input
-                placeholder="e.g., 3"
-                type="number"
-                value={formData.bedrooms}
-                onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: e.target.value }))}
-              />
-            </div>
+          {/* Bedrooms & Bathrooms (shown for Villa and Apartment only) */}
+          {(formData.propertyType === 'Villa' || formData.propertyType === 'Apartment') && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Bed className="w-4 h-4 text-muted-foreground" />
+                  Bedrooms
+                </Label>
+                <Input
+                  placeholder="e.g., 3"
+                  type="number"
+                  value={formData.bedrooms}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: e.target.value }))}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Bath className="w-4 h-4 text-muted-foreground" />
-                Bathrooms
-              </Label>
-              <Input
-                placeholder="e.g., 2"
-                type="number"
-                value={formData.bathrooms}
-                onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: e.target.value }))}
-              />
+              <div className="space-y-2">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Bath className="w-4 h-4 text-muted-foreground" />
+                  Bathrooms
+                </Label>
+                <Input
+                  placeholder="e.g., 2"
+                  type="number"
+                  value={formData.bathrooms}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: e.target.value }))}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Price & Currency */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -273,25 +305,38 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
           </div>
 
-          {/* Furnishing Status */}
+          {/* Furnishing Status (shown for Villa and Apartment only) */}
+          {(formData.propertyType === 'Villa' || formData.propertyType === 'Apartment') && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Sofa className="w-4 h-4 text-muted-foreground" />
+                Furnishing Status
+              </Label>
+              <Select
+                value={formData.furnishingStatus}
+                onValueChange={(value: FurnishingStatus) => setFormData(prev => ({ ...prev, furnishingStatus: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select furnishing" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FURNISHING_OPTIONS.map(option => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Unique Selling Points */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Sofa className="w-4 h-4 text-muted-foreground" />
-              Furnishing Status
-            </Label>
-            <Select
-              value={formData.furnishingStatus}
-              onValueChange={(value: FurnishingStatus) => setFormData(prev => ({ ...prev, furnishingStatus: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select furnishing" />
-              </SelectTrigger>
-              <SelectContent>
-                {FURNISHING_OPTIONS.map(option => (
-                  <SelectItem key={option} value={option}>{option}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-sm font-medium">Unique Selling Points</Label>
+            <Textarea
+              placeholder="What makes this property special? e.g., Recently renovated, prime location, stunning views..."
+              value={formData.uniqueSellingPoints}
+              onChange={(e) => setFormData(prev => ({ ...prev, uniqueSellingPoints: e.target.value }))}
+              className="min-h-[100px] resize-none"
+            />
           </div>
 
           {/* Amenities */}
@@ -321,41 +366,33 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
           </div>
 
-          {/* EWA Included */}
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-3">
-              <Zap className="w-5 h-5 text-secondary" />
-              <div>
-                <Label className="text-sm font-medium">EWA Included</Label>
-                <p className="text-xs text-muted-foreground">Electricity and Water Authority</p>
+          {/* EWA Included (shown for Villa and Apartment only) */}
+          {(formData.propertyType === 'Villa' || formData.propertyType === 'Apartment') && (
+            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Zap className="w-5 h-5 text-secondary" />
+                <div>
+                  <Label className="text-sm font-medium">EWA Included</Label>
+                  <p className="text-xs text-muted-foreground">Electricity and Water Authority</p>
+                </div>
               </div>
-            </div>
-            <Switch
-              checked={formData.ewaIncluded}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ewaIncluded: checked }))}
-            />
-          </div>
-
-          {/* Unique Selling Points */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Unique Selling Points</Label>
-            <Textarea
-              placeholder="What makes this property special? e.g., Recently renovated, prime location, stunning views..."
-              value={formData.uniqueSellingPoints}
-              onChange={(e) => setFormData(prev => ({ ...prev, uniqueSellingPoints: e.target.value }))}
-              className="min-h-[100px] resize-none"
-            />
-          </div>
-
-          {/* Auto-generation indicator */}
-          {isLoading && (
-            <div className="flex items-center justify-center gap-2 p-4 bg-secondary/10 rounded-lg">
-              <span className="w-5 h-5 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin" />
-              <span className="text-sm font-medium text-secondary">Generating listings automatically...</span>
+              <Switch
+                checked={formData.ewaIncluded}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ewaIncluded: checked }))}
+              />
             </div>
           )}
+
         </form>
       </CardContent>
+      
+      {/* Auto-generation indicator - Hovering notification */}
+      {isLoading && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-card border border-border shadow-lg rounded-lg animate-in slide-in-from-bottom-5">
+          <span className="w-5 h-5 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin" />
+          <span className="text-sm font-medium text-foreground">Generating listings...</span>
+        </div>
+      )}
     </Card>
   );
 }

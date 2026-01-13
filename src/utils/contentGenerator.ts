@@ -2,7 +2,7 @@ import { PropertyInput, GeneratedContent } from '@/types/property';
 
 export function generateContent(input: PropertyInput): GeneratedContent {
   const { 
-    propertyType, category, location, size, buildingSize, bedrooms, bathrooms, 
+    listingType, propertyType, category, location, size, buildingSize, bedrooms, bathrooms, 
     price, currency, furnishingStatus, amenities, ewaIncluded, uniqueSellingPoints 
   } = input;
 

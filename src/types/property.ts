@@ -19,7 +19,10 @@ export type FurnishingStatus = 'Furnished' | 'Semi-Furnished' | 'Unfurnished';
 
 export type LandClassification = 'RA' | 'RB' | 'RC' | 'RD' | 'BA' | 'BB' | 'BC' | 'BD' | 'CA' | 'CB' | 'IA' | 'IB' | '';
 
+export type ListingType = 'Sale' | 'Rent';
+
 export interface PropertyInput {
+  listingType: ListingType;
   propertyType: PropertyType | '';
   category: PropertyCategory | '';
   location: string;
