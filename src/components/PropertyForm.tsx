@@ -6,8 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X, Layers } from 'lucide-react';
+import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X, Layers, RefreshCw } from 'lucide-react';
 
 const PROPERTY_TYPES: PropertyType[] = [
   'Land', 'Villa', 'Apartment', 'Office', 'Shop', 'Store', 
@@ -525,6 +526,19 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
               />
             </div>
           )}
+
+          {/* Update Description Button */}
+          <div className="pt-2">
+            <Button
+              type="button"
+              onClick={() => onGenerate(formData)}
+              disabled={isLoading || !formData.propertyType || !formData.category || !formData.location}
+              className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              {isLoading ? 'Generating...' : 'Update Description'}
+            </Button>
+          </div>
 
         </form>
       </CardContent>
