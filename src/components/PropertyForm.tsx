@@ -38,7 +38,7 @@ const COMMON_AMENITIES = [
   'Swimming Pool', 'Gym', 'Parking', 'Security', 'Garden',
   'Balcony', 'Central AC', 'Maid Room', 'Storage', 'Elevator',
   'Sea View', 'City View', 'Private Pool', 'Smart Home', 'Terrace',
-  'Hospital', 'Mosque', 'Airport'
+  'Hospital', 'Mosque', 'Airport', 'Strategic Access to Main Roads'
 ];
 
 interface PropertyFormProps {
