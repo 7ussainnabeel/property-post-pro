@@ -52,6 +52,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     category: '',
     location: '',
     size: '',
+    buildingSize: '',
     bedrooms: '',
     bathrooms: '',
     price: '',
@@ -186,7 +187,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Size (sqm)</Label>
+              <Label className="text-sm font-medium">{formData.propertyType === 'Villa' ? 'Plot Size (sqm)' : 'Size (sqm)'}</Label>
               <Input
                 placeholder="e.g., 150"
                 type="number"
@@ -195,6 +196,19 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
               />
             </div>
           </div>
+
+          {/* Building Size (shown for Villa only) */}
+          {formData.propertyType === 'Villa' && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Building Size (sqm)</Label>
+              <Input
+                placeholder="e.g., 280"
+                type="number"
+                value={formData.buildingSize}
+                onChange={(e) => setFormData(prev => ({ ...prev, buildingSize: e.target.value }))}
+              />
+            </div>
+          )}
 
           {/* Bedrooms & Bathrooms */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

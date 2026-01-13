@@ -2,7 +2,7 @@ import { PropertyInput, GeneratedContent } from '@/types/property';
 
 export function generateContent(input: PropertyInput): GeneratedContent {
   const { 
-    propertyType, category, location, size, bedrooms, bathrooms, 
+    propertyType, category, location, size, buildingSize, bedrooms, bathrooms, 
     price, currency, furnishingStatus, amenities, ewaIncluded, uniqueSellingPoints 
   } = input;
 
@@ -12,6 +12,8 @@ export function generateContent(input: PropertyInput): GeneratedContent {
 
   const hasBedrooms = bedrooms && bedrooms.trim() !== '';
   const hasBathrooms = bathrooms && bathrooms.trim() !== '';
+  const hasBuildingSize = buildingSize && buildingSize.trim() !== '';
+  const isVilla = propertyType === 'Villa';
   
   const bedroomsBathroomsEN = hasBedrooms && hasBathrooms 
     ? `• ${bedrooms} Bedrooms | ${bathrooms} Bathrooms`
@@ -64,11 +66,11 @@ PROPERTY DETAILS
 
 DESCRIPTION
 
-We are pleased to present this distinguished ${propertyType?.toLowerCase()} located in the prime area of ${location}. This property represents an exceptional ${category?.toLowerCase()} opportunity, offering ${size} square meters of thoughtfully designed space.
+We are pleased to present this distinguished ${propertyType?.toLowerCase()} located in the prime area of ${location}. This property represents an exceptional ${category?.toLowerCase()} opportunity${isVilla && hasBuildingSize ? `, featuring ${buildingSize} square meters of building space on a ${size} square meter plot` : isVilla ? `, offering a generous ${size} square meter plot` : `, offering ${size} square meters of thoughtfully designed space`}.
 
 PROPERTY SPECIFICATIONS
 
-📐 Built-up Area: ${size} sqm${hasBedrooms ? `\n🛏️ Bedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\n🚿 Bathrooms: ${bathrooms}` : ''}
+${isVilla && hasBuildingSize ? `📐 Plot Size: ${size} sqm\n🏗️ Building Size: ${buildingSize} sqm` : `📐 Built-up Area: ${size} sqm`}${hasBedrooms ? `\n🛏️ Bedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\n🚿 Bathrooms: ${bathrooms}` : ''}
 🛋️ Furnishing Status: ${furnishingStatus}
 ${ewaIncluded ? '⚡💧 Utilities: EWA Included!' : '🔌 Utilities: EWA Not Included'}
 
@@ -118,11 +120,11 @@ ${getArabicPropertyType(propertyType)} ${hasBedrooms ? `${bedroomsAR} غرف ن�
 
 الوصف
 
-يسرنا أن نقدم لكم هذا ${getArabicPropertyType(propertyType)} المتميز الواقع في المنطقة الرئيسية ${locationAR}. يمثل هذا العقار فرصة ${getArabicCategory(category)}ة استثنائية، حيث يوفر ${sizeAR} متر مربع من المساحة المصممة بعناية.
+يسرنا أن نقدم لكم هذا ${getArabicPropertyType(propertyType)} المتميز الواقع في المنطقة الرئيسية ${locationAR}. يمثل هذا العقار فرصة ${getArabicCategory(category)}ة استثنائية${isVilla && hasBuildingSize ? `، حيث يوفر ${toArabicNumerals(buildingSize)} متر مربع من المساحة المبنية على قطعة أرض ${sizeAR} متر مربع` : isVilla ? `، حيث يوفر قطعة أرض واسعة بمساحة ${sizeAR} متر مربع` : `، حيث يوفر ${sizeAR} متر مربع من المساحة المصممة بعناية`}.
 
 مواصفات العقار
 
-📐 المساحة المبنية: ${sizeAR} متر مربع${hasBedrooms ? `\n🛏️ غرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\n🚿 الحمامات: ${bathroomsAR}` : ''}
+${isVilla && hasBuildingSize ? `📐 مساحة الأرض: ${sizeAR} متر مربع\n🏗️ المساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : `📐 المساحة المبنية: ${sizeAR} متر مربع`}${hasBedrooms ? `\n🛏️ غرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\n🚿 الحمامات: ${bathroomsAR}` : ''}
 🛋️ حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}
 ${ewaIncluded ? '⚡💧 المرافق: شامل الكهرباء والماء!' : '🔌 المرافق: غير شامل الكهرباء والماء'}
 
@@ -142,7 +144,7 @@ ${uniqueSellingPoints ? `\n💎 مميزات إضافية\n${uniqueSellingPoints
 🏠 ${propertyType?.toUpperCase()} FOR ${category === 'Investment' ? 'INVESTMENT' : 'SALE'}
 
 📍 Location: ${location}${hasBedrooms ? `\n🛏️ ${bedrooms} Bedrooms` : ''}${hasBathrooms ? `\n🚿 ${bathrooms} Bathrooms` : ''}
-📐 Size: ${size} SQM
+${isVilla && hasBuildingSize ? `📐 Plot Size: ${size} SQM\n🏗️ Building Size: ${buildingSize} SQM` : `📐 Size: ${size} SQM`}
 🛋️ ${furnishingStatus}
 ${ewaIncluded ? '⚡💧 EWA Included!' : ''}
 💰 ${currency} ${Number(price).toLocaleString()}
@@ -160,7 +162,7 @@ ${uniqueSellingPoints ? `\n🌟 ${uniqueSellingPoints.split('.')[0]}` : ''}
 🏠 ${getArabicPropertyType(propertyType)} ${category === 'Investment' ? 'للاستثمار' : 'للبيع'}
 
 📍 الموقع: ${locationAR}${hasBedrooms ? `\n🛏️ ${bedroomsAR} غرف نوم` : ''}${hasBathrooms ? `\n🚿 ${bathroomsAR} حمامات` : ''}
-📐 المساحة: ${sizeAR} م²
+${isVilla && hasBuildingSize ? `📐 مساحة الأرض: ${sizeAR} م²\n🏗️ المساحة المبنية: ${toArabicNumerals(buildingSize)} م²` : `📐 المساحة: ${sizeAR} م²`}
 🛋️ ${getArabicFurnishing(furnishingStatus)}
 ${ewaIncluded ? '⚡💧 شامل الكهرباء والماء!' : ''}
 💰 ${priceAR}
@@ -179,21 +181,37 @@ ${uniqueSellingPoints ? `\n🌟 ${uniqueSellingPoints.split('.')[0]}` : ''}
   const bedroomsLineAR = hasBedrooms ? `- غرف النوم: ${bedrooms}` : '';
   const bathroomsLineAR = hasBathrooms ? `- الحمامات: ${bathrooms}` : '';
   
-  const descriptionEN = hasBedrooms && hasBathrooms 
-    ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bedrooms} spacious bedrooms and ${bathrooms} modern bathrooms.`
-    : hasBedrooms 
-      ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bedrooms} spacious bedrooms.`
-      : hasBathrooms 
-        ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bathrooms} modern bathrooms.`
-        : `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters.`;
+  const descriptionEN = isVilla && hasBuildingSize 
+    ? hasBedrooms && hasBathrooms 
+      ? `This ${furnishingStatus?.toLowerCase()} villa features ${buildingSize} square meters of building space on a ${size} square meter plot, with ${bedrooms} spacious bedrooms and ${bathrooms} modern bathrooms.`
+      : hasBedrooms 
+        ? `This ${furnishingStatus?.toLowerCase()} villa features ${buildingSize} square meters of building space on a ${size} square meter plot, with ${bedrooms} spacious bedrooms.`
+        : hasBathrooms 
+          ? `This ${furnishingStatus?.toLowerCase()} villa features ${buildingSize} square meters of building space on a ${size} square meter plot, with ${bathrooms} modern bathrooms.`
+          : `This ${furnishingStatus?.toLowerCase()} villa features ${buildingSize} square meters of building space on a ${size} square meter plot.`
+    : hasBedrooms && hasBathrooms 
+      ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bedrooms} spacious bedrooms and ${bathrooms} modern bathrooms.`
+      : hasBedrooms 
+        ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bedrooms} spacious bedrooms.`
+        : hasBathrooms 
+          ? `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters and features ${bathrooms} modern bathrooms.`
+          : `This ${furnishingStatus?.toLowerCase()} property spans ${size} square meters.`;
 
-  const descriptionAR = hasBedrooms && hasBathrooms 
-    ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bedroomsAR} غرف نوم واسعة و${bathroomsAR} حمامات عصرية.`
-    : hasBedrooms 
-      ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bedroomsAR} غرف نوم واسعة.`
-      : hasBathrooms 
-        ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bathroomsAR} حمامات عصرية.`
-        : `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع.`;
+  const descriptionAR = isVilla && hasBuildingSize 
+    ? hasBedrooms && hasBathrooms 
+      ? `تتميز هذه الفيلا ${getArabicFurnishing(furnishingStatus)} بمساحة مبنية ${toArabicNumerals(buildingSize)} متر مربع على قطعة أرض ${sizeAR} متر مربع، وتضم ${bedroomsAR} غرف نوم واسعة و${bathroomsAR} حمامات عصرية.`
+      : hasBedrooms 
+        ? `تتميز هذه الفيلا ${getArabicFurnishing(furnishingStatus)} بمساحة مبنية ${toArabicNumerals(buildingSize)} متر مربع على قطعة أرض ${sizeAR} متر مربع، وتضم ${bedroomsAR} غرف نوم واسعة.`
+        : hasBathrooms 
+          ? `تتميز هذه الفيلا ${getArabicFurnishing(furnishingStatus)} بمساحة مبنية ${toArabicNumerals(buildingSize)} متر مربع على قطعة أرض ${sizeAR} متر مربع، وتضم ${bathroomsAR} حمامات عصرية.`
+          : `تتميز هذه الفيلا ${getArabicFurnishing(furnishingStatus)} بمساحة مبنية ${toArabicNumerals(buildingSize)} متر مربع على قطعة أرض ${sizeAR} متر مربع.`
+    : hasBedrooms && hasBathrooms 
+      ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bedroomsAR} غرف نوم واسعة و${bathroomsAR} حمامات عصرية.`
+      : hasBedrooms 
+        ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bedroomsAR} غرف نوم واسعة.`
+        : hasBathrooms 
+          ? `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع ويضم ${bathroomsAR} حمامات عصرية.`
+          : `يمتد هذا العقار ${getArabicFurnishing(furnishingStatus)} على مساحة ${sizeAR} متر مربع.`;
 
   const bedroomsLineARArabic = hasBedrooms ? `- غرف النوم: ${bedroomsAR}` : '';
   const bathroomsLineARArabic = hasBathrooms ? `- الحمامات: ${bathroomsAR}` : '';
@@ -206,7 +224,7 @@ Discover this remarkable ${propertyType?.toLowerCase()} situated in ${location},
 Key Features:
 - Property Type: ${propertyType}
 - Category: ${category}
-- Size: ${size} sqm
+${isVilla && hasBuildingSize ? `- Plot Size: ${size} sqm\n- Building Size: ${buildingSize} sqm` : `- Size: ${size} sqm`}
 ${bedroomsLineEN}
 ${bathroomsLineEN}
 - Furnishing: ${furnishingStatus}
@@ -231,7 +249,7 @@ ${getArabicPropertyType(propertyType)} في ${locationAR} | عقار ${getArabic
 المواصفات الرئيسية:
 - نوع العقار: ${getArabicPropertyType(propertyType)}
 - الفئة: ${getArabicCategory(category)}
-- المساحة: ${sizeAR} متر مربع
+${isVilla && hasBuildingSize ? `- مساحة الأرض: ${sizeAR} متر مربع\n- المساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : `- المساحة: ${sizeAR} متر مربع`}
 ${bedroomsLineARArabic}
 ${bathroomsLineARArabic}
 - التأثيث: ${getArabicFurnishing(furnishingStatus)}

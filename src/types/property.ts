@@ -24,6 +24,7 @@ export interface PropertyInput {
   category: PropertyCategory | '';
   location: string;
   size: string;
+  buildingSize?: string;
   bedrooms: string;
   bathrooms: string;
   price: string;
