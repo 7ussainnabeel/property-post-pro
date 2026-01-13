@@ -57,25 +57,27 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="gradient-hero py-12 px-4 text-center">
+      <header className="gradient-hero py-6 px-4 text-center">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-3 bg-secondary/20 rounded-xl">
-              <Building2 className="w-8 h-8 text-secondary" />
-            </div>
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <img 
+              src="/CarltonLogo.png" 
+              alt="Carlton Real Estate" 
+              className="h-8 md:h-10"
+            />
           </div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-primary-foreground mb-4">
+          <h1 className="text-2xl md:text-3xl font-display font-bold text-primary-foreground mb-2">
             Property Listing
-            <span className="text-gradient-gold block mt-1">Content Generator</span>
+            <span className="text-gradient-gold block mt-0.5">Content Generator</span>
           </h1>
-          <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto font-body">
+          <p className="text-sm text-primary-foreground/80 max-w-2xl mx-auto font-body">
             Generate professional, bilingual property listings for Property Finder, Instagram, 
             and other platforms in seconds.
           </p>
-          <div className="flex items-center justify-center gap-2 mt-6 text-secondary">
-            <Sparkles className="w-5 h-5" />
-            <span className="text-sm font-medium">AI-Powered • English & Arabic • Latest Hashtags</span>
-            <Sparkles className="w-5 h-5" />
+          <div className="flex items-center justify-center gap-2 mt-3 text-secondary">
+            <Sparkles className="w-4 h-4" />
+            <span className="text-xs font-medium">AI-Powered • English & Arabic • Latest Hashtags</span>
+            <Sparkles className="w-4 h-4" />
           </div>
         </div>
       </header>
