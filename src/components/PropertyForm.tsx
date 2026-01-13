@@ -422,8 +422,8 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
           )}
 
-          {/* Price per Feet, Price & Currency */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Price per Feet & Price */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Price per Feet</Label>
               <Input
@@ -436,7 +436,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
 
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
+                <span className="text-muted-foreground text-xs font-semibold">BD</span>
                 Price
               </Label>
               <Input
@@ -445,24 +445,6 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
                 value={formData.price}
                 onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Currency</Label>
-              <Select
-                value={formData.currency}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="BHD">BHD</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="AED">AED</SelectItem>
-                  <SelectItem value="SAR">SAR</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 

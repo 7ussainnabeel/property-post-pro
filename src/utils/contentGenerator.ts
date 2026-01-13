@@ -83,7 +83,7 @@ ${uniqueSellingPoints ? `\n💎 ADDITIONAL HIGHLIGHTS\n${uniqueSellingPoints}` :
 
 PRICING
 
-💰 Asking Price: ${currency} ${Number(price).toLocaleString()}
+💰 Asking Price: BD ${Number(price).toLocaleString()}
 
 For further information, property viewings, or to discuss this opportunity, please contact our property consultants at your earliest convenience.
   `.trim().replace(/\n\n\n/g, '\n\n');
@@ -151,7 +151,7 @@ ${uniqueSellingPoints ? `\n💎 مميزات إضافية\n${uniqueSellingPoints
 ${isVilla && hasBuildingSize ? `📐 Plot Size: ${size} SQM\n🏗️ Building Size: ${buildingSize} SQM` : `📐 Size: ${size} SQM`}
 🛋️ ${furnishingStatus}
 ${ewaIncluded ? '⚡💧 EWA Included!' : ''}
-💰 ${currency} ${Number(price).toLocaleString()}
+💰 BD ${Number(price).toLocaleString()}
 
 💎 Highlights:
 ${amenities.slice(0, 5).map(a => `${getAmenityEmoji(a)} ${a}`).join('\n')}
@@ -239,7 +239,7 @@ ${amenitiesList}
 
 ${uniqueSellingPoints ? `Special Features: ${uniqueSellingPoints}` : ''}
 
-Listed at ${currency} ${Number(price).toLocaleString()}, this property represents excellent value for those seeking quality ${category?.toLowerCase()} real estate in ${location}.
+Listed at BD ${Number(price).toLocaleString()}, this property represents excellent value for those seeking quality ${category?.toLowerCase()} real estate in ${location}.
 
 Contact our team today for more information or to arrange a private viewing.
   `.trim().replace(/\n\n\n/g, '\n\n').replace(/^\n/gm, '');
@@ -368,13 +368,7 @@ function toArabicNumerals(num: string | number): string {
 function formatArabicPrice(price: string, currency: string): string {
   const formattedNumber = Number(price).toLocaleString();
   const arabicNumber = toArabicNumerals(formattedNumber);
-  const currencyMap: Record<string, string> = {
-    'BHD': 'دينار بحريني',
-    'USD': 'دولار أمريكي',
-    'AED': 'درهم إماراتي',
-    'SAR': 'ريال سعودي',
-  };
-  return `${arabicNumber} ${currencyMap[currency] || currency}`;
+  return `${arabicNumber} دينار بحريني`;
 }
 
 function getArabicLocation(location: string): string {
