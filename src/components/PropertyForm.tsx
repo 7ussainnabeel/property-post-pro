@@ -63,6 +63,14 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     ewaIncluded: false,
     uniqueSellingPoints: '',
     landClassification: '',
+    // Villa-specific fields
+    numberOfEntrances: '',
+    numberOfFamilyHalls: '',
+    numberOfLivingAreas: '',
+    numberOfInternalKitchens: '',
+    numberOfExternalKitchens: '',
+    kitchenType: '',
+    outsideQuarters: false,
   });
 
   // Auto-generate with debouncing - only once when minimum data is entered
@@ -238,6 +246,122 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
                 onChange={(e) => setFormData(prev => ({ ...prev, buildingSize: e.target.value }))}
               />
             </div>
+          )}
+
+          {/* Villa-specific fields */}
+          {formData.propertyType === 'Villa' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Number of Entrances</Label>
+                  <Input
+                    placeholder="e.g., 2"
+                    type="number"
+                    value={formData.numberOfEntrances}
+                    onChange={(e) => setFormData(prev => ({ ...prev, numberOfEntrances: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Number of Family Halls</Label>
+                  <Input
+                    placeholder="e.g., 1"
+                    type="number"
+                    value={formData.numberOfFamilyHalls}
+                    onChange={(e) => setFormData(prev => ({ ...prev, numberOfFamilyHalls: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Number of Living Areas</Label>
+                  <Input
+                    placeholder="e.g., 2"
+                    type="number"
+                    value={formData.numberOfLivingAreas}
+                    onChange={(e) => setFormData(prev => ({ ...prev, numberOfLivingAreas: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Kitchen Type</Label>
+                  <Select
+                    value={formData.kitchenType}
+                    onValueChange={(value: 'Internal' | 'External' | 'Both') => setFormData(prev => ({ ...prev, kitchenType: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select kitchen type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Internal">Internal</SelectItem>
+                      <SelectItem value="External">External</SelectItem>
+                      <SelectItem value="Both">Both Internal & External</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Kitchen count fields based on type */}
+              {formData.kitchenType === 'Both' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Number of Internal Kitchens</Label>
+                    <Input
+                      placeholder="e.g., 1"
+                      type="number"
+                      value={formData.numberOfInternalKitchens}
+                      onChange={(e) => setFormData(prev => ({ ...prev, numberOfInternalKitchens: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Number of External Kitchens</Label>
+                    <Input
+                      placeholder="e.g., 1"
+                      type="number"
+                      value={formData.numberOfExternalKitchens}
+                      onChange={(e) => setFormData(prev => ({ ...prev, numberOfExternalKitchens: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              ) : formData.kitchenType === 'Internal' ? (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Number of Internal Kitchens</Label>
+                  <Input
+                    placeholder="e.g., 1"
+                    type="number"
+                    value={formData.numberOfInternalKitchens}
+                    onChange={(e) => setFormData(prev => ({ ...prev, numberOfInternalKitchens: e.target.value }))}
+                  />
+                </div>
+              ) : formData.kitchenType === 'External' ? (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Number of External Kitchens</Label>
+                  <Input
+                    placeholder="e.g., 1"
+                    type="number"
+                    value={formData.numberOfExternalKitchens}
+                    onChange={(e) => setFormData(prev => ({ ...prev, numberOfExternalKitchens: e.target.value }))}
+                  />
+                </div>
+              ) : null}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Outside Quarters</Label>
+                  <div className="flex items-center h-10 px-3 border border-input rounded-md bg-background">
+                    <Switch
+                      checked={formData.outsideQuarters}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, outsideQuarters: checked }))}
+                    />
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      {formData.outsideQuarters ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Bedrooms & Bathrooms (shown for Villa and Apartment only) */}

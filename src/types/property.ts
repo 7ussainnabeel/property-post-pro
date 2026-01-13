@@ -37,6 +37,14 @@ export interface PropertyInput {
   ewaIncluded: boolean;
   uniqueSellingPoints: string;
   landClassification: LandClassification;
+  // Villa-specific fields
+  numberOfEntrances?: string;
+  numberOfFamilyHalls?: string;
+  numberOfLivingAreas?: string;
+  numberOfInternalKitchens?: string;
+  numberOfExternalKitchens?: string;
+  kitchenType?: 'Internal' | 'External' | 'Both' | '';
+  outsideQuarters?: boolean;
 }
 
 export interface GeneratedContent {
