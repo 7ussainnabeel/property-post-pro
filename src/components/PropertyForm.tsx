@@ -56,6 +56,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     buildingSize: '',
     bedrooms: '',
     bathrooms: '',
+    pricePerFeet: '',
     price: '',
     currency: 'BHD',
     furnishingStatus: '',
@@ -74,6 +75,16 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     // Land and Villa field
     numberOfRoads: '',
   });
+
+  // Auto-calculate price from size (sqm) and price per feet
+  useEffect(() => {
+    if (formData.size && formData.pricePerFeet && !isNaN(Number(formData.size)) && !isNaN(Number(formData.pricePerFeet))) {
+      const sqm = Number(formData.size);
+      const pricePerFeet = Number(formData.pricePerFeet);
+      const calculatedPrice = Math.round(sqm * 10.764 * pricePerFeet);
+      setFormData(prev => ({ ...prev, price: calculatedPrice.toString() }));
+    }
+  }, [formData.size, formData.pricePerFeet]);
 
   // Auto-generate with debouncing - only once when minimum data is entered
   useEffect(() => {
@@ -411,9 +422,19 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
           )}
 
-          {/* Price & Currency */}
+          {/* Price per Feet, Price & Currency */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Price per Feet</Label>
+              <Input
+                placeholder="e.g., 50"
+                type="number"
+                value={formData.pricePerFeet}
+                onChange={(e) => setFormData(prev => ({ ...prev, pricePerFeet: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-muted-foreground" />
                 Price

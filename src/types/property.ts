@@ -30,6 +30,7 @@ export interface PropertyInput {
   buildingSize?: string;
   bedrooms: string;
   bathrooms: string;
+  pricePerFeet?: string;
   price: string;
   currency: string;
   furnishingStatus: FurnishingStatus | '';
