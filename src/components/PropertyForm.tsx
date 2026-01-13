@@ -71,6 +71,8 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     numberOfExternalKitchens: '',
     kitchenType: '',
     outsideQuarters: false,
+    // Land and Villa field
+    numberOfRoads: '',
   });
 
   // Auto-generate with debouncing - only once when minimum data is entered
@@ -106,17 +108,18 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
   };
 
   return (
-    <Card className="shadow-medium border-0 overflow-hidden">
-      <CardHeader className="gradient-hero text-primary-foreground pb-8 pt-6">
-        <CardTitle className="text-2xl font-display flex items-center gap-3">
-          <Building2 className="w-7 h-7" />
-          Property Details
-        </CardTitle>
-        <p className="text-primary-foreground/80 mt-1 font-body text-sm">
-          Enter your property information to generate professional listings
-        </p>
-      </CardHeader>
-      <CardContent className="p-6 space-y-6">
+    <>
+      <Card className="shadow-medium border-0 overflow-hidden">
+        <CardHeader className="gradient-hero text-primary-foreground pb-8 pt-6">
+          <CardTitle className="text-2xl font-display flex items-center gap-3">
+            <Building2 className="w-7 h-7" />
+            Property Details
+          </CardTitle>
+          <p className="text-primary-foreground/80 mt-1 font-body text-sm">
+            Enter your property information to generate professional listings
+          </p>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Listing Type - Sale or Rent */}
           <div className="space-y-3">
@@ -234,6 +237,19 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
               />
             </div>
           </div>
+
+          {/* Number of Roads (shown for Land and Villa only) */}
+          {(formData.propertyType === 'Land' || formData.propertyType === 'Land Planning' || formData.propertyType === 'Villa') && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Number of Roads</Label>
+              <Input
+                placeholder="e.g., 2"
+                type="number"
+                value={formData.numberOfRoads}
+                onChange={(e) => setFormData(prev => ({ ...prev, numberOfRoads: e.target.value }))}
+              />
+            </div>
+          )}
 
           {/* Building Size (shown for Villa only) */}
           {formData.propertyType === 'Villa' && (
@@ -509,14 +525,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
 
         </form>
       </CardContent>
-      
-      {/* Auto-generation indicator - Hovering notification */}
-      {isLoading && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-card border border-border shadow-lg rounded-lg animate-in slide-in-from-bottom-5">
-          <span className="w-5 h-5 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin" />
-          <span className="text-sm font-medium text-foreground">Generating listings...</span>
-        </div>
-      )}
-    </Card>
+      </Card>
+    </>
   );
 }

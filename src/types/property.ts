@@ -45,6 +45,8 @@ export interface PropertyInput {
   numberOfExternalKitchens?: string;
   kitchenType?: 'Internal' | 'External' | 'Both' | '';
   outsideQuarters?: boolean;
+  // Land and Villa field
+  numberOfRoads?: string;
 }
 
 export interface GeneratedContent {

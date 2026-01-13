@@ -5,7 +5,7 @@ export function generateContent(input: PropertyInput): GeneratedContent {
     listingType, propertyType, category, location, size, buildingSize, bedrooms, bathrooms, 
     price, currency, furnishingStatus, amenities, ewaIncluded, uniqueSellingPoints,
     numberOfEntrances, numberOfFamilyHalls, numberOfLivingAreas, numberOfInternalKitchens,
-    numberOfExternalKitchens, kitchenType, outsideQuarters
+    numberOfExternalKitchens, kitchenType, outsideQuarters, numberOfRoads
   } = input;
 
   const amenitiesList = amenities.join(', ');
@@ -72,7 +72,7 @@ We are pleased to present this distinguished ${propertyType?.toLowerCase()} loca
 
 PROPERTY SPECIFICATIONS
 
-${isVilla && hasBuildingSize ? `📐 Plot Size: ${size} sqm\n🏗️ Building Size: ${buildingSize} sqm` : `📐 Built-up Area: ${size} sqm`}${hasBedrooms ? `\n🛏️ Bedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\n🚿 Bathrooms: ${bathrooms}` : ''}
+${isVilla && hasBuildingSize ? `📐 Plot Size: ${size} sqm\n🏗️ Building Size: ${buildingSize} sqm` : `📐 Built-up Area: ${size} sqm`}${(propertyType === 'Land' || propertyType === 'Land Planning' || propertyType === 'Villa') && numberOfRoads ? `\n🛣️ Number of Roads: ${numberOfRoads}` : ''}${hasBedrooms ? `\n🛏️ Bedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\n🚿 Bathrooms: ${bathrooms}` : ''}
 ${isVilla && numberOfEntrances ? `\n🚪 Entrances: ${numberOfEntrances}` : ''}${isVilla && numberOfFamilyHalls ? `\n👨‍👩‍👧‍👦 Family Halls: ${numberOfFamilyHalls}` : ''}${isVilla && numberOfLivingAreas ? `\n🛋️ Living Areas: ${numberOfLivingAreas}` : ''}${isVilla && kitchenType === 'Both' && (numberOfInternalKitchens || numberOfExternalKitchens) ? `\n🍳 Kitchens: ${numberOfInternalKitchens || '0'} Internal, ${numberOfExternalKitchens || '0'} External` : isVilla && kitchenType === 'Internal' && numberOfInternalKitchens ? `\n🍳 Internal Kitchens: ${numberOfInternalKitchens}` : isVilla && kitchenType === 'External' && numberOfExternalKitchens ? `\n🍳 External Kitchens: ${numberOfExternalKitchens}` : ''}${isVilla && outsideQuarters ? `\n🏠 Outside Quarters: Yes` : ''}
 🛋️ Furnishing Status: ${furnishingStatus}
 ${ewaIncluded ? '⚡💧 Utilities: EWA Included!' : '🔌 Utilities: EWA Not Included'}
@@ -127,7 +127,7 @@ ${getArabicPropertyType(propertyType)} ${hasBedrooms ? `${bedroomsAR} غرف ن�
 
 مواصفات العقار
 
-${isVilla && hasBuildingSize ? `📐 مساحة الأرض: ${sizeAR} متر مربع\n🏗️ المساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : `📐 المساحة المبنية: ${sizeAR} متر مربع`}${hasBedrooms ? `\n🛏️ غرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\n🚿 الحمامات: ${bathroomsAR}` : ''}
+${isVilla && hasBuildingSize ? `📐 مساحة الأرض: ${sizeAR} متر مربع\n🏗️ المساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : `📐 المساحة المبنية: ${sizeAR} متر مربع`}${(propertyType === 'Land' || propertyType === 'Land Planning' || propertyType === 'Villa') && numberOfRoads ? `\n🛣️ عدد الشوارع: ${toArabicNumerals(numberOfRoads)}` : ''}${hasBedrooms ? `\n🛏️ غرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\n🚿 الحمامات: ${bathroomsAR}` : ''}
 ${isVilla && numberOfEntrances ? `\n🚪 المداخل: ${toArabicNumerals(numberOfEntrances)}` : ''}${isVilla && numberOfFamilyHalls ? `\n👨‍👩‍👧‍👦 صالات العائلة: ${toArabicNumerals(numberOfFamilyHalls)}` : ''}${isVilla && numberOfLivingAreas ? `\n🛋️ مناطق المعيشة: ${toArabicNumerals(numberOfLivingAreas)}` : ''}${isVilla && kitchenType === 'Both' && (numberOfInternalKitchens || numberOfExternalKitchens) ? `\n🍳 المطابخ: ${toArabicNumerals(numberOfInternalKitchens || '0')} داخلي، ${toArabicNumerals(numberOfExternalKitchens || '0')} خارجي` : isVilla && kitchenType === 'Internal' && numberOfInternalKitchens ? `\n🍳 المطابخ الداخلية: ${toArabicNumerals(numberOfInternalKitchens)}` : isVilla && kitchenType === 'External' && numberOfExternalKitchens ? `\n🍳 المطابخ الخارجية: ${toArabicNumerals(numberOfExternalKitchens)}` : ''}${isVilla && outsideQuarters ? `\n🏠 ملحق خارجي: نعم` : ''}
 🛋️ حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}
 ${ewaIncluded ? '⚡💧 المرافق: شامل الكهرباء والماء!' : '🔌 المرافق: غير شامل الكهرباء والماء'}

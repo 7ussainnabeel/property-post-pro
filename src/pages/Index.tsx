@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { PropertyForm } from '@/components/PropertyForm';
 import { GeneratedContent } from '@/components/GeneratedContent';
 import { PropertyInput, GeneratedContent as GeneratedContentType } from '@/types/property';
@@ -9,9 +9,11 @@ import { toast } from 'sonner';
 const Index = () => {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContentType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const loadingToastId = useRef<string | number | null>(null);
 
   const handleGenerate = async (data: PropertyInput) => {
     setIsLoading(true);
+    loadingToastId.current = toast.loading('Generating listings...');
     
     try {
       const { data: result, error } = await supabase.functions.invoke('generate-listing', {
@@ -20,12 +22,14 @@ const Index = () => {
 
       if (error) {
         console.error('Error calling edge function:', error);
+        if (loadingToastId.current) toast.dismiss(loadingToastId.current);
         toast.error('Failed to generate content. Please try again.');
         return;
       }
 
       if (result?.error) {
         console.error('Edge function error:', result.error);
+        if (loadingToastId.current) toast.dismiss(loadingToastId.current);
         if (result.error.includes('Rate limits')) {
           toast.error('Rate limit exceeded. Please wait a moment and try again.');
         } else if (result.error.includes('Payment required')) {
@@ -38,10 +42,12 @@ const Index = () => {
 
       if (result?.content) {
         setGeneratedContent(result.content);
+        if (loadingToastId.current) toast.dismiss(loadingToastId.current);
         toast.success('Content generated successfully!');
       }
     } catch (err) {
       console.error('Unexpected error:', err);
+      if (loadingToastId.current) toast.dismiss(loadingToastId.current);
       toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
