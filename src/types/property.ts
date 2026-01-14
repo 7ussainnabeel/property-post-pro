@@ -17,7 +17,7 @@ export type PropertyType =
 
 export type FurnishingStatus = 'Furnished' | 'Semi-Furnished' | 'Unfurnished';
 
-export type LandClassification = 'RA' | 'RB' | 'RC' | 'RD' | 'BA' | 'BB' | 'BC' | 'BD' | 'CA' | 'CB' | 'IA' | 'IB' | '';
+export type LandClassification = 'AG' | 'B3' | 'B4' | 'COM' | 'BR5' | 'RHA' | 'RHB' | 'RHC' | 'F' | 'RG' | 'GB' | 'DA' | 'DB' | 'BC' | 'BA' | 'BB' | 'BD' | 'BE' | 'LD' | 'MOH' | 'RA' | 'RB' | 'S' | 'SP' | 'SP(g)' | 'UP' | 'US' | 'WS' | '';
 
 export type ListingType = 'Sale' | 'Rent';
 
