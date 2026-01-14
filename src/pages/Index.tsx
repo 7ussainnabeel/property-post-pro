@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { PropertyForm } from '@/components/PropertyForm';
 import { GeneratedContent } from '@/components/GeneratedContent';
 import { PropertyInput, GeneratedContent as GeneratedContentType } from '@/types/property';
-import { Building2, Sparkles } from 'lucide-react';
+import { Building2, Sparkles, Video } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContentType | null>(null);
@@ -57,7 +59,17 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="gradient-hero py-6 px-4 text-center">
+      <header className="gradient-hero py-6 px-4 text-center relative">
+        {/* Video Quality Link */}
+        <div className="absolute top-4 right-4">
+          <Link to="/video-quality">
+            <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Video className="h-4 w-4 mr-2" />
+              Video Quality
+            </Button>
+          </Link>
+        </div>
+        
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-3">
             <img 
