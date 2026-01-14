@@ -16,30 +16,36 @@ export type Database = {
     Tables: {
       video_submissions: {
         Row: {
+          agent_name: string | null
           created_at: string
           description: string | null
           id: string
           notes: string | null
+          property_id: string | null
           quality_status: string | null
           title: string | null
           updated_at: string
           youtube_url: string
         }
         Insert: {
+          agent_name?: string | null
           created_at?: string
           description?: string | null
           id?: string
           notes?: string | null
+          property_id?: string | null
           quality_status?: string | null
           title?: string | null
           updated_at?: string
           youtube_url: string
         }
         Update: {
+          agent_name?: string | null
           created_at?: string
           description?: string | null
           id?: string
           notes?: string | null
+          property_id?: string | null
           quality_status?: string | null
           title?: string | null
           updated_at?: string
