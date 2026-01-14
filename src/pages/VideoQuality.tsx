@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Video, Plus, Trash2, ExternalLink, Copy, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -16,20 +16,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface VideoSubmission {
   id: string;
   youtube_url: string;
   title: string | null;
   description: string | null;
-  quality_status: string;
+  
   notes: string | null;
   agent_name: string | null;
   property_id: string | null;
@@ -177,29 +170,6 @@ const VideoQuality = () => {
     }
   };
 
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      const { error } = await supabase
-        .from("video_submissions")
-        .update({ quality_status: status })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Status Updated",
-        description: `Video marked as ${status}`,
-      });
-
-      fetchVideos();
-    } catch (error: any) {
-      toast({
-        title: "Error updating status",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   const deleteVideo = async (id: string) => {
     try {
@@ -229,16 +199,6 @@ const VideoQuality = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "approved":
-        return <Badge className="bg-green-500 hover:bg-green-600">✅ Approved</Badge>;
-      case "rejected":
-        return <Badge className="bg-red-500 hover:bg-red-600">❌ Rejected</Badge>;
-      default:
-        return <Badge className="bg-yellow-500 hover:bg-yellow-600">⏳ Pending</Badge>;
-    }
-  };
 
   const getYoutubeEmbedUrl = (url: string): string | null => {
     const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]+)/);
@@ -383,7 +343,7 @@ const VideoQuality = () => {
                       <TableHead className="text-slate-300">Agent</TableHead>
                       <TableHead className="text-slate-300">Property ID</TableHead>
                       <TableHead className="text-slate-300">Title</TableHead>
-                      <TableHead className="text-slate-300">Status</TableHead>
+                      
                       <TableHead className="text-slate-300">Date Added</TableHead>
                       <TableHead className="text-slate-300">Actions</TableHead>
                     </TableRow>
@@ -432,7 +392,7 @@ const VideoQuality = () => {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>{getStatusBadge(video.quality_status)}</TableCell>
+                          
                           <TableCell className="text-slate-400">
                             {new Date(video.created_at).toLocaleDateString()}
                           </TableCell>
@@ -451,19 +411,6 @@ const VideoQuality = () => {
                                   <Copy className="h-4 w-4" />
                                 )}
                               </Button>
-                              <Select
-                                value={video.quality_status}
-                                onValueChange={(value) => updateStatus(video.id, value)}
-                              >
-                                <SelectTrigger className="w-32 bg-slate-700 border-slate-600 text-white">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="approved">Approved</SelectItem>
-                                  <SelectItem value="rejected">Rejected</SelectItem>
-                                </SelectContent>
-                              </Select>
                               <Button
                                 variant="destructive"
                                 size="icon"
