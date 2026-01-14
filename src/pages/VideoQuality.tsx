@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Video, Plus, Trash2, Check, X, ExternalLink } from "lucide-react";
+import { ArrowLeft, Video, Plus, Trash2, ExternalLink, Copy, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Table,
@@ -31,6 +31,8 @@ interface VideoSubmission {
   description: string | null;
   quality_status: string;
   notes: string | null;
+  agent_name: string | null;
+  property_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -41,7 +43,11 @@ const VideoQuality = () => {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [agentName, setAgentName] = useState("");
+  const [propertyId, setPropertyId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [lastSubmittedId, setLastSubmittedId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchVideos = async () => {
@@ -73,6 +79,29 @@ const VideoQuality = () => {
     return youtubeRegex.test(url);
   };
 
+  const generateVideoLink = (id: string) => {
+    return `${window.location.origin}/video-quality?video=${id}`;
+  };
+
+  const copyToClipboard = async (id: string) => {
+    const link = generateVideoLink(id);
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedId(id);
+      toast({
+        title: "Link Copied",
+        description: "Video link has been copied to clipboard",
+      });
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy link to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -94,15 +123,37 @@ const VideoQuality = () => {
       return;
     }
 
+    if (!agentName.trim()) {
+      toast({
+        title: "Agent Name Required",
+        description: "Please enter the agent name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!propertyId.trim()) {
+      toast({
+        title: "Property ID Required",
+        description: "Please enter the property ID",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("video_submissions").insert({
+      const { data, error } = await supabase.from("video_submissions").insert({
         youtube_url: youtubeUrl.trim(),
         title: title.trim() || null,
         description: description.trim() || null,
-      });
+        agent_name: agentName.trim(),
+        property_id: propertyId.trim(),
+      }).select().single();
 
       if (error) throw error;
+
+      setLastSubmittedId(data.id);
 
       toast({
         title: "Video Added",
@@ -112,6 +163,8 @@ const VideoQuality = () => {
       setYoutubeUrl("");
       setTitle("");
       setDescription("");
+      setAgentName("");
+      setPropertyId("");
       fetchVideos();
     } catch (error: any) {
       toast({
@@ -162,6 +215,10 @@ const VideoQuality = () => {
         description: "Video has been removed",
       });
 
+      if (lastSubmittedId === id) {
+        setLastSubmittedId(null);
+      }
+
       fetchVideos();
     } catch (error: any) {
       toast({
@@ -204,6 +261,40 @@ const VideoQuality = () => {
           </div>
         </div>
 
+        {/* Success Card with Copy Link */}
+        {lastSubmittedId && (
+          <Card className="mb-8 bg-green-900/30 border-green-700">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                  <div>
+                    <p className="text-green-300 font-medium">Video submitted successfully!</p>
+                    <p className="text-sm text-green-400/70">Copy the link below to share with others</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => copyToClipboard(lastSubmittedId)}
+                  className="border-green-600 text-green-300 hover:bg-green-800/50"
+                >
+                  {copiedId === lastSubmittedId ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Link
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Add Video Form */}
         <Card className="mb-8 bg-slate-800/50 border-slate-700">
           <CardHeader>
@@ -214,6 +305,26 @@ const VideoQuality = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-300">Agent Name *</label>
+                  <Input
+                    placeholder="Enter agent name"
+                    value={agentName}
+                    onChange={(e) => setAgentName(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-300">Property ID *</label>
+                  <Input
+                    placeholder="Enter property ID"
+                    value={propertyId}
+                    onChange={(e) => setPropertyId(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+              </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm text-slate-300">YouTube URL *</label>
@@ -269,6 +380,8 @@ const VideoQuality = () => {
                   <TableHeader>
                     <TableRow className="border-slate-700">
                       <TableHead className="text-slate-300">Video</TableHead>
+                      <TableHead className="text-slate-300">Agent</TableHead>
+                      <TableHead className="text-slate-300">Property ID</TableHead>
                       <TableHead className="text-slate-300">Title</TableHead>
                       <TableHead className="text-slate-300">Status</TableHead>
                       <TableHead className="text-slate-300">Date Added</TableHead>
@@ -303,6 +416,12 @@ const VideoQuality = () => {
                               </a>
                             )}
                           </TableCell>
+                          <TableCell className="text-white font-medium">
+                            {video.agent_name || "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {video.property_id || "-"}
+                          </TableCell>
                           <TableCell className="text-white">
                             <div>
                               <div className="font-medium">{video.title || "Untitled"}</div>
@@ -319,6 +438,19 @@ const VideoQuality = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => copyToClipboard(video.id)}
+                                className="border-slate-600 hover:bg-slate-700"
+                                title="Copy link"
+                              >
+                                {copiedId === video.id ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
                               <Select
                                 value={video.quality_status}
                                 onValueChange={(value) => updateStatus(video.id, value)}
