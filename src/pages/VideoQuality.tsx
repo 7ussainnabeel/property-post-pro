@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Video, Plus, Trash2, ExternalLink, Copy, CheckCircle, Loader2, Edit2, Star, Smartphone, Monitor, X } from "lucide-react";
+import { ArrowLeft, Video, Plus, Trash2, ExternalLink, Copy, CheckCircle, Loader2, Edit2, Star, Smartphone, Monitor, Upload, Film } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Table,
@@ -23,10 +23,17 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 interface VideoSubmission {
   id: string;
-  youtube_url: string;
+  youtube_url: string | null;
+  video_file_url: string | null;
   title: string | null;
   description: string | null;
   notes: string | null;
@@ -56,6 +63,10 @@ const VideoQuality = () => {
   const [editingVideo, setEditingVideo] = useState<VideoSubmission | null>(null);
   const [editYoutubeUrl, setEditYoutubeUrl] = useState("");
   const [editingSubmitting, setEditingSubmitting] = useState(false);
+  const [uploadType, setUploadType] = useState<"youtube" | "upload">("upload");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const fetchVideos = async () => {
@@ -110,11 +121,11 @@ const VideoQuality = () => {
     }
   };
 
-  const reviewVideo = async (videoId: string, youtubeUrl: string) => {
+  const reviewVideo = async (videoId: string, videoUrl: string, isUploadedVideo: boolean = false) => {
     setReviewingId(videoId);
     try {
       const { data, error } = await supabase.functions.invoke('review-video', {
-        body: { videoId, youtubeUrl }
+        body: { videoId, youtubeUrl: videoUrl, isUploadedVideo }
       });
 
       if (error) throw error;
@@ -140,27 +151,52 @@ const VideoQuality = () => {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (max 100MB)
+      if (file.size > 100 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Maximum file size is 100MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      // Check file type
+      if (!file.type.startsWith("video/")) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please select a video file",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadVideo = async (file: File): Promise<string> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `uploads/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("videos")
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: publicUrl } = supabase.storage
+      .from("videos")
+      .getPublicUrl(filePath);
+
+    return publicUrl.publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!youtubeUrl.trim()) {
-      toast({
-        title: "URL Required",
-        description: "Please enter a YouTube URL",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!validateYoutubeUrl(youtubeUrl)) {
-      toast({
-        title: "Invalid URL",
-        description: "Please enter a valid YouTube URL",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!agentName.trim()) {
       toast({
         title: "Agent Name Required",
@@ -179,10 +215,51 @@ const VideoQuality = () => {
       return;
     }
 
+    if (uploadType === "youtube") {
+      if (!youtubeUrl.trim()) {
+        toast({
+          title: "URL Required",
+          description: "Please enter a YouTube URL",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!validateYoutubeUrl(youtubeUrl)) {
+        toast({
+          title: "Invalid URL",
+          description: "Please enter a valid YouTube URL",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      if (!selectedFile) {
+        toast({
+          title: "Video Required",
+          description: "Please select a video file to upload",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setSubmitting(true);
+    setUploading(uploadType === "upload");
+    
     try {
+      let videoFileUrl: string | null = null;
+      let youtubeUrlValue: string | null = null;
+
+      if (uploadType === "upload" && selectedFile) {
+        videoFileUrl = await uploadVideo(selectedFile);
+      } else {
+        youtubeUrlValue = youtubeUrl.trim();
+      }
+
       const { data, error } = await supabase.from("video_submissions").insert({
-        youtube_url: youtubeUrl.trim(),
+        youtube_url: youtubeUrlValue,
+        video_file_url: videoFileUrl,
         title: title.trim() || null,
         description: description.trim() || null,
         agent_name: agentName.trim(),
@@ -203,9 +280,14 @@ const VideoQuality = () => {
       setDescription("");
       setAgentName("");
       setPropertyId("");
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       
       // Trigger AI review
-      await reviewVideo(data.id, data.youtube_url);
+      const reviewUrl = videoFileUrl || youtubeUrlValue || "";
+      await reviewVideo(data.id, reviewUrl, !!videoFileUrl);
       
       fetchVideos();
     } catch (error: any) {
@@ -216,11 +298,20 @@ const VideoQuality = () => {
       });
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
 
-  const deleteVideo = async (id: string) => {
+  const deleteVideo = async (id: string, videoFileUrl: string | null) => {
     try {
+      // Delete from storage if it's an uploaded file
+      if (videoFileUrl) {
+        const path = videoFileUrl.split("/videos/")[1];
+        if (path) {
+          await supabase.storage.from("videos").remove([path]);
+        }
+      }
+
       const { error } = await supabase
         .from("video_submissions")
         .delete()
@@ -249,7 +340,7 @@ const VideoQuality = () => {
 
   const handleEditOpen = (video: VideoSubmission) => {
     setEditingVideo(video);
-    setEditYoutubeUrl(video.youtube_url);
+    setEditYoutubeUrl(video.youtube_url || "");
   };
 
   const handleEditClose = () => {
@@ -284,6 +375,7 @@ const VideoQuality = () => {
         .from("video_submissions")
         .update({
           youtube_url: editYoutubeUrl.trim(),
+          video_file_url: null,
           orientation: null,
           stability_rating: null,
           overall_rating: null,
@@ -316,7 +408,8 @@ const VideoQuality = () => {
     }
   };
 
-  const getYoutubeEmbedUrl = (url: string): string | null => {
+  const getYoutubeEmbedUrl = (url: string | null): string | null => {
+    if (!url) return null;
     const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]+)/);
     return match ? `https://www.youtube.com/embed/${match[1]}` : null;
   };
@@ -341,6 +434,52 @@ const VideoQuality = () => {
         <span className={`ml-1 text-sm ${getRatingColor(rating)}`}>{rating}/10</span>
       </div>
     );
+  };
+
+  const renderVideoPreview = (video: VideoSubmission) => {
+    if (video.video_file_url) {
+      return (
+        <div className="w-40 h-24 rounded overflow-hidden bg-slate-900">
+          <video
+            src={video.video_file_url}
+            className="w-full h-full object-cover"
+            muted
+            preload="metadata"
+          />
+        </div>
+      );
+    }
+    
+    const embedUrl = getYoutubeEmbedUrl(video.youtube_url);
+    if (embedUrl) {
+      return (
+        <div className="w-40 h-24 rounded overflow-hidden">
+          <iframe
+            src={embedUrl}
+            title={video.title || "YouTube video"}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      );
+    }
+
+    if (video.youtube_url) {
+      return (
+        <a
+          href={video.youtube_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:underline flex items-center gap-1"
+        >
+          <ExternalLink className="h-4 w-4" />
+          View Video
+        </a>
+      );
+    }
+
+    return <span className="text-slate-500">No video</span>;
   };
 
   return (
@@ -398,7 +537,7 @@ const VideoQuality = () => {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Add YouTube Video for AI Review
+              Add Video for AI Review
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -423,16 +562,53 @@ const VideoQuality = () => {
                   />
                 </div>
               </div>
+
+              <Tabs value={uploadType} onValueChange={(v) => setUploadType(v as "youtube" | "upload")}>
+                <TabsList className="bg-slate-700">
+                  <TabsTrigger value="upload" className="data-[state=active]:bg-slate-600">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Video
+                  </TabsTrigger>
+                  <TabsTrigger value="youtube" className="data-[state=active]:bg-slate-600">
+                    <Film className="h-4 w-4 mr-2" />
+                    YouTube URL
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="upload" className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-300">Video File * (Max 100MB)</label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="video/*"
+                        onChange={handleFileSelect}
+                        className="bg-slate-700 border-slate-600 text-white file:bg-slate-600 file:text-white file:border-0 file:mr-4"
+                      />
+                      {selectedFile && (
+                        <Badge variant="secondary" className="shrink-0">
+                          {selectedFile.name}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="youtube" className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-300">YouTube URL *</label>
+                    <Input
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      value={youtubeUrl}
+                      onChange={(e) => setYoutubeUrl(e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-300">YouTube URL *</label>
-                  <Input
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    value={youtubeUrl}
-                    onChange={(e) => setYoutubeUrl(e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
                 <div className="space-y-2">
                   <label className="text-sm text-slate-300">Title (optional)</label>
                   <Input
@@ -442,25 +618,28 @@ const VideoQuality = () => {
                     className="bg-slate-700 border-slate-600 text-white"
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-300">Description (optional)</label>
+                  <Input
+                    placeholder="Add notes about the video..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-300">Description (optional)</label>
-                <Textarea
-                  placeholder="Add notes about the video..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="bg-slate-700 border-slate-600 text-white"
-                  rows={3}
-                />
-              </div>
+
               <Button type="submit" disabled={submitting} className="w-full md:w-auto">
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Submitting & Reviewing...
+                    {uploading ? "Uploading..." : "Submitting..."}
                   </>
                 ) : (
-                  "Add Video for AI Review"
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Submit Video for AI Review
+                  </>
                 )}
               </Button>
             </form>
@@ -477,7 +656,7 @@ const VideoQuality = () => {
               <div className="text-center py-8 text-slate-400">Loading videos...</div>
             ) : videos.length === 0 ? (
               <div className="text-center py-8 text-slate-400">
-                No videos submitted yet. Add a YouTube URL above to get started.
+                No videos submitted yet. Upload a video or add a YouTube URL above to get started.
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -496,33 +675,10 @@ const VideoQuality = () => {
                   </TableHeader>
                   <TableBody>
                     {videos.map((video) => {
-                      const embedUrl = getYoutubeEmbedUrl(video.youtube_url);
                       const isReviewing = reviewingId === video.id;
                       return (
                         <TableRow key={video.id} className="border-slate-700">
-                          <TableCell>
-                            {embedUrl ? (
-                              <div className="w-40 h-24 rounded overflow-hidden">
-                                <iframe
-                                  src={embedUrl}
-                                  title={video.title || "YouTube video"}
-                                  className="w-full h-full"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowFullScreen
-                                />
-                              </div>
-                            ) : (
-                              <a
-                                href={video.youtube_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline flex items-center gap-1"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                                View Video
-                              </a>
-                            )}
-                          </TableCell>
+                          <TableCell>{renderVideoPreview(video)}</TableCell>
                           <TableCell className="text-white font-medium">
                             {video.agent_name || "-"}
                           </TableCell>
@@ -601,7 +757,7 @@ const VideoQuality = () => {
                               <Button
                                 variant="destructive"
                                 size="icon"
-                                onClick={() => deleteVideo(video.id)}
+                                onClick={() => deleteVideo(video.id, video.video_file_url)}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>

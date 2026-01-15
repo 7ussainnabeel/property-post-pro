@@ -30,7 +30,8 @@ export type Database = {
           stability_rating: number | null
           title: string | null
           updated_at: string
-          youtube_url: string
+          video_file_url: string | null
+          youtube_url: string | null
         }
         Insert: {
           agent_name?: string | null
@@ -47,7 +48,8 @@ export type Database = {
           stability_rating?: number | null
           title?: string | null
           updated_at?: string
-          youtube_url: string
+          video_file_url?: string | null
+          youtube_url?: string | null
         }
         Update: {
           agent_name?: string | null
@@ -64,7 +66,8 @@ export type Database = {
           stability_rating?: number | null
           title?: string | null
           updated_at?: string
-          youtube_url?: string
+          video_file_url?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
