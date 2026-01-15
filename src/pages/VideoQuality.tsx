@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Video, Plus, Trash2, ExternalLink, Copy, CheckCircle } from "lucide-react";
+import { ArrowLeft, Video, Plus, Trash2, ExternalLink, Copy, CheckCircle, Loader2, Edit2, Star, Smartphone, Monitor, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Table,
@@ -16,16 +16,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface VideoSubmission {
   id: string;
   youtube_url: string;
   title: string | null;
   description: string | null;
-  
   notes: string | null;
   agent_name: string | null;
   property_id: string | null;
+  orientation: string | null;
+  stability_rating: number | null;
+  overall_rating: number | null;
+  ai_feedback: string | null;
+  reviewed_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -39,8 +50,12 @@ const VideoQuality = () => {
   const [agentName, setAgentName] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [lastSubmittedId, setLastSubmittedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [editingVideo, setEditingVideo] = useState<VideoSubmission | null>(null);
+  const [editYoutubeUrl, setEditYoutubeUrl] = useState("");
+  const [editingSubmitting, setEditingSubmitting] = useState(false);
   const { toast } = useToast();
 
   const fetchVideos = async () => {
@@ -92,6 +107,36 @@ const VideoQuality = () => {
         description: "Failed to copy link to clipboard",
         variant: "destructive",
       });
+    }
+  };
+
+  const reviewVideo = async (videoId: string, youtubeUrl: string) => {
+    setReviewingId(videoId);
+    try {
+      const { data, error } = await supabase.functions.invoke('review-video', {
+        body: { videoId, youtubeUrl }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: "AI Review Complete",
+        description: `Video rated ${data.overall_rating}/10 - ${data.orientation} orientation`,
+      });
+
+      fetchVideos();
+    } catch (error: any) {
+      toast({
+        title: "Review Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setReviewingId(null);
     }
   };
 
@@ -150,7 +195,7 @@ const VideoQuality = () => {
 
       toast({
         title: "Video Added",
-        description: "Video has been submitted for quality review",
+        description: "Starting AI review...",
       });
 
       setYoutubeUrl("");
@@ -158,6 +203,10 @@ const VideoQuality = () => {
       setDescription("");
       setAgentName("");
       setPropertyId("");
+      
+      // Trigger AI review
+      await reviewVideo(data.id, data.youtube_url);
+      
       fetchVideos();
     } catch (error: any) {
       toast({
@@ -169,7 +218,6 @@ const VideoQuality = () => {
       setSubmitting(false);
     }
   };
-
 
   const deleteVideo = async (id: string) => {
     try {
@@ -199,10 +247,100 @@ const VideoQuality = () => {
     }
   };
 
+  const handleEditOpen = (video: VideoSubmission) => {
+    setEditingVideo(video);
+    setEditYoutubeUrl(video.youtube_url);
+  };
+
+  const handleEditClose = () => {
+    setEditingVideo(null);
+    setEditYoutubeUrl("");
+  };
+
+  const handleEditSave = async () => {
+    if (!editingVideo) return;
+
+    if (!editYoutubeUrl.trim()) {
+      toast({
+        title: "URL Required",
+        description: "Please enter a YouTube URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!validateYoutubeUrl(editYoutubeUrl)) {
+      toast({
+        title: "Invalid URL",
+        description: "Please enter a valid YouTube URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setEditingSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("video_submissions")
+        .update({
+          youtube_url: editYoutubeUrl.trim(),
+          orientation: null,
+          stability_rating: null,
+          overall_rating: null,
+          ai_feedback: null,
+          reviewed_at: null,
+        })
+        .eq("id", editingVideo.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "URL Updated",
+        description: "Starting AI review of new video...",
+      });
+
+      handleEditClose();
+      
+      // Trigger new AI review
+      await reviewVideo(editingVideo.id, editYoutubeUrl.trim());
+      
+      fetchVideos();
+    } catch (error: any) {
+      toast({
+        title: "Error updating video",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setEditingSubmitting(false);
+    }
+  };
 
   const getYoutubeEmbedUrl = (url: string): string | null => {
     const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]+)/);
     return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+  };
+
+  const getRatingColor = (rating: number | null) => {
+    if (!rating) return "text-slate-400";
+    if (rating >= 8) return "text-green-400";
+    if (rating >= 5) return "text-yellow-400";
+    return "text-red-400";
+  };
+
+  const renderStars = (rating: number | null) => {
+    if (!rating) return null;
+    return (
+      <div className="flex items-center gap-1">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`h-3 w-3 ${i < Math.round(rating / 2) ? "fill-yellow-400 text-yellow-400" : "text-slate-600"}`}
+          />
+        ))}
+        <span className={`ml-1 text-sm ${getRatingColor(rating)}`}>{rating}/10</span>
+      </div>
+    );
   };
 
   return (
@@ -229,7 +367,7 @@ const VideoQuality = () => {
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-6 w-6 text-green-500" />
                   <div>
-                    <p className="text-green-300 font-medium">Video submitted successfully!</p>
+                    <p className="text-green-300 font-medium">Video submitted and reviewed!</p>
                     <p className="text-sm text-green-400/70">Copy the link below to share with others</p>
                   </div>
                 </div>
@@ -260,7 +398,7 @@ const VideoQuality = () => {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Add YouTube Video for Review
+              Add YouTube Video for AI Review
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -316,7 +454,14 @@ const VideoQuality = () => {
                 />
               </div>
               <Button type="submit" disabled={submitting} className="w-full md:w-auto">
-                {submitting ? "Submitting..." : "Add Video for Review"}
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Submitting & Reviewing...
+                  </>
+                ) : (
+                  "Add Video for AI Review"
+                )}
               </Button>
             </form>
           </CardContent>
@@ -342,15 +487,17 @@ const VideoQuality = () => {
                       <TableHead className="text-slate-300">Video</TableHead>
                       <TableHead className="text-slate-300">Agent</TableHead>
                       <TableHead className="text-slate-300">Property ID</TableHead>
-                      <TableHead className="text-slate-300">Title</TableHead>
-                      
-                      <TableHead className="text-slate-300">Date Added</TableHead>
+                      <TableHead className="text-slate-300">Orientation</TableHead>
+                      <TableHead className="text-slate-300">Stability</TableHead>
+                      <TableHead className="text-slate-300">Overall</TableHead>
+                      <TableHead className="text-slate-300">AI Feedback</TableHead>
                       <TableHead className="text-slate-300">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {videos.map((video) => {
                       const embedUrl = getYoutubeEmbedUrl(video.youtube_url);
+                      const isReviewing = reviewingId === video.id;
                       return (
                         <TableRow key={video.id} className="border-slate-700">
                           <TableCell>
@@ -382,22 +529,62 @@ const VideoQuality = () => {
                           <TableCell className="text-slate-300">
                             {video.property_id || "-"}
                           </TableCell>
-                          <TableCell className="text-white">
-                            <div>
-                              <div className="font-medium">{video.title || "Untitled"}</div>
-                              {video.description && (
-                                <div className="text-sm text-slate-400 truncate max-w-xs">
-                                  {video.description}
-                                </div>
-                              )}
-                            </div>
+                          <TableCell>
+                            {isReviewing ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                            ) : video.orientation ? (
+                              <Badge variant={video.orientation === "horizontal" ? "default" : "secondary"} className="flex items-center gap-1 w-fit">
+                                {video.orientation === "horizontal" ? (
+                                  <Monitor className="h-3 w-3" />
+                                ) : (
+                                  <Smartphone className="h-3 w-3" />
+                                )}
+                                {video.orientation}
+                              </Badge>
+                            ) : (
+                              <span className="text-slate-500">-</span>
+                            )}
                           </TableCell>
-                          
-                          <TableCell className="text-slate-400">
-                            {new Date(video.created_at).toLocaleDateString()}
+                          <TableCell>
+                            {isReviewing ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                            ) : video.stability_rating ? (
+                              renderStars(video.stability_rating)
+                            ) : (
+                              <span className="text-slate-500">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {isReviewing ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                            ) : video.overall_rating ? (
+                              renderStars(video.overall_rating)
+                            ) : (
+                              <span className="text-slate-500">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="max-w-xs">
+                            {isReviewing ? (
+                              <span className="text-slate-400 text-sm">Reviewing...</span>
+                            ) : video.ai_feedback ? (
+                              <p className="text-slate-300 text-sm line-clamp-3" title={video.ai_feedback}>
+                                {video.ai_feedback}
+                              </p>
+                            ) : (
+                              <span className="text-slate-500 text-sm">Not reviewed</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleEditOpen(video)}
+                                className="border-slate-600 hover:bg-slate-700"
+                                title="Edit YouTube URL"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
                               <Button
                                 variant="outline"
                                 size="icon"
@@ -430,6 +617,44 @@ const VideoQuality = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit YouTube URL Dialog */}
+      <Dialog open={!!editingVideo} onOpenChange={(open) => !open && handleEditClose()}>
+        <DialogContent className="bg-slate-800 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit YouTube URL</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm text-slate-300">YouTube URL *</label>
+              <Input
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={editYoutubeUrl}
+                onChange={(e) => setEditYoutubeUrl(e.target.value)}
+                className="bg-slate-700 border-slate-600 text-white"
+              />
+            </div>
+            <p className="text-sm text-slate-400">
+              Changing the URL will trigger a new AI review of the video.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleEditClose} className="border-slate-600">
+              Cancel
+            </Button>
+            <Button onClick={handleEditSave} disabled={editingSubmitting}>
+              {editingSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save & Review"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
