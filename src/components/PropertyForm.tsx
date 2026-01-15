@@ -105,8 +105,16 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
 
   // Auto-generate with debouncing - only once when minimum data is entered
   useEffect(() => {
-    // Check if we have minimum required fields
-    const hasMinimumData = formData.propertyType && formData.category && formData.location;
+    // Check basic required fields
+    const hasBasicData = formData.propertyType && formData.category && formData.location 
+      && formData.size && formData.price && formData.furnishingStatus;
+    
+    // Additional checks for Villa and Apartment - require bedrooms and bathrooms
+    const isVillaOrApartment = formData.propertyType === 'Villa' || formData.propertyType === 'Apartment';
+    const hasVillaApartmentData = !isVillaOrApartment || (formData.bedrooms && formData.bathrooms);
+    
+    // Check if all required fields are filled
+    const hasMinimumData = hasBasicData && hasVillaApartmentData;
     
     // Don't generate if already loading or no minimum data
     if (!hasMinimumData || isLoading) return;

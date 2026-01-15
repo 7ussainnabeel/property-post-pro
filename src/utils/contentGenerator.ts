@@ -62,10 +62,10 @@ ${titleEN}
 
 PROPERTY DETAILS
 
-🏠 Property Type: ${propertyType}
-📋 Category: ${category}
-📍 Location: ${location}
-🎯 Purpose: ${category === 'Investment' ? 'Investment Opportunity' : 'For Sale'}
+Property Type: ${propertyType}
+Category: ${category}
+Location: ${location}
+Purpose: ${category === 'Investment' ? 'Investment Opportunity' : 'For Sale'}
 
 DESCRIPTION
 
@@ -73,18 +73,17 @@ We are pleased to present this distinguished ${propertyType?.toLowerCase()} loca
 
 PROPERTY SPECIFICATIONS
 
-${isVilla && hasBuildingSize ? `📐 Plot Size: ${size} sqm\n🏗️ Building Size: ${buildingSize} sqm` : `📐 Built-up Area: ${size} sqm`}${(propertyType === 'Land' || propertyType === 'Land Planning' || propertyType === 'Villa') && numberOfRoads ? `\n🛣️ Number of Roads: ${numberOfRoads}` : ''}${landClassification ? `\n📋 Land Classification: ${landClassification}` : ''}${pricePerFeet ? `\n💵 Price per Feet: ${pricePerFeet}` : ''}${hasBedrooms ? `\n🛏️ Bedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\n🚿 Bathrooms: ${bathrooms}` : ''}
-${isVilla && numberOfEntrances ? `\n🚪 Entrances: ${numberOfEntrances}` : ''}${isVilla && numberOfFamilyHalls ? `\n👨‍👩‍👧‍👦 Family Halls: ${numberOfFamilyHalls}` : ''}${isVilla && numberOfLivingAreas ? `\n🛋️ Living Areas: ${numberOfLivingAreas}` : ''}${isVilla && kitchenType === 'Both' && (numberOfInternalKitchens || numberOfExternalKitchens) ? `\n🍳 Kitchens: ${numberOfInternalKitchens || '0'} Internal, ${numberOfExternalKitchens || '0'} External` : isVilla && kitchenType === 'Internal' && numberOfInternalKitchens ? `\n🍳 Internal Kitchens: ${numberOfInternalKitchens}` : isVilla && kitchenType === 'External' && numberOfExternalKitchens ? `\n🍳 External Kitchens: ${numberOfExternalKitchens}` : ''}${isVilla && outsideQuarters ? `\n🏠 Outside Quarters: Yes` : ''}
-🛋️ Furnishing Status: ${furnishingStatus}
-${ewaIncluded ? '⚡💧 Utilities: EWA Included!' : '🔌 Utilities: EWA Not Included'}
+${isVilla && hasBuildingSize ? `Plot Size: ${size} sqm\nBuilding Size: ${buildingSize} sqm` : hasBuildingSize ? `Plot Size: ${size} sqm\nBuilding Size: ${buildingSize} sqm` : `Built-up Area: ${size} sqm`}${numberOfRoads ? `\nNumber of Roads: ${numberOfRoads}` : ''}${landClassification ? `\nLand Classification: ${landClassification}` : ''}${pricePerFeet ? `\nPrice per Feet: ${pricePerFeet}` : ''}${hasBedrooms ? `\nBedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\nBathrooms: ${bathrooms}` : ''}${numberOfEntrances ? `\nEntrances: ${numberOfEntrances}` : ''}${numberOfFamilyHalls ? `\nFamily Halls: ${numberOfFamilyHalls}` : ''}${numberOfLivingAreas ? `\nLiving Areas: ${numberOfLivingAreas}` : ''}${kitchenType === 'Both' && (numberOfInternalKitchens || numberOfExternalKitchens) ? `\nKitchens: ${numberOfInternalKitchens || '0'} Internal, ${numberOfExternalKitchens || '0'} External` : kitchenType === 'Internal' && numberOfInternalKitchens ? `\nInternal Kitchens: ${numberOfInternalKitchens}` : kitchenType === 'External' && numberOfExternalKitchens ? `\nExternal Kitchens: ${numberOfExternalKitchens}` : ''}${outsideQuarters ? `\nOutside Quarters: Yes` : ''}
+Furnishing Status: ${furnishingStatus}
+${ewaIncluded ? 'Utilities: EWA Included!' : 'Utilities: EWA Not Included'}
 
 AMENITIES & FEATURES
-${amenities.map(a => `${getAmenityEmoji(a)} ${a}`).join('\n')}
-${uniqueSellingPoints ? `\n💎 ADDITIONAL HIGHLIGHTS\n${uniqueSellingPoints}` : ''}
+${amenities.map(a => `- ${a}`).join('\n')}
+${uniqueSellingPoints ? `\nADDITIONAL HIGHLIGHTS\n${uniqueSellingPoints}` : ''}
 
 PRICING
 
-💰 Asking Price: BD ${Number(price).toLocaleString()}
+Asking Price: BD ${Number(price).toLocaleString()}
 
 For further information, property viewings, or to discuss this opportunity, please contact our property consultants at your earliest convenience.
   `.trim().replace(/\n\n\n/g, '\n\n');
@@ -117,10 +116,10 @@ ${getArabicPropertyType(propertyType)} ${hasBedrooms ? `${bedroomsAR} غرف ن�
 
 تفاصيل العقار
 
-🏠 نوع العقار: ${getArabicPropertyType(propertyType)}
-📋 الفئة: ${getArabicCategory(category)}
-📍 الموقع: ${locationAR}
-🎯 الغرض: ${category === 'Investment' ? 'فرصة استثمارية' : 'للبيع'}
+نوع العقار: ${getArabicPropertyType(propertyType)}
+الفئة: ${getArabicCategory(category)}
+الموقع: ${locationAR}
+الغرض: ${category === 'Investment' ? 'فرصة استثمارية' : 'للبيع'}
 
 الوصف
 
@@ -128,18 +127,17 @@ ${getArabicPropertyType(propertyType)} ${hasBedrooms ? `${bedroomsAR} غرف ن�
 
 مواصفات العقار
 
-${isVilla && hasBuildingSize ? `📐 مساحة الأرض: ${sizeAR} متر مربع\n🏗️ المساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : `📐 المساحة المبنية: ${sizeAR} متر مربع`}${(propertyType === 'Land' || propertyType === 'Land Planning' || propertyType === 'Villa') && numberOfRoads ? `\n🛣️ عدد الشوارع: ${toArabicNumerals(numberOfRoads)}` : ''}${landClassification ? `\n📋 تصنيف الأرض: ${landClassification}` : ''}${pricePerFeet ? `\n💵 السعر للقدم: ${toArabicNumerals(pricePerFeet)}` : ''}${hasBedrooms ? `\n🛏️ غرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\n🚿 الحمامات: ${bathroomsAR}` : ''}
-${isVilla && numberOfEntrances ? `\n🚪 المداخل: ${toArabicNumerals(numberOfEntrances)}` : ''}${isVilla && numberOfFamilyHalls ? `\n👨‍👩‍👧‍👦 صالات العائلة: ${toArabicNumerals(numberOfFamilyHalls)}` : ''}${isVilla && numberOfLivingAreas ? `\n🛋️ مناطق المعيشة: ${toArabicNumerals(numberOfLivingAreas)}` : ''}${isVilla && kitchenType === 'Both' && (numberOfInternalKitchens || numberOfExternalKitchens) ? `\n🍳 المطابخ: ${toArabicNumerals(numberOfInternalKitchens || '0')} داخلي، ${toArabicNumerals(numberOfExternalKitchens || '0')} خارجي` : isVilla && kitchenType === 'Internal' && numberOfInternalKitchens ? `\n🍳 المطابخ الداخلية: ${toArabicNumerals(numberOfInternalKitchens)}` : isVilla && kitchenType === 'External' && numberOfExternalKitchens ? `\n🍳 المطابخ الخارجية: ${toArabicNumerals(numberOfExternalKitchens)}` : ''}${isVilla && outsideQuarters ? `\n🏠 ملحق خارجي: نعم` : ''}
-🛋️ حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}
-${ewaIncluded ? '⚡💧 المرافق: شامل الكهرباء والماء!' : '🔌 المرافق: غير شامل الكهرباء والماء'}
+${isVilla && hasBuildingSize ? `مساحة الأرض: ${sizeAR} متر مربع\nالمساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : hasBuildingSize ? `مساحة الأرض: ${sizeAR} متر مربع\nالمساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : `المساحة المبنية: ${sizeAR} متر مربع`}${numberOfRoads ? `\nعدد الشوارع: ${toArabicNumerals(numberOfRoads)}` : ''}${landClassification ? `\nتصنيف الأرض: ${landClassification}` : ''}${pricePerFeet ? `\nالسعر للقدم: ${toArabicNumerals(pricePerFeet)}` : ''}${hasBedrooms ? `\nغرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\nالحمامات: ${bathroomsAR}` : ''}${numberOfEntrances ? `\nالمداخل: ${toArabicNumerals(numberOfEntrances)}` : ''}${numberOfFamilyHalls ? `\nصالات العائلة: ${toArabicNumerals(numberOfFamilyHalls)}` : ''}${numberOfLivingAreas ? `\nمناطق المعيشة: ${toArabicNumerals(numberOfLivingAreas)}` : ''}${kitchenType === 'Both' && (numberOfInternalKitchens || numberOfExternalKitchens) ? `\nالمطابخ: ${toArabicNumerals(numberOfInternalKitchens || '0')} داخلي، ${toArabicNumerals(numberOfExternalKitchens || '0')} خارجي` : kitchenType === 'Internal' && numberOfInternalKitchens ? `\nالمطابخ الداخلية: ${toArabicNumerals(numberOfInternalKitchens)}` : kitchenType === 'External' && numberOfExternalKitchens ? `\nالمطابخ الخارجية: ${toArabicNumerals(numberOfExternalKitchens)}` : ''}${outsideQuarters ? `\nملحق خارجي: نعم` : ''}
+حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}
+${ewaIncluded ? 'المرافق: شامل الكهرباء والماء!' : 'المرافق: غير شامل الكهرباء والماء'}
 
 المرافق والخدمات
-${amenities.map(a => `${getAmenityEmoji(a)} ${getArabicAmenity(a)}`).join('\n')}
-${uniqueSellingPoints ? `\n💎 مميزات إضافية\n${uniqueSellingPoints}` : ''}
+${amenities.map(a => `- ${getArabicAmenity(a)}`).join('\n')}
+${uniqueSellingPoints ? `\nمميزات إضافية\n${uniqueSellingPoints}` : ''}
 
 السعر
 
-💰 السعر المطلوب: ${priceAR}
+السعر المطلوب: ${priceAR}
 
 للمزيد من المعلومات أو لترتيب موعد معاينة أو لمناقشة هذه الفرصة، يرجى التواصل مع مستشاري العقارات لدينا في أقرب وقت ممكن.
   `.trim().replace(/\n\n\n/g, '\n\n');
