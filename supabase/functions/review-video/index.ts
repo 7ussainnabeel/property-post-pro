@@ -12,34 +12,40 @@ serve(async (req) => {
   }
 
   try {
-    const { videoId, youtubeUrl } = await req.json();
+    const { videoId, youtubeUrl, isUploadedVideo } = await req.json();
     
     if (!videoId || !youtubeUrl) {
       throw new Error('videoId and youtubeUrl are required');
     }
 
-    console.log(`Reviewing video: ${videoId}, URL: ${youtubeUrl}`);
+    console.log(`Reviewing video: ${videoId}, URL: ${youtubeUrl}, isUploaded: ${isUploadedVideo}`);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Extract video ID from YouTube URL for metadata analysis
-    const youtubeIdMatch = youtubeUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]+)/);
-    const youtubeVideoId = youtubeIdMatch ? youtubeIdMatch[1] : null;
-
-    const prompt = `You are a professional video quality reviewer for real estate property videos. Analyze this YouTube video URL: ${youtubeUrl}
+    const videoType = isUploadedVideo ? "an uploaded video file" : "a YouTube video";
+    
+    const prompt = `You are a professional video quality reviewer for real estate property videos. You are reviewing ${videoType} at this URL: ${youtubeUrl}
 
 Based on the URL and typical real estate video standards, provide a quality assessment. Consider these factors:
 
-1. **Orientation**: Is this likely a horizontal (landscape) or vertical (portrait) video? Horizontal is preferred for professional real estate videos.
+1. **Orientation**: Is this likely a horizontal (landscape) or vertical (portrait) video? 
+   - For uploaded files, look at the file name for hints (e.g., "vertical", "portrait", "reel", "short")
+   - Horizontal is preferred for professional real estate videos
+   - If URL contains "/shorts/" or similar, it's likely vertical
 
 2. **Stability**: Rate the likely stability of the video on a scale of 1-10 (10 being perfectly stable, like using a gimbal or tripod).
+   - For uploaded videos, assume basic smartphone footage unless title suggests professional equipment
 
 3. **Overall Quality Rating**: Provide an overall quality rating from 1-10 based on professional real estate video standards.
 
-4. **Feedback**: Provide specific, actionable feedback for the agent to improve their video quality.
+4. **Feedback**: Provide specific, actionable feedback for the agent to improve their video quality. Include tips about:
+   - Orientation (horizontal is best for real estate)
+   - Stability (use a gimbal or tripod)
+   - Lighting suggestions
+   - Pacing and coverage
 
 IMPORTANT: Respond in this exact JSON format:
 {
@@ -49,7 +55,7 @@ IMPORTANT: Respond in this exact JSON format:
   "feedback": "<detailed feedback string>"
 }
 
-Focus on being helpful and constructive. If this is a YouTube Shorts URL or has indicators of vertical video, note that. Otherwise assume professional horizontal format.`;
+Focus on being helpful and constructive.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
