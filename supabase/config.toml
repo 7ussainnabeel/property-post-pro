@@ -9,3 +9,6 @@ max_rows = 1000
 
 [functions.generate-listing]
 verify_jwt = false
+
+[functions.review-video]
+verify_jwt = false

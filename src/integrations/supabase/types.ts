@@ -17,36 +17,51 @@ export type Database = {
       video_submissions: {
         Row: {
           agent_name: string | null
+          ai_feedback: string | null
           created_at: string
           description: string | null
           id: string
           notes: string | null
+          orientation: string | null
+          overall_rating: number | null
           property_id: string | null
           quality_status: string | null
+          reviewed_at: string | null
+          stability_rating: number | null
           title: string | null
           updated_at: string
           youtube_url: string
         }
         Insert: {
           agent_name?: string | null
+          ai_feedback?: string | null
           created_at?: string
           description?: string | null
           id?: string
           notes?: string | null
+          orientation?: string | null
+          overall_rating?: number | null
           property_id?: string | null
           quality_status?: string | null
+          reviewed_at?: string | null
+          stability_rating?: number | null
           title?: string | null
           updated_at?: string
           youtube_url: string
         }
         Update: {
           agent_name?: string | null
+          ai_feedback?: string | null
           created_at?: string
           description?: string | null
           id?: string
           notes?: string | null
+          orientation?: string | null
+          overall_rating?: number | null
           property_id?: string | null
           quality_status?: string | null
+          reviewed_at?: string | null
+          stability_rating?: number | null
           title?: string | null
           updated_at?: string
           youtube_url?: string
