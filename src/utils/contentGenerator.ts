@@ -6,12 +6,37 @@ export function generateContent(input: PropertyInput): GeneratedContent {
     price, currency, furnishingStatus, amenities, ewaIncluded, uniqueSellingPoints,
     numberOfEntrances, numberOfFamilyHalls, numberOfLivingAreas, numberOfInternalKitchens,
     numberOfExternalKitchens, kitchenType, outsideQuarters, numberOfRoads, landClassification,
-    pricePerFeet
+    pricePerFeet, agent
   } = input;
 
   const amenitiesList = amenities.join(', ');
-  const ewaText = ewaIncluded ? 'EWA included' : 'EWA not included';
-  const ewaTextAR = ewaIncluded ? 'شامل الكهرباء والماء' : 'غير شامل الكهرباء والماء';
+  
+  // EWA logic: Hide for Land, Villa Sale, and Apartment Sale
+  const shouldShowEWA = !(propertyType === 'Land' || propertyType === 'Land Planning' || 
+    (propertyType === 'Villa' && listingType === 'Sale') || 
+    (propertyType === 'Apartment' && listingType === 'Sale'));
+  
+  const ewaText = shouldShowEWA ? (ewaIncluded ? 'EWA included' : 'EWA not included') : '';
+  const ewaTextAR = shouldShowEWA ? (ewaIncluded ? 'شامل الكهرباء والماء' : 'غير شامل الكهرباء والماء') : '';
+  
+  // Get agent information
+  const CARLTON_STAFF = [
+    { name: 'Ahmed Al Aali', nameAR: 'أحمد العلي', phone: '36943000' },
+    { name: 'Hamar Adel', nameAR: 'همار عدل', phone: '36504411' },
+    { name: 'Hesham Ismaeel', nameAR: 'هشام اسماعيل', phone: '36503399' },
+    { name: 'Muna Kamal', nameAR: 'منى كمال', phone: '36960222' },
+    { name: 'Mohamed Abdulla', nameAR: 'محمد عبدالله', phone: '36744755' },
+    { name: 'Sara Ali', nameAR: 'سارة علي', phone: '36503388' },
+    { name: 'Violeta Abboud', nameAR: 'فيوليت عبود', phone: '36504477' },
+    { name: 'Husain Mansoor', nameAR: 'حسين منصور', phone: '38218600' },
+    { name: 'Abdulla Hasan', nameAR: 'عبدالله حسن', phone: '32319900' },
+    { name: 'Ali Hasan', nameAR: 'علي حسن', phone: '38213300' },
+    { name: 'Masoud Ali', nameAR: 'مسعود علي', phone: '36504499' },
+    { name: 'Ibrahim Mohamed', nameAR: 'إبراهيم محمد', phone: '36390222' }
+  ];
+  const selectedAgent = agent ? CARLTON_STAFF.find(staff => staff.phone === agent) : null;
+  const agentInfoEN = selectedAgent ? `\n\nFor more information, contact ${selectedAgent.name} at ${selectedAgent.phone}` : '';
+  const agentInfoAR = selectedAgent ? `\n\nللمزيد من المعلومات، تواصل مع ${selectedAgent.nameAR} على ${selectedAgent.phone}` : '';
 
   const hasBedrooms = bedrooms && bedrooms.trim() !== '';
   const hasBathrooms = bathrooms && bathrooms.trim() !== '';
@@ -51,11 +76,12 @@ export function generateContent(input: PropertyInput): GeneratedContent {
         : '';
 
   // Property Finder English
+  const purposeText = category === 'Investment' ? 'Investment' : listingType;
   const titleEN = hasBedrooms && hasBathrooms 
-    ? `${bedrooms}-Bedroom ${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${location} | ${size} SQM | ${furnishingStatus}`
+    ? `${bedrooms}-Bedroom ${propertyType} for ${purposeText} in ${location} | ${size} SQM | ${furnishingStatus}`
     : hasBedrooms 
-      ? `${bedrooms}-Bedroom ${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${location} | ${size} SQM | ${furnishingStatus}`
-      : `${propertyType} for ${category === 'Investment' ? 'Investment' : 'Sale'} in ${location} | ${size} SQM | ${furnishingStatus}`;
+      ? `${bedrooms}-Bedroom ${propertyType} for ${purposeText} in ${location} | ${size} SQM | ${furnishingStatus}`
+      : `${propertyType} for ${purposeText} in ${location} | ${size} SQM | ${furnishingStatus}`;
 
   const propertyFinderEN = `
 ${titleEN}
@@ -65,7 +91,7 @@ PROPERTY DETAILS
 Property Type: ${propertyType}
 Category: ${category}
 Location: ${location}
-Purpose: ${category === 'Investment' ? 'Investment Opportunity' : 'For Sale'}
+Purpose: ${category === 'Investment' ? 'Investment Opportunity' : listingType}
 
 DESCRIPTION
 
@@ -74,8 +100,7 @@ We are pleased to present this distinguished ${propertyType?.toLowerCase()} loca
 PROPERTY SPECIFICATIONS
 
 ${isVilla && hasBuildingSize ? `Plot Size: ${size} sqm\nBuilding Size: ${buildingSize} sqm` : hasBuildingSize ? `Plot Size: ${size} sqm\nBuilding Size: ${buildingSize} sqm` : `Built-up Area: ${size} sqm`}${numberOfRoads ? `\nNumber of Roads: ${numberOfRoads}` : ''}${landClassification ? `\nLand Classification: ${landClassification}` : ''}${pricePerFeet ? `\nPrice per Feet: ${pricePerFeet}` : ''}${hasBedrooms ? `\nBedrooms: ${bedrooms}` : ''}${hasBathrooms ? `\nBathrooms: ${bathrooms}` : ''}${numberOfEntrances ? `\nEntrances: ${numberOfEntrances}` : ''}${numberOfFamilyHalls ? `\nFamily Halls: ${numberOfFamilyHalls}` : ''}${numberOfLivingAreas ? `\nLiving Areas: ${numberOfLivingAreas}` : ''}${kitchenType === 'Both' && (numberOfInternalKitchens || numberOfExternalKitchens) ? `\nKitchens: ${numberOfInternalKitchens || '0'} Internal, ${numberOfExternalKitchens || '0'} External` : kitchenType === 'Internal' && numberOfInternalKitchens ? `\nInternal Kitchens: ${numberOfInternalKitchens}` : kitchenType === 'External' && numberOfExternalKitchens ? `\nExternal Kitchens: ${numberOfExternalKitchens}` : ''}${outsideQuarters ? `\nOutside Quarters: Yes` : ''}
-Furnishing Status: ${furnishingStatus}
-${ewaIncluded ? 'Utilities: EWA Included!' : 'Utilities: EWA Not Included'}
+Furnishing Status: ${furnishingStatus}${shouldShowEWA && ewaText ? `\n${ewaText}` : ''}
 
 AMENITIES & FEATURES
 ${amenities.map(a => `- ${a}`).join('\n')}
@@ -119,17 +144,16 @@ ${getArabicPropertyType(propertyType)} ${hasBedrooms ? `${bedroomsAR} غرف ن�
 نوع العقار: ${getArabicPropertyType(propertyType)}
 الفئة: ${getArabicCategory(category)}
 الموقع: ${locationAR}
-الغرض: ${category === 'Investment' ? 'فرصة استثمارية' : 'للبيع'}
+الغرض: ${category === 'Investment' ? 'فرصة استثمارية' : listingType === 'Sale' ? 'للبيع' : 'للإيجار'}
 
 الوصف
 
-يسرنا أن نقدم لكم هذا ${getArabicPropertyType(propertyType)} المتميز الواقع في المنطقة الرئيسية ${locationAR}. يمثل هذا العقار فرصة ${getArabicCategory(category)}ة استثنائية${isVilla && hasBuildingSize ? `، حيث يوفر ${toArabicNumerals(buildingSize)} متر مربع من المساحة المبنية على قطعة أرض ${sizeAR} متر مربع` : isVilla ? `، حيث يوفر قطعة أرض واسعة بمساحة ${sizeAR} متر مربع` : `، حيث يوفر ${sizeAR} متر مربع من المساحة المصممة بعناية`}.
+يسرنا أن نقدم لكم هذا ${getArabicPropertyType(propertyType)} المتميز الواقع في المنطقة الرئيسية ${locationAR}. يمثل هذا العقار فرصة ${category === 'Investment' ? 'استثمارية' : getArabicCategory(category)}${category === 'Investment' ? '' : 'ة'} استثنائية${isVilla && hasBuildingSize ? `، حيث يوفر ${toArabicNumerals(buildingSize)} متر مربع من المساحة المبنية على قطعة أرض ${sizeAR} متر مربع` : isVilla ? `، حيث يوفر قطعة أرض واسعة بمساحة ${sizeAR} متر مربع` : `، حيث يوفر ${sizeAR} متر مربع من المساحة المصممة بعناية`}.
 
 مواصفات العقار
 
 ${isVilla && hasBuildingSize ? `مساحة الأرض: ${sizeAR} متر مربع\nالمساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : hasBuildingSize ? `مساحة الأرض: ${sizeAR} متر مربع\nالمساحة المبنية: ${toArabicNumerals(buildingSize)} متر مربع` : `المساحة المبنية: ${sizeAR} متر مربع`}${numberOfRoads ? `\nعدد الشوارع: ${toArabicNumerals(numberOfRoads)}` : ''}${landClassification ? `\nتصنيف الأرض: ${landClassification}` : ''}${pricePerFeet ? `\nالسعر للقدم: ${toArabicNumerals(pricePerFeet)}` : ''}${hasBedrooms ? `\nغرف النوم: ${bedroomsAR}` : ''}${hasBathrooms ? `\nالحمامات: ${bathroomsAR}` : ''}${numberOfEntrances ? `\nالمداخل: ${toArabicNumerals(numberOfEntrances)}` : ''}${numberOfFamilyHalls ? `\nصالات العائلة: ${toArabicNumerals(numberOfFamilyHalls)}` : ''}${numberOfLivingAreas ? `\nمناطق المعيشة: ${toArabicNumerals(numberOfLivingAreas)}` : ''}${kitchenType === 'Both' && (numberOfInternalKitchens || numberOfExternalKitchens) ? `\nالمطابخ: ${toArabicNumerals(numberOfInternalKitchens || '0')} داخلي، ${toArabicNumerals(numberOfExternalKitchens || '0')} خارجي` : kitchenType === 'Internal' && numberOfInternalKitchens ? `\nالمطابخ الداخلية: ${toArabicNumerals(numberOfInternalKitchens)}` : kitchenType === 'External' && numberOfExternalKitchens ? `\nالمطابخ الخارجية: ${toArabicNumerals(numberOfExternalKitchens)}` : ''}${outsideQuarters ? `\nملحق خارجي: نعم` : ''}
-حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}
-${ewaIncluded ? 'المرافق: شامل الكهرباء والماء!' : 'المرافق: غير شامل الكهرباء والماء'}
+حالة التأثيث: ${getArabicFurnishing(furnishingStatus)}${shouldShowEWA ? (ewaIncluded ? '\nالمرافق: شامل الكهرباء والماء!' : '\nالمرافق: غير شامل الكهرباء والماء') : ''}
 
 المرافق والخدمات
 ${amenities.map(a => `- ${getArabicAmenity(a)}`).join('\n')}
@@ -156,7 +180,7 @@ ${ewaIncluded ? '⚡💧 EWA Included!' : ''}
 ${amenities.slice(0, 5).map(a => `${getAmenityEmoji(a)} ${a}`).join('\n')}
 ${uniqueSellingPoints ? `\n🌟 ${uniqueSellingPoints.split('.')[0]}` : ''}
 
-📩 DM us for more details!
+📩 DM us for more details!${agentInfoEN}
 #RealEstate #${location.replace(/\s/g, '')} #PropertyForSale #${propertyType?.replace(/\s/g, '')} #LuxuryLiving #Bahrain
   `.trim();
 
@@ -174,7 +198,7 @@ ${ewaIncluded ? '⚡💧 شامل الكهرباء والماء!' : ''}
 ${amenities.slice(0, 5).map(a => `${getAmenityEmoji(a)} ${getArabicAmenity(a)}`).join('\n')}
 ${uniqueSellingPoints ? `\n🌟 ${uniqueSellingPoints.split('.')[0]}` : ''}
 
-📩 راسلنا للمزيد من التفاصيل!
+📩 راسلنا للمزيد من التفاصيل!${agentInfoAR}
 #عقارات #${locationAR.replace(/\s/g, '')} #عقار_للبيع #استثمار_عقاري #البحرين
   `.trim();
 
@@ -238,7 +262,7 @@ ${amenitiesList}
 
 ${uniqueSellingPoints ? `Special Features: ${uniqueSellingPoints}` : ''}
 
-Listed at BD ${Number(price).toLocaleString()}, this property represents excellent value for those seeking quality ${category?.toLowerCase()} real estate in ${location}.
+Listed at BD ${Number(price).toLocaleString()}, this property represents excellent value for those seeking quality ${category?.toLowerCase()} real estate in ${location}.${agentInfoEN}
 
 Contact our team today for more information or to arrange a private viewing.
   `.trim().replace(/\n\n\n/g, '\n\n').replace(/^\n/gm, '');
@@ -263,7 +287,7 @@ ${amenities.map(a => getArabicAmenity(a)).join('، ')}
 
 ${uniqueSellingPoints ? `مميزات خاصة: ${uniqueSellingPoints}` : ''}
 
-مدرج بسعر ${priceAR}، يمثل هذا العقار قيمة ممتازة لمن يبحث عن عقار ${getArabicCategory(category)} عالي الجودة في ${locationAR}.
+مدرج بسعر ${priceAR}، يمثل هذا العقار قيمة ممتازة لمن يبحث عن عقار ${getArabicCategory(category)} عالي الجودة في ${locationAR}.${agentInfoAR}
 
 تواصل مع فريقنا اليوم للحصول على مزيد من المعلومات أو لترتيب معاينة خاصة.
   `.trim().replace(/\n\n\n/g, '\n\n').replace(/^\n/gm, '');

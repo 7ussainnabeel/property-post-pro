@@ -28,6 +28,7 @@ export interface PropertyInput {
   location: string;
   size: string;
   buildingSize?: string;
+  agent?: string;
   bedrooms: string;
   bathrooms: string;
   pricePerFeet?: string;

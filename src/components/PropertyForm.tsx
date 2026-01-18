@@ -54,8 +54,23 @@ const LAND_CLASSIFICATIONS: { value: LandClassification; label: string }[] = [
 const COMMON_AMENITIES = [
   'Swimming Pool', 'Gym', 'Parking', 'Security', 'Garden',
   'Balcony', 'Central AC', 'Maid Room', 'Storage', 'Elevator',
-  'Sea View', 'City View', 'Private Pool', 'Smart Home', 'Terrace',
-  'Hospital', 'Mosque', 'Airport', 'Strategic Access to Main Roads'
+  'City View', 'Private Pool', 'Smart Home', 'Terrace',
+  'Hospital', 'Mosque'
+];
+
+const CARLTON_STAFF = [
+  { name: 'Ahmed Al Aali', nameAR: 'أحمد العلي', phone: '36943000' },
+  { name: 'Hana Adel', nameAR: 'هناء عادل', phone: '36504411' },
+  { name: 'Hesham Ismaeel', nameAR: 'هشام اسماعيل', phone: '36503399' },
+  { name: 'Mirna Kamal', nameAR: 'ميرنه كمال', phone: '36960222' },
+  { name: 'Mohamed Abdulla', nameAR: 'محمد عبدالله', phone: '36744755' },
+  { name: 'Sara Ali', nameAR: 'سارة علي', phone: '36503388' },
+  { name: 'Violeta Abboud', nameAR: 'فيوليت عبود', phone: '36504477' },
+  { name: 'Husain Mansoor', nameAR: 'حسين منصور', phone: '38218600' },
+  { name: 'Abdulla Hasan', nameAR: 'عبدالله حسن', phone: '32319900' },
+  { name: 'Ali Hasan', nameAR: 'علي حسن', phone: '38213300' },
+  { name: 'Masoud Ali', nameAR: 'مسعود علي', phone: '36504499' },
+  { name: 'Ibrahim Mohamed', nameAR: 'إبراهيم محمد', phone: '36390222' }
 ];
 
 interface PropertyFormProps {
@@ -78,6 +93,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     currency: 'BHD',
     furnishingStatus: '',
     amenities: [],
+    agent: '',
     ewaIncluded: false,
     uniqueSellingPoints: '',
     landClassification: '',
@@ -93,15 +109,22 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     numberOfRoads: '',
   });
 
-  // Auto-calculate price from size (sqm) and price per feet
+  // Auto-calculate price from size (sqm) and price per feet/sqm
   useEffect(() => {
     if (formData.size && formData.pricePerFeet && !isNaN(Number(formData.size)) && !isNaN(Number(formData.pricePerFeet))) {
       const sqm = Number(formData.size);
-      const pricePerFeet = Number(formData.pricePerFeet);
-      const calculatedPrice = Math.round(sqm * 10.764 * pricePerFeet);
+      const pricePerUnit = Number(formData.pricePerFeet);
+      
+      // For Apartment Sale: price per sqm calculation (sqm x price per sqm)
+      // For other properties: price per feet calculation (sqm x 10.764 x price per feet)
+      const isApartmentForSale = formData.propertyType === 'Apartment' && formData.listingType === 'Sale';
+      const calculatedPrice = isApartmentForSale 
+        ? Math.round(sqm * pricePerUnit)
+        : Math.round(sqm * 10.764 * pricePerUnit);
+      
       setFormData(prev => ({ ...prev, price: calculatedPrice.toString() }));
     }
-  }, [formData.size, formData.pricePerFeet]);
+  }, [formData.size, formData.pricePerFeet, formData.propertyType, formData.listingType]);
 
   // Auto-generate with debouncing - only once when minimum data is entered
   useEffect(() => {
@@ -447,17 +470,22 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
           )}
 
-          {/* Price per Feet & Price */}
+          {/* Price per Feet/SQM & Price */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Price per Feet</Label>
-              <Input
-                placeholder="e.g., 50"
-                type="number"
-                value={formData.pricePerFeet}
-                onChange={(e) => setFormData(prev => ({ ...prev, pricePerFeet: e.target.value }))}
-              />
-            </div>
+            {/* Hide Price per SQM for Apartment Rent */}
+            {!(formData.propertyType === 'Apartment' && formData.listingType === 'Rent') && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  {formData.propertyType === 'Apartment' && formData.listingType === 'Sale' ? 'Price per SQM' : 'Price per Feet'}
+                </Label>
+                <Input
+                  placeholder="e.g., 50"
+                  type="number"
+                  value={formData.pricePerFeet}
+                  onChange={(e) => setFormData(prev => ({ ...prev, pricePerFeet: e.target.value }))}
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-2">
@@ -495,6 +523,26 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
               </Select>
             </div>
           )}
+
+          {/* Carlton Staff Agent */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Carlton Staff Agent</Label>
+            <Select
+              value={formData.agent}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, agent: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select agent" />
+              </SelectTrigger>
+              <SelectContent>
+                {CARLTON_STAFF.map(staff => (
+                  <SelectItem key={staff.phone} value={staff.phone}>
+                    {staff.name} - {staff.phone}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Unique Selling Points */}
           <div className="space-y-2">

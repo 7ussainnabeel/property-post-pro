@@ -40,7 +40,7 @@ export function GeneratedContent({ content }: GeneratedContentProps) {
             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
           >
             <Globe className="w-4 h-4 mr-2" />
-            Websites
+            Website & Others
           </TabsTrigger>
         </TabsList>
 
