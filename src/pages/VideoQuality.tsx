@@ -59,6 +59,15 @@ const VideoQuality = () => {
   const [analyzingVideoId, setAnalyzingVideoId] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const getOrientationBadgeStyle = (orientation: string | null) => {
+    if (orientation === 'Horizontal') {
+      return 'border-blue-500 text-blue-400';
+    } else if (orientation === 'Portrait') {
+      return 'border-green-500 text-green-400';
+    }
+    return 'border-slate-600 text-slate-400';
+  };
+
   const fetchVideos = async () => {
     try {
       const { data, error } = await supabase
@@ -579,7 +588,10 @@ const VideoQuality = () => {
                           {video.reviewed_at ? (
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs border-slate-600">
+                                <Badge 
+                                  variant="outline" 
+                                  className={`text-xs ${getOrientationBadgeStyle(video.orientation)}`}
+                                >
                                   {video.orientation || "Unknown"}
                                 </Badge>
                               </div>
@@ -609,7 +621,7 @@ const VideoQuality = () => {
                               )}
                             </div>
                           ) : (
-                            <Badge variant="outline" className="!text-white border-slate-600">
+                            <Badge variant="outline" className="text-xs text-white border-slate-600">
                               Not analyzed
                             </Badge>
                           )}
