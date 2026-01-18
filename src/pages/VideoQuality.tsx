@@ -749,7 +749,7 @@ const VideoQuality = () => {
 
       {/* Video Player Dialog */}
       <Dialog open={!!playingVideo} onOpenChange={(open) => !open && setPlayingVideo(null)}>
-        <DialogContent className="bg-slate-800 border-slate-700 max-w-4xl">
+        <DialogContent className="bg-slate-800 border-slate-700 max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">
               {playingVideo?.title || "Video Player"}
@@ -757,10 +757,10 @@ const VideoQuality = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             {playingVideo?.video_file_url && (
-              <div className="w-full rounded-lg overflow-hidden bg-black">
+              <div className="w-full rounded-lg overflow-hidden bg-black flex items-center justify-center">
                 <video
                   src={playingVideo.video_file_url}
-                  className="w-full h-auto"
+                  className="w-full max-h-[60vh] object-contain"
                   controls
                   autoPlay
                 />
