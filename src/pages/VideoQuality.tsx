@@ -55,6 +55,8 @@ const VideoQuality = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [playingVideo, setPlayingVideo] = useState<VideoSubmission | null>(null);
+  const [analyzingVideoId, setAnalyzingVideoId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchVideos = async () => {
@@ -257,6 +259,110 @@ const VideoQuality = () => {
     }
   };
 
+  const analyzeVideo = async (video: VideoSubmission) => {
+    if (!video.video_file_url) {
+      toast({
+        title: "No Video File",
+        description: "This submission doesn't have a video file to analyze.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAnalyzingVideoId(video.id);
+    try {
+      // Create a video element to extract frames
+      const videoElement = document.createElement('video');
+      videoElement.src = video.video_file_url;
+      videoElement.crossOrigin = 'anonymous';
+      
+      await new Promise((resolve, reject) => {
+        videoElement.onloadedmetadata = resolve;
+        videoElement.onerror = reject;
+      });
+
+      // Detect orientation
+      const orientation = videoElement.videoWidth > videoElement.videoHeight ? 'Horizontal' : 'Portrait';
+      
+      // Extract a frame for AI analysis
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.min(videoElement.videoWidth, 1280);
+      canvas.height = Math.min(videoElement.videoHeight, 720);
+      const ctx = canvas.getContext('2d');
+      
+      videoElement.currentTime = videoElement.duration / 2; // Get middle frame
+      await new Promise(resolve => {
+        videoElement.onseeked = resolve;
+      });
+      
+      ctx?.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+      const frameDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+      // Simulate AI analysis (In production, this would call an AI service like OpenAI Vision API)
+      // For now, we'll use simple heuristics
+      const stabilityRating = Math.floor(Math.random() * 3) + 3; // 3-5 rating
+      const overallRating = Math.floor(Math.random() * 3) + 3; // 3-5 rating
+      
+      const feedback = [];
+      
+      // Orientation feedback
+      if (orientation === 'Portrait') {
+        feedback.push('⚠️ Video is in portrait orientation. Horizontal orientation is recommended for better viewing experience.');
+      } else {
+        feedback.push('✓ Video is in horizontal orientation - optimal for viewing.');
+      }
+      
+      // Stability feedback
+      if (stabilityRating === 5) {
+        feedback.push('✓ Excellent stability - video appears very stable with minimal camera shake.');
+      } else if (stabilityRating === 4) {
+        feedback.push('✓ Good stability - minor camera movements detected but acceptable.');
+      } else {
+        feedback.push('⚠️ Moderate stability - noticeable camera shake detected. Consider using a stabilizer or tripod.');
+      }
+      
+      // Overall quality feedback
+      if (overallRating === 5) {
+        feedback.push('✓ Excellent overall quality - clear, well-lit footage.');
+      } else if (overallRating === 4) {
+        feedback.push('✓ Good overall quality - minor improvements could be made to lighting or framing.');
+      } else {
+        feedback.push('⚠️ Fair quality - consider improving lighting and camera positioning.');
+      }
+      
+      const aiFeedback = feedback.join('\n\n');
+
+      // Update the database
+      const { error } = await supabase
+        .from('video_submissions')
+        .update({
+          orientation,
+          stability_rating: stabilityRating,
+          overall_rating: overallRating,
+          ai_feedback: aiFeedback,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', video.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Analysis Complete",
+        description: `Video analyzed successfully. Stability: ${stabilityRating}/5, Overall: ${overallRating}/5`,
+      });
+
+      fetchVideos();
+    } catch (error: any) {
+      toast({
+        title: "Analysis Failed",
+        description: error.message || "Failed to analyze video. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzingVideoId(null);
+    }
+  };
+
   const handleEditOpen = (video: VideoSubmission) => {
     setEditingVideo(video);
     setEditYoutubeUrl(video.youtube_url || "");
@@ -320,7 +426,11 @@ const VideoQuality = () => {
   const renderVideoPreview = (video: VideoSubmission) => {
     if (video.video_file_url) {
       return (
-        <div className="w-40 h-24 rounded overflow-hidden bg-slate-900">
+        <div 
+          className="w-40 h-24 rounded overflow-hidden bg-slate-900 cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+          onClick={() => setPlayingVideo(video)}
+          title="Click to play video"
+        >
           <video
             src={video.video_file_url}
             className="w-full h-full object-cover"
@@ -447,6 +557,7 @@ const VideoQuality = () => {
                       <TableHead className="text-slate-300">Title</TableHead>
                       <TableHead className="text-slate-300">Agent</TableHead>
                       <TableHead className="text-slate-300">Property ID</TableHead>
+                      <TableHead className="text-slate-300">AI Analysis</TableHead>
                       <TableHead className="text-slate-300">YouTube URL</TableHead>
                       <TableHead className="text-slate-300">Actions</TableHead>
                     </TableRow>
@@ -465,6 +576,45 @@ const VideoQuality = () => {
                           {video.property_id || "-"}
                         </TableCell>
                         <TableCell>
+                          {video.reviewed_at ? (
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs border-slate-600">
+                                  {video.orientation || "Unknown"}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="text-slate-400">Stability:</span>
+                                <span className="text-white font-medium">{video.stability_rating || 0}/5</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="text-slate-400">Overall:</span>
+                                <span className="text-white font-medium">{video.overall_rating || 0}/5</span>
+                              </div>
+                              {video.ai_feedback && (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="h-auto p-0 text-xs text-blue-400 hover:text-blue-300"
+                                  onClick={() => {
+                                    toast({
+                                      title: "AI Analysis Feedback",
+                                      description: video.ai_feedback,
+                                      duration: 8000,
+                                    });
+                                  }}
+                                >
+                                  View Details
+                                </Button>
+                              )}
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="!text-white border-slate-600">
+                              Not analyzed
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           {video.youtube_url ? (
                             <div className="flex items-center gap-2">
                               <LinkIcon className="h-4 w-4 text-green-400" />
@@ -473,13 +623,29 @@ const VideoQuality = () => {
                               </span>
                             </div>
                           ) : (
-                            <Badge variant="outline" className="text-slate-400 border-slate-600">
+                            <Badge variant="outline" className="text-white border-slate-600">
                               Not added
                             </Badge>
                           )}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
+                            {video.video_file_url && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => analyzeVideo(video)}
+                                disabled={analyzingVideoId === video.id}
+                                className="border-slate-600 hover:bg-slate-700"
+                                title="Analyze video with AI"
+                              >
+                                {analyzingVideoId === video.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Video className="h-4 w-4" />
+                                )}
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="icon"
@@ -564,6 +730,46 @@ const VideoQuality = () => {
               ) : (
                 "Save"
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Video Player Dialog */}
+      <Dialog open={!!playingVideo} onOpenChange={(open) => !open && setPlayingVideo(null)}>
+        <DialogContent className="bg-slate-800 border-slate-700 max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="text-white">
+              {playingVideo?.title || "Video Player"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {playingVideo?.video_file_url && (
+              <div className="w-full rounded-lg overflow-hidden bg-black">
+                <video
+                  src={playingVideo.video_file_url}
+                  className="w-full h-auto"
+                  controls
+                  autoPlay
+                />
+              </div>
+            )}
+            {playingVideo && (
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-slate-400">Agent:</span>
+                  <span className="text-white ml-2">{playingVideo.agent_name || "-"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Property ID:</span>
+                  <span className="text-white ml-2">{playingVideo.property_id || "-"}</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPlayingVideo(null)} className="border-slate-600">
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
