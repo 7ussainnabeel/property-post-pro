@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X, Layers, RefreshCw, Home, TrendingUp, Map, Briefcase, ShoppingBag, Store, Factory, Hospital, MapPinned, Trees, FolderKanban } from 'lucide-react';
+import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X, Layers, RefreshCw, Home, TrendingUp, Map, Briefcase, ShoppingBag, Store, Factory, Hospital, MapPinned, Trees, FolderKanban, FileCheck, Route, Droplets, FileText, Lightbulb, Plug, UtensilsCrossed, Users, Package, User, Leaf, Waves, Wind, Camera, Shield, Shirt, Snowflake, Dumbbell, Flame, Clapperboard, Cpu, DoorClosed, Car, Mountain, Dog, Wifi, Gamepad2, Bell, UserCheck, Expand, ShoppingCart, Cuboid } from 'lucide-react';
 
 const PROPERTY_TYPES: PropertyType[] = [
   'Land', 'Villa', 'Apartment', 'Office', 'Shop', 'Store', 
@@ -144,7 +144,71 @@ const getAmenitiesForProperty = (propertyType: string, category: string): string
   if (propertyType === 'Store' && category === 'Commercial') {
     return STORE_COMMERCIAL_AMENITIES;
   }
+  if (propertyType === 'Building' && category === 'Investment') {
+    return BUILDING_COMMERCIAL_AMENITIES;
+  }
+  if (propertyType === 'Land Planning' && category === 'Investment') {
+    return LAND_COMMERCIAL_AMENITIES;
+  }
   return COMMON_AMENITIES;
+};
+
+// Get icon for each amenity
+const getAmenityIcon = (amenity: string) => {
+  const iconMap: Record<string, any> = {
+    'Building Permit': FileCheck,
+    'Asphalt Road': Route,
+    'Sanitary Network': Droplets,
+    'Building Plan': FileText,
+    'Street Lighting': Lightbulb,
+    'Electricity & Water': Plug,
+    'Open Kitchen': UtensilsCrossed,
+    'Mejlas': Users,
+    'Store': Package,
+    'Maid Room': User,
+    'Garden': Leaf,
+    'Sea View': Waves,
+    'Swimming Pool': Waves,
+    'Elevator': Building2,
+    'CCTV': Camera,
+    'Security System': Shield,
+    'Laundry': Shirt,
+    'Central A/C': Snowflake,
+    'Basement': Building2,
+    'Gym': Dumbbell,
+    'BBQ': Flame,
+    'Cinema': Clapperboard,
+    'Home Appliances': Cpu,
+    'Closed Kitchen': DoorClosed,
+    'Guard Room': Shield,
+    'Dirty Kitchen': UtensilsCrossed,
+    'Walk-in Closet': DoorClosed,
+    'Smart Home System': Cpu,
+    'Balcony': Mountain,
+    'Playground': Gamepad2,
+    'WiFi': Wifi,
+    'Games Area': Gamepad2,
+    'Reception': Bell,
+    'Security Guard': UserCheck,
+    'Terrace': Mountain,
+    'Pets Allowed': Dog,
+    'City View': Building2,
+    'Shared Bathrooms': Droplets,
+    'Shared Meetings Rooms': Users,
+    'Car Parking': Car,
+    'Meetings Room': Users,
+    'Open Space': Expand,
+    'Equipped': ShoppingCart,
+    'Mezzanine': Layers,
+    'Parking': Car,
+    'Security': Shield,
+    'Storage': Package,
+    'Private Pool': Waves,
+    'Smart Home': Cpu,
+    'Hospital': Hospital,
+    'Mosque': Building2
+  };
+  return iconMap[amenity] || Sparkles;
 };
 
 const CARLTON_STAFF = [
@@ -696,32 +760,38 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             />
           </div>
 
-          {/* Amenities */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-muted-foreground" />
-              Amenities & Facilities
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {getAmenitiesForProperty(formData.propertyType, formData.category).map(amenity => (
-                <Badge
-                  key={amenity}
-                  variant={formData.amenities.includes(amenity) ? "default" : "outline"}
-                  className={`cursor-pointer transition-all hover:scale-105 ${
-                    formData.amenities.includes(amenity) 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'hover:bg-muted'
-                  }`}
-                  onClick={() => toggleAmenity(amenity)}
-                >
-                  {amenity}
-                  {formData.amenities.includes(amenity) && (
-                    <X className="w-3 h-3 ml-1" />
-                  )}
-                </Badge>
-              ))}
+          {/* Amenities - Only show after property type is selected */}
+          {formData.propertyType && (
+            <div className="space-y-3">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-muted-foreground" />
+                Amenities & Facilities
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {getAmenitiesForProperty(formData.propertyType, formData.category).map(amenity => {
+                  const Icon = getAmenityIcon(amenity);
+                  return (
+                    <Badge
+                      key={amenity}
+                      variant={formData.amenities.includes(amenity) ? "default" : "outline"}
+                      className={`cursor-pointer transition-all hover:scale-105 flex items-center gap-1.5 ${
+                        formData.amenities.includes(amenity) 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'hover:bg-muted'
+                      }`}
+                      onClick={() => toggleAmenity(amenity)}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {amenity}
+                      {formData.amenities.includes(amenity) && (
+                        <X className="w-3 h-3 ml-1" />
+                      )}
+                    </Badge>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* EWA Included (shown for Villa and Apartment only) */}
           {(formData.propertyType === 'Villa' || formData.propertyType === 'Apartment') && (
