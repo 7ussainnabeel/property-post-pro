@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X, Layers, RefreshCw } from 'lucide-react';
+import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X, Layers, RefreshCw, Home, TrendingUp, Map, Briefcase, ShoppingBag, Store, Factory, Hospital, MapPinned, Trees, FolderKanban } from 'lucide-react';
 
 const PROPERTY_TYPES: PropertyType[] = [
   'Land', 'Villa', 'Apartment', 'Office', 'Shop', 'Store', 
@@ -72,6 +72,43 @@ const APARTMENT_RESIDENTIAL_AMENITIES = [
   'Walk-in Closet', 'Terrace', 'Pets Allowed', 'City View', 'Smart Home System'
 ];
 
+const LAND_COMMERCIAL_AMENITIES = [
+  'Building Permit', 'Asphalt Road', 'Sanitary Network', 'Building Plan',
+  'Street Lighting', 'Electricity & Water'
+];
+
+const VILLA_COMMERCIAL_AMENITIES = [
+  'Open Kitchen', 'Mejlas', 'Store', 'Maid Room', 'Garden', 'Sea View',
+  'Swimming Pool', 'Elevator', 'CCTV', 'Security System', 'Laundry',
+  'Central A/C', 'Basement', 'Gym', 'BBQ', 'Cinema', 'Home Appliances',
+  'Closed Kitchen', 'Guard Room', 'Dirty Kitchen', 'Walk-in Closet',
+  'Smart Home System'
+];
+
+const BUILDING_COMMERCIAL_AMENITIES = [
+  'Sea View', 'Swimming Pool', 'Shared Bathrooms', 'Shared Meetings Rooms',
+  'Elevator', 'CCTV', 'Security System', 'Central A/C', 'Basement', 'Gym',
+  'Games Area', 'BBQ', 'Cinema', 'Car Parking', 'Guard Room', 'Reception',
+  'City View'
+];
+
+const OFFICE_COMMERCIAL_AMENITIES = [
+  'Meetings Room', 'Sea View', 'Shared Bathrooms', 'Shared Meetings Rooms',
+  'Elevator', 'CCTV', 'Security System', 'Central A/C', 'Car Parking',
+  'Open Space', 'Equipped', 'Reception', 'Security Guard', 'City View',
+  'Smart Home System'
+];
+
+const SHOP_COMMERCIAL_AMENITIES = [
+  'Store', 'Sea View', 'Shared Bathrooms', 'CCTV', 'Security System',
+  'Central A/C', 'Car Parking', 'Equipped', 'Mezzanine', 'Security Guard'
+];
+
+const STORE_COMMERCIAL_AMENITIES = [
+  'CCTV', 'Security System', 'Guard Room', 'Equipped', 'Mezzanine',
+  'Security Guard'
+];
+
 const COMMON_AMENITIES = [
   'Swimming Pool', 'Gym', 'Parking', 'Security', 'Garden',
   'Balcony', 'Central AC', 'Maid Room', 'Storage', 'Elevator',
@@ -88,6 +125,24 @@ const getAmenitiesForProperty = (propertyType: string, category: string): string
   }
   if (propertyType === 'Apartment' && category === 'Residential') {
     return APARTMENT_RESIDENTIAL_AMENITIES;
+  }
+  if (propertyType === 'Land' && category === 'Commercial') {
+    return LAND_COMMERCIAL_AMENITIES;
+  }
+  if (propertyType === 'Villa' && category === 'Commercial') {
+    return VILLA_COMMERCIAL_AMENITIES;
+  }
+  if (propertyType === 'Building' && category === 'Commercial') {
+    return BUILDING_COMMERCIAL_AMENITIES;
+  }
+  if (propertyType === 'Office' && category === 'Commercial') {
+    return OFFICE_COMMERCIAL_AMENITIES;
+  }
+  if (propertyType === 'Shop' && category === 'Commercial') {
+    return SHOP_COMMERCIAL_AMENITIES;
+  }
+  if (propertyType === 'Store' && category === 'Commercial') {
+    return STORE_COMMERCIAL_AMENITIES;
   }
   return COMMON_AMENITIES;
 };
@@ -107,10 +162,36 @@ const CARLTON_STAFF = [
   { name: 'Ibrahim Mohamed', nameAR: 'إبراهيم محمد', phone: '36390222' }
 ];
 
+// Get icon for each property type
+const getPropertyTypeIcon = (type: PropertyType) => {
+  const iconMap: Record<PropertyType, any> = {
+    'Land': Map,
+    'Villa': Home,
+    'Apartment': Building2,
+    'Office': Briefcase,
+    'Shop': ShoppingBag,
+    'Store': Store,
+    'Factory': Factory,
+    'Medical Facility': Hospital,
+    'Building': Building2,
+    'Land Planning': MapPinned,
+    'Compound': Layers,
+    'Farm': Trees,
+    'Projects': FolderKanban
+  };
+  return iconMap[type] || Building2;
+};
+
 // Get property types based on category
 const getPropertyTypesForCategory = (category: PropertyCategory | ''): PropertyType[] => {
   if (category === 'Residential') {
     return ['Land', 'Villa', 'Apartment'];
+  }
+  if (category === 'Commercial') {
+    return ['Land', 'Villa', 'Building', 'Office', 'Shop', 'Store', 'Factory', 'Medical Facility'];
+  }
+  if (category === 'Investment') {
+    return ['Building', 'Land Planning', 'Compound', 'Farm', 'Projects'];
   }
   return PROPERTY_TYPES;
 };
@@ -230,70 +311,84 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
           {/* Listing Type - Sale or Rent */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">Listing Type</Label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="listingType"
-                  value="Sale"
-                  checked={formData.listingType === 'Sale'}
-                  onChange={(e) => setFormData(prev => ({ ...prev, listingType: e.target.value as ListingType }))}
-                  className="w-4 h-4 text-primary focus:ring-primary focus:ring-2"
-                />
-                <span className="text-sm font-medium">For Sale</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="listingType"
-                  value="Rent"
-                  checked={formData.listingType === 'Rent'}
-                  onChange={(e) => setFormData(prev => ({ ...prev, listingType: e.target.value as ListingType }))}
-                  className="w-4 h-4 text-primary focus:ring-primary focus:ring-2"
-                />
-                <span className="text-sm font-medium">For Rent</span>
-              </label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={formData.listingType === 'Sale' ? 'default' : 'outline'}
+                className={`flex-1 ${formData.listingType === 'Sale' ? 'bg-blue-600 hover:bg-blue-700 border-blue-600' : 'hover:bg-blue-50 hover:border-blue-300'}`}
+                onClick={() => setFormData(prev => ({ ...prev, listingType: 'Sale' }))}
+              >
+                For Sale
+              </Button>
+              <Button
+                type="button"
+                variant={formData.listingType === 'Rent' ? 'default' : 'outline'}
+                className={`flex-1 ${formData.listingType === 'Rent' ? 'bg-green-600 hover:bg-green-700 border-green-600' : 'hover:bg-green-50 hover:border-green-300'}`}
+                onClick={() => setFormData(prev => ({ ...prev, listingType: 'Rent' }))}
+              >
+                For Rent
+              </Button>
             </div>
           </div>
 
-          {/* Property Type & Category */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Category */}
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value: PropertyCategory) => setFormData(prev => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={formData.category === 'Residential' ? 'default' : 'outline'}
+                  className="flex-1 flex items-center gap-2"
+                  onClick={() => setFormData(prev => ({ ...prev, category: 'Residential' }))}
+                >
+                  <Home className="w-4 h-4" />
+                  Residential
+                </Button>
+                <Button
+                  type="button"
+                  variant={formData.category === 'Commercial' ? 'default' : 'outline'}
+                  className="flex-1 flex items-center gap-2"
+                  onClick={() => setFormData(prev => ({ ...prev, category: 'Commercial' }))}
+                >
+                  <Building2 className="w-4 h-4" />
+                  Commercial
+                </Button>
+                <Button
+                  type="button"
+                  variant={formData.category === 'Investment' ? 'default' : 'outline'}
+                  className="flex-1 flex items-center gap-2"
+                  onClick={() => setFormData(prev => ({ ...prev, category: 'Investment' }))}
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  Investment
+                </Button>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-muted-foreground" />
-                Property Type
-              </Label>
-              <Select
-                value={formData.propertyType}
-                onValueChange={(value: PropertyType) => setFormData(prev => ({ ...prev, propertyType: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getPropertyTypesForCategory(formData.category).map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Property Type - Only show after category is selected */}
+            {formData.category && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Property Type</Label>
+                <div className="flex flex-wrap gap-2">
+                  {getPropertyTypesForCategory(formData.category).map(type => {
+                    const Icon = getPropertyTypeIcon(type);
+                    return (
+                      <Button
+                        key={type}
+                        type="button"
+                        variant={formData.propertyType === type ? 'default' : 'outline'}
+                        className="flex items-center gap-2"
+                        onClick={() => setFormData(prev => ({ ...prev, propertyType: type }))}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {type}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Land Classification (shown for Land types) */}
@@ -575,21 +670,19 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
           {/* Carlton Staff Agent */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Carlton Staff Agent</Label>
-            <Select
-              value={formData.agent}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, agent: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select agent" />
-              </SelectTrigger>
-              <SelectContent>
-                {CARLTON_STAFF.map(staff => (
-                  <SelectItem key={staff.phone} value={staff.phone}>
-                    {staff.name} - {staff.phone}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {CARLTON_STAFF.map(staff => (
+                <Button
+                  key={staff.phone}
+                  type="button"
+                  variant={formData.agent === staff.phone ? 'default' : 'outline'}
+                  className="text-xs px-2 py-2 h-auto whitespace-normal leading-tight"
+                  onClick={() => setFormData(prev => ({ ...prev, agent: staff.phone }))}
+                >
+                  {staff.name}
+                </Button>
+              ))}
+            </div>
           </div>
 
           {/* Unique Selling Points */}
