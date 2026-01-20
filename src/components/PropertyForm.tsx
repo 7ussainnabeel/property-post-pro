@@ -51,12 +51,46 @@ const LAND_CLASSIFICATIONS: { value: LandClassification; label: string }[] = [
   { value: 'WS', label: 'WS - Workshops and Maintenance Services Areas' },
 ];
 
+const LAND_RESIDENTIAL_AMENITIES = [
+  'Building Permit', 'Asphalt Road', 'Sanitary Network', 'Building Plan', 
+  'Street Lighting', 'Electricity & Water'
+];
+
+const VILLA_RESIDENTIAL_AMENITIES = [
+  'Open Kitchen', 'Mejlas', 'Store', 'Maid Room', 'Garden', 'Sea View', 
+  'Swimming Pool', 'Elevator', 'CCTV', 'Security System', 'Laundry', 
+  'Central A/C', 'Basement', 'Gym', 'BBQ', 'Cinema', 'Home Appliances', 
+  'Closed Kitchen', 'Guard Room', 'Dirty Kitchen', 'Walk-in Closet', 
+  'Smart Home System'
+];
+
+const APARTMENT_RESIDENTIAL_AMENITIES = [
+  'Open Kitchen', 'Store', 'Balcony', 'Maid Room', 'Playground', 'Garden', 
+  'Sea View', 'Swimming Pool', 'Elevator', 'CCTV', 'Security System', 
+  'Laundry', 'Central A/C', 'WiFi', 'Gym', 'Games Area', 'BBQ', 'Cinema', 
+  'Home Appliances', 'Closed Kitchen', 'Reception', 'Security Guard', 
+  'Walk-in Closet', 'Terrace', 'Pets Allowed', 'City View', 'Smart Home System'
+];
+
 const COMMON_AMENITIES = [
   'Swimming Pool', 'Gym', 'Parking', 'Security', 'Garden',
   'Balcony', 'Central AC', 'Maid Room', 'Storage', 'Elevator',
   'City View', 'Private Pool', 'Smart Home', 'Terrace',
   'Hospital', 'Mosque'
 ];
+
+const getAmenitiesForProperty = (propertyType: string, category: string): string[] => {
+  if (propertyType === 'Land' && category === 'Residential') {
+    return LAND_RESIDENTIAL_AMENITIES;
+  }
+  if (propertyType === 'Villa' && category === 'Residential') {
+    return VILLA_RESIDENTIAL_AMENITIES;
+  }
+  if (propertyType === 'Apartment' && category === 'Residential') {
+    return APARTMENT_RESIDENTIAL_AMENITIES;
+  }
+  return COMMON_AMENITIES;
+};
 
 const CARLTON_STAFF = [
   { name: 'Ahmed Al Aali', nameAR: 'أحمد العلي', phone: '36943000' },
@@ -72,6 +106,14 @@ const CARLTON_STAFF = [
   { name: 'Masoud Ali', nameAR: 'مسعود علي', phone: '36504499' },
   { name: 'Ibrahim Mohamed', nameAR: 'إبراهيم محمد', phone: '36390222' }
 ];
+
+// Get property types based on category
+const getPropertyTypesForCategory = (category: PropertyCategory | ''): PropertyType[] => {
+  if (category === 'Residential') {
+    return ['Land', 'Villa', 'Apartment'];
+  }
+  return PROPERTY_TYPES;
+};
 
 interface PropertyFormProps {
   onGenerate: (data: PropertyInput) => void;
@@ -108,6 +150,11 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     // Land and Villa field
     numberOfRoads: '',
   });
+
+  // Clear amenities when property type or category changes
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, amenities: [] }));
+  }, [formData.propertyType, formData.category]);
 
   // Auto-calculate price from size (sqm) and price per feet/sqm
   useEffect(() => {
@@ -224,7 +271,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PROPERTY_TYPES.map(type => (
+                  {getPropertyTypesForCategory(formData.category).map(type => (
                     <SelectItem key={type} value={type}>{type}</SelectItem>
                   ))}
                 </SelectContent>
@@ -563,7 +610,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
               Amenities & Facilities
             </Label>
             <div className="flex flex-wrap gap-2">
-              {COMMON_AMENITIES.map(amenity => (
+              {getAmenitiesForProperty(formData.propertyType, formData.category).map(amenity => (
                 <Badge
                   key={amenity}
                   variant={formData.amenities.includes(amenity) ? "default" : "outline"}
