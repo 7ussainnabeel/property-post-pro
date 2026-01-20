@@ -731,35 +731,6 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
           )}
 
-          {/* Carlton Staff Agent */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Carlton Staff Agent</Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-              {CARLTON_STAFF.map(staff => (
-                <Button
-                  key={staff.phone}
-                  type="button"
-                  variant={formData.agent === staff.phone ? 'default' : 'outline'}
-                  className="text-xs px-2 py-2 h-auto whitespace-normal leading-tight"
-                  onClick={() => setFormData(prev => ({ ...prev, agent: staff.phone }))}
-                >
-                  {staff.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Unique Selling Points */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Unique Selling Points</Label>
-            <Textarea
-              placeholder="What makes this property special? e.g., Recently renovated, prime location, stunning views..."
-              value={formData.uniqueSellingPoints}
-              onChange={(e) => setFormData(prev => ({ ...prev, uniqueSellingPoints: e.target.value }))}
-              className="min-h-[100px] resize-none"
-            />
-          </div>
-
           {/* Amenities - Only show after property type is selected */}
           {formData.propertyType && (
             <div className="space-y-3">
@@ -792,6 +763,35 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
               </div>
             </div>
           )}
+
+          {/* Unique Selling Points */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Unique Selling Points</Label>
+            <Textarea
+              placeholder="What makes this property special? e.g., Recently renovated, prime location, stunning views..."
+              value={formData.uniqueSellingPoints}
+              onChange={(e) => setFormData(prev => ({ ...prev, uniqueSellingPoints: e.target.value }))}
+              className="min-h-[100px] resize-none"
+            />
+          </div>
+
+          {/* Carlton Staff Agent */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Carlton Staff Agent</Label>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {CARLTON_STAFF.map(staff => (
+                <Button
+                  key={staff.phone}
+                  type="button"
+                  variant={formData.agent === staff.phone ? 'default' : 'outline'}
+                  className="text-xs px-2 py-2 h-auto whitespace-normal leading-tight"
+                  onClick={() => setFormData(prev => ({ ...prev, agent: staff.phone }))}
+                >
+                  {staff.name}
+                </Button>
+              ))}
+            </div>
+          </div>
 
           {/* EWA Included (shown for Villa and Apartment only) */}
           {(formData.propertyType === 'Villa' || formData.propertyType === 'Apartment') && (
