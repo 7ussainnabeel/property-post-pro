@@ -322,7 +322,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
   useEffect(() => {
     // Check basic required fields
     const hasBasicData = formData.propertyType && formData.category && formData.location 
-      && formData.size && formData.price && formData.furnishingStatus;
+      && formData.size && formData.price && formData.furnishingStatus && formData.agent;
     
     // Additional checks for Villa and Apartment - require bedrooms and bathrooms
     const isVillaOrApartment = formData.propertyType === 'Villa' || formData.propertyType === 'Apartment';

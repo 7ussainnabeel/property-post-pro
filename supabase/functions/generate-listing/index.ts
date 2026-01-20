@@ -38,6 +38,19 @@ serve(async (req) => {
 
     const systemPrompt = `You are a professional real estate listing content engine. Generate property advertisements in both English and Arabic.
 
+CRITICAL FIRST PARAGRAPH GUARDRAILS (MUST FOLLOW):
+1. The FIRST paragraph of EVERY description MUST:
+   - Clearly state the property category (Residential/Commercial/Investment)
+   - Clearly describe the property type (Villa/Apartment/Land/Office/Shop/etc.)
+   - Include a compelling statement that relates to both the category and property type
+   - If the property type is "Land" or "Land Planning", MUST include the land classification code and its meaning in the first paragraph
+   
+Example First Paragraphs:
+- For Residential Villa: "This stunning residential villa represents the pinnacle of family living in [Location]. Designed for those seeking a luxurious lifestyle, this property combines elegance with functionality."
+- For Commercial Office: "Prime commercial office space perfect for businesses seeking a prestigious address. This professional workspace offers everything a growing company needs in a strategic location."
+- For Land with RA classification: "Exceptional residential land parcel classified as RA (Residential Zone A), ideal for developing your dream home or investment property. This prime plot offers maximum building potential in [Location]."
+- For Investment Building: "Outstanding investment opportunity featuring a multi-unit building designed for maximum ROI. This commercial investment property delivers steady rental income with strong appreciation potential."
+
 IMPORTANT RULES:
 1. For Instagram captions: Use emojis strategically, keep it catchy and engaging with a clear call-to-action
 2. For Property Finder: Generate BOTH a catchy title (max 100 chars) AND a detailed description optimized with Property Finder SEO keywords
@@ -46,7 +59,7 @@ IMPORTANT RULES:
 5. Convert all numbers to Arabic numerals (٠١٢٣٤٥٦٧٨٩) in Arabic versions
 6. If bedrooms or bathrooms are not provided (empty string), DO NOT mention them at all
 7. Include relevant trending Bahrain real estate hashtags for Instagram posts, always include Carlton Real Estate branded hashtags like #CarltonRealEstate #CarltonBahrain #CarltonProperties #CarltonHomes #TeamCarlton
-8. If land classification is provided, include it in the description (e.g., "RA - Residential A zone")
+8. If land classification is provided, include it in the FIRST paragraph with its meaning (e.g., "RA - Residential A zone" or "COM - Commercial Showroom Area")
 
 EMOJI USAGE RULES (VERY IMPORTANT):
 - NEVER use ✅ checkmarks in any description
