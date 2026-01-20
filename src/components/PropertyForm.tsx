@@ -810,7 +810,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
             </div>
           )}
 
-          {/* Update Description Button */}
+          {/* Generate Description Button */}
           <div className="pt-2">
             <Button
               type="button"
@@ -819,7 +819,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
               className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              {isLoading ? 'Generating...' : 'Update Description'}
+              {isLoading ? 'Generating...' : 'Generate Description'}
             </Button>
           </div>
 
