@@ -259,6 +259,23 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
           {/* Property Type & Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label className="text-sm font-medium">Category</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value: PropertyCategory) => setFormData(prev => ({ ...prev, category: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-muted-foreground" />
                 Property Type
@@ -273,23 +290,6 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
                 <SelectContent>
                   {getPropertyTypesForCategory(formData.category).map(type => (
                     <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value: PropertyCategory) => setFormData(prev => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
