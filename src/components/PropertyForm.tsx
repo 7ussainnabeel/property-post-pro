@@ -472,8 +472,9 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
 
           {/* Price per Feet/SQM & Price */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Hide Price per SQM for Apartment Rent */}
-            {!(formData.propertyType === 'Apartment' && formData.listingType === 'Rent') && (
+            {/* Hide Price per SQM for Apartment Rent and Commercial properties (Office, Shop, Store, Building, Compound, Farm, Projects) */}
+            {!(formData.propertyType === 'Apartment' && formData.listingType === 'Rent') && 
+             !(formData.category === 'Commercial' && ['Office', 'Shop', 'Store', 'Building', 'Compound', 'Farm', 'Projects'].includes(formData.propertyType)) && (
               <div className="space-y-2">
                 <Label className="text-sm font-medium">
                   {formData.propertyType === 'Apartment' && formData.listingType === 'Sale' ? 'Price per SQM' : 'Price per Feet'}

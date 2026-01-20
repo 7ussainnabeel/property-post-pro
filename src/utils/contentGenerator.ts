@@ -21,10 +21,10 @@ export function generateContent(input: PropertyInput): GeneratedContent {
   
   // Get agent information
   const CARLTON_STAFF = [
-    { name: 'Ahmed Al Aali', nameAR: 'أحمد العلي', phone: '36943000' },
-    { name: 'Hamar Adel', nameAR: 'همار عدل', phone: '36504411' },
+    { name: 'Ahmed Al Aali', nameAR: 'أحمد العالي', phone: '36943000' },
+    { name: 'Hana Adel', nameAR: 'هناء عدل', phone: '36504411' },
     { name: 'Hesham Ismaeel', nameAR: 'هشام اسماعيل', phone: '36503399' },
-    { name: 'Muna Kamal', nameAR: 'منى كمال', phone: '36960222' },
+    { name: 'Mirna Kamal', nameAR: 'ميرنا كمال', phone: '36960222' },
     { name: 'Mohamed Abdulla', nameAR: 'محمد عبدالله', phone: '36744755' },
     { name: 'Sara Ali', nameAR: 'سارة علي', phone: '36503388' },
     { name: 'Violeta Abboud', nameAR: 'فيوليت عبود', phone: '36504477' },
@@ -35,8 +35,8 @@ export function generateContent(input: PropertyInput): GeneratedContent {
     { name: 'Ibrahim Mohamed', nameAR: 'إبراهيم محمد', phone: '36390222' }
   ];
   const selectedAgent = agent ? CARLTON_STAFF.find(staff => staff.phone === agent) : null;
-  const agentInfoEN = selectedAgent ? `\n\nFor more information, contact ${selectedAgent.name} at ${selectedAgent.phone}` : '';
-  const agentInfoAR = selectedAgent ? `\n\nللمزيد من المعلومات، تواصل مع ${selectedAgent.nameAR} على ${selectedAgent.phone}` : '';
+  const agentInfoEN = selectedAgent ? `\n\nFor more information, contact:\n${selectedAgent.name}\n${selectedAgent.phone}` : '';
+  const agentInfoAR = selectedAgent ? `\n\nللمزيد من المعلومات، تواصل مع:\n${selectedAgent.nameAR}\n${selectedAgent.phone}` : '';
 
   const hasBedrooms = bedrooms && bedrooms.trim() !== '';
   const hasBathrooms = bathrooms && bathrooms.trim() !== '';
