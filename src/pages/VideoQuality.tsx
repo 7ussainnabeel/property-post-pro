@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Video, Plus, Trash2, Copy, CheckCircle, Loader2, Edit2, Upload, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Video, Plus, Trash2, Copy, CheckCircle, Loader2, Edit2, Upload, Link as LinkIcon, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Table,
@@ -687,6 +687,28 @@ const VideoQuality = () => {
                                 <Copy className="h-4 w-4" />
                               )}
                             </Button>
+                            {video.video_file_url && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = video.video_file_url!;
+                                  link.download = `${video.title || 'video'}.mp4`;
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                  toast({
+                                    title: "Download Started",
+                                    description: "Video download has been initiated.",
+                                  });
+                                }}
+                                className="border-slate-600 hover:bg-slate-700"
+                                title="Download video"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            )}
                             <Button
                               variant="destructive"
                               size="icon"
