@@ -19,6 +19,7 @@ interface PropertyInput {
   ewaIncluded: boolean;
   uniqueSellingPoints: string;
   landClassification: string;
+  agent: string;
 }
 
 serve(async (req) => {
@@ -38,6 +39,12 @@ serve(async (req) => {
 
     const systemPrompt = `You are a professional real estate listing content engine. Generate property advertisements in both English and Arabic.
 
+CRITICAL GUARDRAILS - PROPERTY FINDER (MUST FOLLOW):
+1. Property Finder descriptions (propertyFinderEN and propertyFinderAR) MUST be 100% emoji-free
+2. ABSOLUTELY NO emojis are allowed in Property Finder content - not a single emoji character
+3. If you include even ONE emoji in Property Finder descriptions, the content will be rejected
+4. Property Finder = TEXT ONLY, no symbols, no emojis, no special characters except standard punctuation
+
 CRITICAL FIRST PARAGRAPH GUARDRAILS (MUST FOLLOW):
 1. The FIRST paragraph of EVERY description MUST:
    - Clearly state the property category (Residential/Commercial/Investment)
@@ -53,15 +60,47 @@ Example First Paragraphs:
 
 IMPORTANT RULES:
 1. For Instagram captions: Use emojis strategically, keep it catchy and engaging with a clear call-to-action
-2. For Property Finder: Generate BOTH a catchy title (max 100 chars) AND a detailed description optimized with Property Finder SEO keywords
+2. For Property Finder: Generate BOTH a catchy title (max 100 chars) AND a detailed description optimized with Property Finder SEO keywords. CRITICAL GUARDRAIL: propertyFinderEN and propertyFinderAR fields MUST contain ZERO emojis - they must be pure text only. Any emoji in these fields is strictly FORBIDDEN and will cause rejection.
 3. For other websites: Use SEO-friendly, comprehensive descriptions
 4. Always translate locations to Arabic properly (e.g., Manama = المنامة, Riffa = الرفاع, Juffair = الجفير)
 5. Convert all numbers to Arabic numerals (٠١٢٣٤٥٦٧٨٩) in Arabic versions
 6. If bedrooms or bathrooms are not provided (empty string), DO NOT mention them at all
 7. Include relevant trending Bahrain real estate hashtags for Instagram posts, always include Carlton Real Estate branded hashtags like #CarltonRealEstate #CarltonBahrain #CarltonProperties #CarltonHomes #TeamCarlton
 8. If land classification is provided, include it in the FIRST paragraph with its meaning (e.g., "RA - Residential A zone" or "COM - Commercial Showroom Area")
+9. CRITICAL CONTACT INFO RULES (MUST FOLLOW EXACTLY):
+   - For Property Finder (propertyFinderEN and propertyFinderAR): DO NOT include ANY contact information - no agent name, no phone numbers, no branch info
+   - For Instagram (instagramEN and instagramAR): MUST end with contact block formatted as:
+     "Contact {Agent Name}
+     {Agent Phone}
+     
+     {Branch Name}
+     {Branch Phone}"
+   - For Website (websiteEN and websiteAR): MUST end with contact block formatted as:
+     "Contact {Agent Name}
+     {Agent Phone}
+     
+     {Branch Name}
+     {Branch Phone}"
+   
+   Example for Instagram/Website English:
+   "Contact Ahmed Al Aali
+   36943000
+   
+   Saar Branch
+   ☎️ +973 1759 1999"
+   
+   Example for Instagram/Website Arabic:
+   "للتواصل أحمد العلي
+   ٣٦٩٤٣٠٠٠
+   
+   رقم المكتب (فرع سار)
+   ☎️ +٩٧٣ ١٧٥٩ ١٩٩٩"
 
-EMOJI USAGE RULES (VERY IMPORTANT):
+10. Property Finder descriptions should be professional, detailed, and completely emoji-free
+
+EMOJI USAGE RULES (FOR INSTAGRAM AND WEBSITE ONLY - NOT FOR PROPERTY FINDER):
+- Property Finder (propertyFinderEN, propertyFinderAR): ABSOLUTELY FORBIDDEN - NO EMOJIS ALLOWED UNDER ANY CIRCUMSTANCES
+- Instagram and Website: Use emojis strategically
 - NEVER use ✅ checkmarks in any description
 - Use descriptive emojis that represent each feature/word:
   📍 for Location
@@ -125,6 +164,25 @@ Respond ONLY with valid JSON in this exact format:
   "websiteAR": "Arabic website description"
 }`;
 
+    // Agent mapping with branch information
+    const agentMap: { [key: string]: { name: string, nameAR: string, branch: string, branchAR: string, branchPhone: string } } = {
+      '36943000': { name: 'Ahmed Al Aali', nameAR: 'أحمد العلي', branch: 'Saar Branch', branchAR: 'رقم المكتب (فرع سار)', branchPhone: '☎️ +973 1759 1999' },
+      '36504411': { name: 'Hana Adel', nameAR: 'هناء عادل', branch: 'Seef Office (Main Branch)', branchAR: 'رقم المكتب (الفرع الرئيسي بضاحية السيف)', branchPhone: '☎️ +973 1729 2827' },
+      '36503399': { name: 'Hesham Ismaeel', nameAR: 'هشام اسماعيل', branch: 'Saar Branch', branchAR: 'رقم المكتب (فرع سار)', branchPhone: '☎️ +973 1759 1999' },
+      '36960222': { name: 'Mirna Kamal', nameAR: 'ميرنه كمال', branch: 'Amwaj Island Branch', branchAR: 'رقم المكتب (فرع جزر أمواج)', branchPhone: '☎️ +973 1600 6000' },
+      '36744755': { name: 'Mohamed Abdulla', nameAR: 'محمد عبدالله', branch: 'Saar Branch', branchAR: 'رقم المكتب (فرع سار)', branchPhone: '☎️ +973 1759 1999' },
+      '36503388': { name: 'Sara Ali', nameAR: 'سارة علي', branch: 'Carlton Real Estate', branchAR: 'كارلتون العقارية', branchPhone: '☎️ +973 1771 3000' },
+      '36504477': { name: 'Violeta Abboud', nameAR: 'فيوليت عبود', branch: 'Amwaj Island Branch', branchAR: 'رقم المكتب (فرع جزر أمواج)', branchPhone: '☎️ +973 1600 6000' },
+      '38218600': { name: 'Husain Mansoor', nameAR: 'حسين منصور', branch: 'Saar Branch', branchAR: 'رقم المكتب (فرع سار)', branchPhone: '☎️ +973 1759 1999' },
+      '32319900': { name: 'Abdulla Hasan', nameAR: 'عبدالله حسن', branch: 'Saar Branch', branchAR: 'رقم المكتب (فرع سار)', branchPhone: '☎️ +973 1759 1999' },
+      '38213300': { name: 'Ali Hasan', nameAR: 'علي حسن', branch: 'Saar Branch', branchAR: 'رقم المكتب (فرع سار)', branchPhone: '☎️ +973 1759 1999' },
+      '36504499': { name: 'Masoud Ali', nameAR: 'مسعود علي', branch: 'Saar Branch', branchAR: 'رقم المكتب (فرع سار)', branchPhone: '☎️ +973 1759 1999' },
+      '36390222': { name: 'Ibrahim Mohamed', nameAR: 'إبراهيم محمد', branch: 'Carlton Real Estate', branchAR: 'كارلتون العقارية', branchPhone: '☎️ +973 1771 3000' }
+    };
+
+    const agentInfo = agentMap[property.agent] || { name: 'Carlton Real Estate', nameAR: 'كارلتون العقارية', branch: 'Carlton Real Estate', branchAR: 'كارلتون العقارية', branchPhone: '☎️ +973 1771 3000' };
+    const agentPhone = property.agent || '17713000';
+
     const userPrompt = `Generate real estate listing content for this property:
 
 Property Type: ${property.propertyType}
@@ -139,6 +197,30 @@ Furnishing: ${property.furnishingStatus}
 Amenities: ${property.amenities.join(', ')}
 EWA Included: ${property.ewaIncluded ? 'Yes' : 'No'}
 Unique Selling Points: ${property.uniqueSellingPoints}
+Agent Name (English): ${agentInfo.name}
+Agent Name (Arabic): ${agentInfo.nameAR}
+Agent Phone: ${agentPhone}
+Branch Name (English): ${agentInfo.branch}
+Branch Name (Arabic): ${agentInfo.branchAR}
+Branch Phone: ${agentInfo.branchPhone}
+
+MANDATORY: For instagramEN, instagramAR, websiteEN, and websiteAR - You MUST end each description with the contact information block in this EXACT format:
+
+For English (instagramEN and websiteEN), end with:
+"Contact ${agentInfo.name}
+${agentPhone}
+
+${agentInfo.branch}
+${agentInfo.branchPhone}"
+
+For Arabic (instagramAR and websiteAR), end with:
+"للتواصل ${agentInfo.nameAR}
+${agentPhone}
+
+${agentInfo.branchAR}
+${agentInfo.branchPhone}"
+
+DO NOT include any contact information in propertyFinderEN or propertyFinderAR.
 
 Generate professional, attractive content that highlights the property's best features. Include a catchy Property Finder title and detailed description. Make the Instagram captions engaging with relevant emojis and include the latest trending Bahrain real estate hashtags.`;
 
