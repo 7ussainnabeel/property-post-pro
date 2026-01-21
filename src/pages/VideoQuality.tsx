@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Video, Plus, Trash2, Copy, CheckCircle, Loader2, Edit2, Upload, Link as LinkIcon, Download } from "lucide-react";
+import { ArrowLeft, Video, Plus, Trash2, Copy, CheckCircle, Loader2, Edit2, Upload, Link as LinkIcon, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Table,
@@ -47,6 +47,7 @@ const VideoQuality = () => {
   const [title, setTitle] = useState("");
   const [agentName, setAgentName] = useState("");
   const [propertyId, setPropertyId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingVideo, setEditingVideo] = useState<VideoSubmission | null>(null);
@@ -551,28 +552,53 @@ const VideoQuality = () => {
             <CardTitle className="text-white">Video Submissions ({videos.length})</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Search Bar */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Search by agent name, property ID, or title..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-slate-700 border-slate-600 text-white pl-10"
+                />
+              </div>
+            </div>
+
             {loading ? (
               <div className="text-center py-8 text-slate-400">Loading videos...</div>
-            ) : videos.length === 0 ? (
-              <div className="text-center py-8 text-slate-400">
-                No videos submitted yet. Upload a video above to get started.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-slate-700">
-                      <TableHead className="text-slate-300">Video</TableHead>
-                      <TableHead className="text-slate-300">Title</TableHead>
-                      <TableHead className="text-slate-300">Agent</TableHead>
-                      <TableHead className="text-slate-300">Property ID</TableHead>
-                      <TableHead className="text-slate-300">AI Analysis</TableHead>
-                      <TableHead className="text-slate-300">YouTube URL</TableHead>
-                      <TableHead className="text-slate-300">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {videos.map((video) => (
+            ) : (() => {
+              // Filter videos based on search query
+              const filteredVideos = videos.filter(video => {
+                if (!searchQuery) return true;
+                const query = searchQuery.toLowerCase();
+                return (
+                  video.agent_name?.toLowerCase().includes(query) ||
+                  video.property_id?.toLowerCase().includes(query) ||
+                  video.title?.toLowerCase().includes(query)
+                );
+              });
+
+              return filteredVideos.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  {searchQuery ? "No videos found matching your search" : "No videos submitted yet. Upload a video above to get started."}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-slate-700">
+                        <TableHead className="text-slate-300">Video</TableHead>
+                        <TableHead className="text-slate-300">Title</TableHead>
+                        <TableHead className="text-slate-300">Agent</TableHead>
+                        <TableHead className="text-slate-300">Property ID</TableHead>
+                        <TableHead className="text-slate-300">AI Analysis</TableHead>
+                        <TableHead className="text-slate-300">YouTube URL</TableHead>
+                        <TableHead className="text-slate-300">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredVideos.map((video) => (
                       <TableRow key={video.id} className="border-slate-700">
                         <TableCell>{renderVideoPreview(video)}</TableCell>
                         <TableCell className="text-white font-medium">
@@ -724,7 +750,8 @@ const VideoQuality = () => {
                   </TableBody>
                 </Table>
               </div>
-            )}
+              );
+            })()}
           </CardContent>
         </Card>
       </div>
