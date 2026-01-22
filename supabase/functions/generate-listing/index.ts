@@ -85,40 +85,61 @@ IMPORTANT RULES:
     - Include location and main features
     
     Property Features: (or Property Details:)
-    - 4 Large en-suite bedrooms with built-in wardrobes
-    - Maids Room with private bathroom
-    - 5 Stylish Bathrooms in total
-    - Expansive Living Area with floor-to-ceiling windows
-    - Gourmet Kitchen fully fitted with premium appliances
-    [Each feature on a new line with - or • bullet]
+    MUST include ALL relevant details from the property data:
+    - [Number] Large/Spacious en-suite bedrooms with built-in wardrobes (if bedrooms provided)
+    - Master bedroom with walk-in closet and luxury en-suite (if luxury property)
+    - Maid's Room with private bathroom (if applicable)
+    - [Number] Stylish/Modern Bathrooms in total (always include)
+    - Expansive/Generous Living Area with floor-to-ceiling windows
+    - Elegant Dining Space - ideal for entertaining
+    - Gourmet/Fully-equipped Kitchen fully fitted with premium/modern appliances
+    - Private Balconies/Terrace with [view type] views
+    - High-Quality Furnishings and Designer Finishes (if furnished)
+    - Central AC/Split AC throughout
+    - [Size] sqm of living space
+    - Private/Covered Parking for [number] vehicles
+    - Laundry room, Storage room (if applicable)
+    [List EVERY property detail with descriptive adjectives]
     
     Exclusive Amenities: (or Building Facilities: for apartments)
-    - Breathtaking Sea Views from multiple vantage points
-    - Access to Swimming Pool, Gym, and Recreational Facilities
-    - Private Covered Parking
-    - 24/7 Security and Concierge Services
-    [Each amenity on a new line with - or • bullet]
+    List ALL amenities from property data professionally:
+    - Breathtaking [View Type] Views from multiple vantage points
+    - Access to Swimming Pool/Infinity Pool (adults and children's pool)
+    - State-of-the-art Gym and Fitness Center
+    - Children's Play Area (if family property)
+    - 24/7 Security and CCTV Surveillance
+    - Concierge Services (if luxury)
+    - Landscaped Gardens and Common Areas
+    - BBQ and Entertainment Areas
+    - EWA Included (if applicable)
+    [List each amenity with professional descriptions]
     
     Prime Location - [Area Name]
-    [2-3 sentences about the area, its prestige, and connectivity]
+    [2-3 sentences about area prestige, character, and lifestyle benefits]
     
-    - Key destination 1
-    - Key destination 2
-    - Quick access to major highways and business hubs
+    Nearby Amenities:
+    - Major shopping malls and retail destinations
+    - International schools and educational institutions
+    - Healthcare facilities
+    - Fine dining restaurants and cafes
+    - Quick access to major highways and business districts
     
     _______________________________________________________________
     
     **Asking Price BD [Price] (Negotiable) or **Monthly Rent BD [Price]
     
     CRITICAL FORMATTING RULES:
-    • Use "Property Features:" or "Property Details:" as section header
-    • Use "Exclusive Amenities:" for villas/houses or "Building Facilities:" for apartments
-    • Each bullet point MUST start with - or • and be on its own line
-    • Use descriptive adjectives (Large, Stylish, Expansive, Gourmet, Premium, Elegant)
-    • Include the separator line _______________________________________________________________ before price
-    • Format price as **Asking Price BD [amount] (Negotiable) or **Monthly Rent BD [amount]
-    • NO contact information - it will be added automatically
-    • NO emojis anywhere in Property Finder content
+    • Use "Property Features:" for main property details section
+    • Use "Exclusive Amenities:" (villas) or "Building Facilities:" (apartments)
+    • Each bullet MUST start with - or • on its own line
+    • Use descriptive adjectives: Large, Spacious, Stylish, Expansive, Gourmet, Premium, Elegant, Modern
+    • Be specific: "4 Large en-suite bedrooms" not "4 bedrooms"
+    • Include property size in sqm in Property Features
+    • Always mention parking if available
+    • Use separator line _______________________________________________________________ before price
+    • Format: **Asking Price BD [amount] (Negotiable) for sale or **Monthly Rent BD [amount] for rent
+    • NO contact info anywhere - added automatically by system
+    • NO emojis - ZERO TOLERANCE for Property Finder
 
 EMOJI USAGE RULES (FOR INSTAGRAM AND WEBSITE ONLY - NOT FOR PROPERTY FINDER):
 - Property Finder (propertyFinderEN, propertyFinderAR): ABSOLUTELY FORBIDDEN - NO EMOJIS ALLOWED UNDER ANY CIRCUMSTANCES
