@@ -26,6 +26,7 @@ import {
 interface VideoSubmission {
   id: string;
   youtube_url: string | null;
+  property_url: string | null;
   video_file_url: string | null;
   title: string | null;
   description: string | null;
@@ -47,11 +48,13 @@ const VideoQuality = () => {
   const [title, setTitle] = useState("");
   const [agentName, setAgentName] = useState("");
   const [propertyId, setPropertyId] = useState("");
+  const [propertyUrl, setPropertyUrl] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingVideo, setEditingVideo] = useState<VideoSubmission | null>(null);
   const [editYoutubeUrl, setEditYoutubeUrl] = useState("");
+  const [editPropertyUrl, setEditPropertyUrl] = useState("");
   const [editingSubmitting, setEditingSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -203,6 +206,7 @@ const VideoQuality = () => {
 
       const { error } = await supabase.from("video_submissions").insert({
         youtube_url: null,
+        property_url: propertyUrl.trim() || null,
         video_file_url: videoFileUrl,
         title: title.trim() || null,
         agent_name: agentName.trim(),
@@ -219,6 +223,7 @@ const VideoQuality = () => {
       setTitle("");
       setAgentName("");
       setPropertyId("");
+      setPropertyUrl("");
       setSelectedFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -376,28 +381,30 @@ const VideoQuality = () => {
   const handleEditOpen = (video: VideoSubmission) => {
     setEditingVideo(video);
     setEditYoutubeUrl(video.youtube_url || "");
+    setEditPropertyUrl(video.property_url || "");
   };
 
   const handleEditClose = () => {
     setEditingVideo(null);
     setEditYoutubeUrl("");
+    setEditPropertyUrl("");
   };
 
   const handleEditSave = async () => {
     if (!editingVideo) return;
 
-    if (!editYoutubeUrl.trim()) {
+    if (!editYoutubeUrl.trim() && !editPropertyUrl.trim()) {
       toast({
         title: "URL Required",
-        description: "Please enter a YouTube URL",
+        description: "Please enter at least a YouTube URL or Property URL",
         variant: "destructive",
       });
       return;
     }
 
-    if (!validateYoutubeUrl(editYoutubeUrl)) {
+    if (editYoutubeUrl.trim() && !validateYoutubeUrl(editYoutubeUrl)) {
       toast({
-        title: "Invalid URL",
+        title: "Invalid YouTube URL",
         description: "Please enter a valid YouTube URL",
         variant: "destructive",
       });
@@ -409,15 +416,16 @@ const VideoQuality = () => {
       const { error } = await supabase
         .from("video_submissions")
         .update({
-          youtube_url: editYoutubeUrl.trim(),
+          youtube_url: editYoutubeUrl.trim() || null,
+          property_url: editPropertyUrl.trim() || null,
         })
         .eq("id", editingVideo.id);
 
       if (error) throw error;
 
       toast({
-        title: "YouTube URL Added",
-        description: "YouTube URL has been saved successfully",
+        title: "URLs Updated",
+        description: "YouTube URL and Property URL have been saved successfully",
       });
 
       handleEditClose();
@@ -507,6 +515,16 @@ const VideoQuality = () => {
                   placeholder="Video title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Property URL (optional)</label>
+                <Input
+                  placeholder="https://example.com/property/..."
+                  value={propertyUrl}
+                  onChange={(e) => setPropertyUrl(e.target.value)}
                   className="bg-slate-700 border-slate-600 text-white"
                 />
               </div>
@@ -761,12 +779,12 @@ const VideoQuality = () => {
         <DialogContent className="bg-slate-800 border-slate-700">
           <DialogHeader>
             <DialogTitle className="text-white">
-              {editingVideo?.youtube_url ? "Edit YouTube URL" : "Add YouTube URL"}
+              Edit Video URLs
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm text-slate-300">YouTube URL *</label>
+              <label className="text-sm text-slate-300">YouTube URL</label>
               <Input
                 placeholder="https://www.youtube.com/watch?v=..."
                 value={editYoutubeUrl}
@@ -774,8 +792,17 @@ const VideoQuality = () => {
                 className="bg-slate-700 border-slate-600 text-white"
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm text-slate-300">Property URL</label>
+              <Input
+                placeholder="https://example.com/property/..."
+                value={editPropertyUrl}
+                onChange={(e) => setEditPropertyUrl(e.target.value)}
+                className="bg-slate-700 border-slate-600 text-white"
+              />
+            </div>
             <p className="text-sm text-slate-400">
-              Add the YouTube URL for this video submission.
+              Add or update the YouTube URL and Property URL for this video submission.
             </p>
           </div>
           <DialogFooter>
