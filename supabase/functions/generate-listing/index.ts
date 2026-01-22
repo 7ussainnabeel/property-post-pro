@@ -67,34 +67,11 @@ IMPORTANT RULES:
 6. If bedrooms or bathrooms are not provided (empty string), DO NOT mention them at all
 7. Include relevant trending Bahrain real estate hashtags for Instagram posts, always include Carlton Real Estate branded hashtags like #CarltonRealEstate #CarltonBahrain #CarltonProperties #CarltonHomes #TeamCarlton
 8. If land classification is provided, include it in the FIRST paragraph with its meaning (e.g., "RA - Residential A zone" or "COM - Commercial Showroom Area")
-9. CRITICAL CONTACT INFO RULES (MUST FOLLOW EXACTLY):
-   - For Property Finder (propertyFinderEN and propertyFinderAR): DO NOT include ANY contact information - no agent name, no phone numbers, no branch info
-   - For Instagram (instagramEN and instagramAR): MUST end with contact block formatted as:
-     "Contact {Agent Name}
-     {Agent Phone}
-     
-     {Branch Name}
-     {Branch Phone}"
-   - For Website (websiteEN and websiteAR): MUST end with contact block formatted as:
-     "Contact {Agent Name}
-     {Agent Phone}
-     
-     {Branch Name}
-     {Branch Phone}"
-   
-   Example for Instagram/Website English:
-   "Contact Ahmed Al Aali
-   36943000
-   
-   Saar Branch
-   ☎️ +973 1759 1999"
-   
-   Example for Instagram/Website Arabic:
-   "للتواصل أحمد العلي
-   ٣٦٩٤٣٠٠٠
-   
-   رقم المكتب (فرع سار)
-   ☎️ +٩٧٣ ١٧٥٩ ١٩٩٩"
+9. CRITICAL CONTACT INFO RULES - DO NOT INCLUDE ANY CONTACT INFO IN YOUR RESPONSE:
+   - For Property Finder (propertyFinderEN and propertyFinderAR): NO contact information
+   - For Instagram (instagramEN and instagramAR): DO NOT include contact info - it will be added automatically
+   - For Website (websiteEN and websiteAR): DO NOT include contact info - it will be added automatically
+   - NEVER include "Call us", "Contact", agent names, phone numbers, or branch info in your response
 
 10. Property Finder descriptions should be professional, detailed, and completely emoji-free
 11. PROPERTY FINDER FORMAT - Property details MUST be listed as bullet points using • symbol with EACH BULLET POINT ON A NEW LINE:
@@ -148,7 +125,6 @@ EMOJI USAGE RULES (FOR INSTAGRAM AND WEBSITE ONLY - NOT FOR PROPERTY FINDER):
   🏠 for Property Type
   🏢 for Building/Apartment
   🏡 for Villa
-  📞 for Contact/Call to Action
 
 LAND CLASSIFICATIONS:
 - RA, RB, RC, RD: Residential zones (A is highest density)
@@ -178,10 +154,10 @@ Respond ONLY with valid JSON in this exact format:
   "propertyFinderTitleAR": "Arabic title for Property Finder (max 100 chars)",
   "propertyFinderEN": "English Property Finder description with bullet points for property details (NO EMOJIS, NO CONTACT INFO)",
   "propertyFinderAR": "Arabic Property Finder description with bullet points for property details (NO EMOJIS, NO CONTACT INFO)",
-  "instagramEN": "English Instagram caption with emojis - contact info BEFORE hashtags:\n[Description]\n\nCall us today! 📞\nContact {Agent}\n{Phone}\n\n{Branch}\n{BranchPhone}\n\n#Hashtags",
-  "instagramAR": "Arabic Instagram caption with emojis - contact info BEFORE hashtags:\n[Description]\n\nاتصل بنا! 📞\nللتواصل {Agent}\n{Phone}\n\n{Branch}\n{BranchPhone}\n\n#Hashtags",
-  "websiteEN": "English website description with emojis - MUST END WITH contact block",
-  "websiteAR": "Arabic website description with emojis - MUST END WITH contact block"
+  "instagramEN": "English Instagram caption with emojis and hashtags ONLY - NO CONTACT INFO",
+  "instagramAR": "Arabic Instagram caption with emojis and hashtags ONLY - NO CONTACT INFO",
+  "websiteEN": "English website description with emojis ONLY - NO CONTACT INFO",
+  "websiteAR": "Arabic website description with emojis ONLY - NO CONTACT INFO"
 }`;
 
     // Agent mapping with branch information
@@ -217,30 +193,8 @@ Furnishing: ${property.furnishingStatus}
 Amenities: ${property.amenities.join(', ')}
 EWA Included: ${property.ewaIncluded ? 'Yes' : 'No'}
 Unique Selling Points: ${property.uniqueSellingPoints}
-Agent Name (English): ${agentInfo.name}
-Agent Name (Arabic): ${agentInfo.nameAR}
-Agent Phone: ${agentPhone}
-Branch Name (English): ${agentInfo.branch}
-Branch Name (Arabic): ${agentInfo.branchAR}
-Branch Phone: ${agentInfo.branchPhone}
 
-MANDATORY: For instagramEN, instagramAR, websiteEN, and websiteAR - You MUST end each description with the contact information block in this EXACT format:
-
-For English (instagramEN and websiteEN), end with:
-"Contact ${agentInfo.name}
-${agentPhone}
-
-${agentInfo.branch}
-${agentInfo.branchPhone}"
-
-For Arabic (instagramAR and websiteAR), end with:
-"للتواصل ${agentInfo.nameAR}
-${agentPhone}
-
-${agentInfo.branchAR}
-${agentInfo.branchPhone}"
-
-DO NOT include any contact information in propertyFinderEN or propertyFinderAR.
+CRITICAL: DO NOT include any contact information (agent name, phone, branch) in your response. Contact info will be added automatically by the system.
 
 Generate professional, attractive content that highlights the property's best features. Include a catchy Property Finder title and detailed description. Make the Instagram captions engaging with relevant emojis and include the latest trending Bahrain real estate hashtags.`;
 
@@ -324,67 +278,61 @@ Generate professional, attractive content that highlights the property's best fe
         generatedContent.propertyFinderTitleAR = generatedContent.propertyFinderTitleAR.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
       }
       
-      // Post-process to ensure contact info is properly placed
+      // Build contact blocks
       const contactBlockEN = `\n\nCall us today for more details! 📞\nContact ${agentInfo.name}\n${agentPhone}\n\n${agentInfo.branch}\n${agentInfo.branchPhone}`;
       const contactBlockAR = `\n\nاتصل بنا اليوم لمزيد من التفاصيل! 📞\nللتواصل ${agentInfo.nameAR}\n${agentPhone}\n\n${agentInfo.branchAR}\n${agentInfo.branchPhone}`;
       
-      // Helper function to remove all contact information variations
-      const removeContactInfo = (text: string, isArabic = false) => {
+      // Helper to strip ALL contact info variations from English text
+      const stripContactEN = (text: string): string => {
         if (!text) return text;
-        
-        if (isArabic) {
-          // Remove Arabic contact blocks - multiple patterns
-          return text
-            .replace(/\n*اتصل بنا.*?(?=\n\n#|\n#|$)/gs, '') // Contact block before hashtags
-            .replace(/\n*للتواصل.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '') // Contact with phone
-            .replace(/\n*رقم المكتب.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '') // Branch info
-            .replace(/اتصل بنا.*$/s, '') // Any remaining at end
-            .replace(/للتواصل.*$/s, '')
-            .replace(/رقم المكتب.*$/s, '');
-        } else {
-          // Remove English contact blocks - multiple patterns
-          return text
-            .replace(/\n*Call us.*?(?=\n\n#|\n#|$)/gs, '') // Contact block before hashtags
-            .replace(/\n*Contact .*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '') // Contact with phone
-            .replace(/\n*Saar Branch.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '') // Branch specific
-            .replace(/\n*Seef Office.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '')
-            .replace(/\n*Amwaj Island Branch.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '')
-            .replace(/Call us.*$/s, '') // Any remaining at end
-            .replace(/Contact .*$/s, '');
-        }
+        return text
+          .replace(/\n*Call us[^\n]*(\n[^\n#]*){0,6}/gi, '')
+          .replace(/\n*Contact\s+[A-Za-z\s]+\n[^\n#]*/gi, '')
+          .replace(/\n*(Saar Branch|Seef Office|Amwaj Island Branch|Carlton Real Estate)[^\n]*/gi, '')
+          .replace(/\n*☎️[^\n]*/gi, '')
+          .replace(/📞[^\n]*/g, '')
+          .trim();
+      };
+      
+      // Helper to strip ALL contact info variations from Arabic text
+      const stripContactAR = (text: string): string => {
+        if (!text) return text;
+        return text
+          .replace(/\n*اتصل بنا[^\n]*(\n[^\n#]*){0,6}/gi, '')
+          .replace(/\n*للتواصل\s+[^\n]+/gi, '')
+          .replace(/\n*(رقم المكتب|فرع سار|فرع السار|مكتب السيف|فرع جزر أمواج|كارلتون العقارية)[^\n]*/gi, '')
+          .replace(/\n*☎️[^\n]*/gi, '')
+          .replace(/📞[^\n]*/g, '')
+          .trim();
       };
       
       // For Instagram: Insert contact block BEFORE hashtags
       if (generatedContent.instagramEN) {
-        // Remove ALL existing contact info
-        let cleanedInstagramEN = removeContactInfo(generatedContent.instagramEN, false);
-        // Find hashtags section
-        const hashtagMatchEN = cleanedInstagramEN.match(/((?:\n|.)*?)((?:\s*#\w+)+\s*)$/);
+        let cleanedInstagramEN = stripContactEN(generatedContent.instagramEN);
+        const hashtagMatchEN = cleanedInstagramEN.match(/([\s\S]*?)((?:\s*#\w+)+\s*)$/);
         if (hashtagMatchEN) {
           generatedContent.instagramEN = hashtagMatchEN[1].trim() + contactBlockEN + '\n\n' + hashtagMatchEN[2].trim();
         } else {
-          generatedContent.instagramEN = cleanedInstagramEN.trim() + contactBlockEN;
+          generatedContent.instagramEN = cleanedInstagramEN + contactBlockEN;
         }
       }
       
       if (generatedContent.instagramAR) {
-        // Remove ALL existing contact info
-        let cleanedInstagramAR = removeContactInfo(generatedContent.instagramAR, true);
-        // Find hashtags section
-        const hashtagMatchAR = cleanedInstagramAR.match(/((?:\n|.)*?)((?:\s*#[\w\u0600-\u06FF_]+)+\s*)$/);
+        let cleanedInstagramAR = stripContactAR(generatedContent.instagramAR);
+        const hashtagMatchAR = cleanedInstagramAR.match(/([\s\S]*?)((?:\s*#[\w\u0600-\u06FF_]+)+\s*)$/);
         if (hashtagMatchAR) {
           generatedContent.instagramAR = hashtagMatchAR[1].trim() + contactBlockAR + '\n\n' + hashtagMatchAR[2].trim();
         } else {
-          generatedContent.instagramAR = cleanedInstagramAR.trim() + contactBlockAR;
+          generatedContent.instagramAR = cleanedInstagramAR + contactBlockAR;
         }
       }
       
-      // For Website: Remove all contact info and re-add once
+      // For Website: Strip all contact info and add once
       if (generatedContent.websiteEN) {
-        generatedContent.websiteEN = removeContactInfo(generatedContent.websiteEN, false).trim() + contactBlockEN;
+        generatedContent.websiteEN = stripContactEN(generatedContent.websiteEN) + contactBlockEN;
       }
       if (generatedContent.websiteAR) {
-        generatedContent.websiteAR = removeContactInfo(generatedContent.websiteAR, true).trim() + contactBlockAR;
+        generatedContent.websiteAR = stripContactAR(generatedContent.websiteAR) + contactBlockAR;
       }
       
     } catch (parseError) {
