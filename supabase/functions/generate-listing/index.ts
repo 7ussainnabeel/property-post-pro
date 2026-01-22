@@ -276,6 +276,41 @@ Generate professional, attractive content that highlights the property's best fe
         jsonStr = content.split('```')[1].split('```')[0].trim();
       }
       generatedContent = JSON.parse(jsonStr);
+      
+      // Post-process to strip emojis from Property Finder descriptions
+      const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F000}-\u{1F02F}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{FE00}-\u{FE0F}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}]/gu;
+      
+      if (generatedContent.propertyFinderEN) {
+        generatedContent.propertyFinderEN = generatedContent.propertyFinderEN.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
+      }
+      if (generatedContent.propertyFinderAR) {
+        generatedContent.propertyFinderAR = generatedContent.propertyFinderAR.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
+      }
+      if (generatedContent.propertyFinderTitleEN) {
+        generatedContent.propertyFinderTitleEN = generatedContent.propertyFinderTitleEN.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
+      }
+      if (generatedContent.propertyFinderTitleAR) {
+        generatedContent.propertyFinderTitleAR = generatedContent.propertyFinderTitleAR.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
+      }
+      
+      // Post-process to ensure contact info is appended to Instagram and Website
+      const contactBlockEN = `\n\nCall us today for more details! 📞\nContact ${agentInfo.name}\n${agentPhone}\n\n${agentInfo.branch}\n${agentInfo.branchPhone}`;
+      const contactBlockAR = `\n\nاتصل بنا اليوم لمزيد من التفاصيل! 📞\nللتواصل ${agentInfo.nameAR}\n${agentPhone}\n\n${agentInfo.branchAR}\n${agentInfo.branchPhone}`;
+      
+      // Check if contact info is missing and append it
+      if (generatedContent.instagramEN && !generatedContent.instagramEN.includes(agentInfo.name)) {
+        generatedContent.instagramEN = generatedContent.instagramEN.replace(/\n\nCall us today.*$/s, '') + contactBlockEN;
+      }
+      if (generatedContent.instagramAR && !generatedContent.instagramAR.includes(agentInfo.nameAR)) {
+        generatedContent.instagramAR = generatedContent.instagramAR.replace(/\n\nاتصل بنا اليوم.*$/s, '') + contactBlockAR;
+      }
+      if (generatedContent.websiteEN && !generatedContent.websiteEN.includes(agentInfo.name)) {
+        generatedContent.websiteEN = generatedContent.websiteEN.replace(/\n\nCall us today.*$/s, '') + contactBlockEN;
+      }
+      if (generatedContent.websiteAR && !generatedContent.websiteAR.includes(agentInfo.nameAR)) {
+        generatedContent.websiteAR = generatedContent.websiteAR.replace(/\n\nاتصل بنا اليوم.*$/s, '') + contactBlockAR;
+      }
+      
     } catch (parseError) {
       console.error("Failed to parse AI response:", parseError);
       return new Response(JSON.stringify({ error: "Failed to parse AI response" }), {
