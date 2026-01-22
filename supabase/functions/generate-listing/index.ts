@@ -97,6 +97,24 @@ IMPORTANT RULES:
    ☎️ +٩٧٣ ١٧٥٩ ١٩٩٩"
 
 10. Property Finder descriptions should be professional, detailed, and completely emoji-free
+11. PROPERTY FINDER FORMAT - Property details MUST be listed as bullet points using • symbol:
+    Example format for Property Finder:
+    "[Opening paragraph about the property]
+    
+    Property Details:
+    • Location: [Location]
+    • Size: [Size] sqm
+    • Bedrooms: [Number]
+    • Bathrooms: [Number]
+    • Furnishing: [Status]
+    • Price: [Price] [Currency]
+    
+    Key Features:
+    • [Feature 1]
+    • [Feature 2]
+    • [Feature 3]
+    
+    [Closing paragraph with call to action]"
 
 EMOJI USAGE RULES (FOR INSTAGRAM AND WEBSITE ONLY - NOT FOR PROPERTY FINDER):
 - Property Finder (propertyFinderEN, propertyFinderAR): ABSOLUTELY FORBIDDEN - NO EMOJIS ALLOWED UNDER ANY CIRCUMSTANCES
@@ -156,12 +174,12 @@ Respond ONLY with valid JSON in this exact format:
 {
   "propertyFinderTitleEN": "Catchy English title for Property Finder (max 100 chars)",
   "propertyFinderTitleAR": "Arabic title for Property Finder (max 100 chars)",
-  "propertyFinderEN": "English Property Finder description (NO EMOJIS, NO CONTACT INFO)",
-  "propertyFinderAR": "Arabic Property Finder description (NO EMOJIS, NO CONTACT INFO)",
-  "instagramEN": "English Instagram caption with emojis and hashtags - MUST END WITH:\n\nCall us today for more details! 📞\nContact {Agent Name}\n{Agent Phone}\n\n{Branch Name}\n{Branch Phone}",
-  "instagramAR": "Arabic Instagram caption with emojis and hashtags - MUST END WITH:\n\nاتصل بنا اليوم لمزيد من التفاصيل! 📞\nللتواصل {Agent Arabic Name}\n{Agent Phone}\n\n{Branch Arabic Name}\n{Branch Phone}",
-  "websiteEN": "English website description - MUST END WITH:\n\nCall us today for more details! 📞\nContact {Agent Name}\n{Agent Phone}\n\n{Branch Name}\n{Branch Phone}",
-  "websiteAR": "Arabic website description - MUST END WITH:\n\nاتصل بنا اليوم لمزيد من التفاصيل! 📞\nللتواصل {Agent Arabic Name}\n{Agent Phone}\n\n{Branch Arabic Name}\n{Branch Phone}"
+  "propertyFinderEN": "English Property Finder description with bullet points for property details (NO EMOJIS, NO CONTACT INFO)",
+  "propertyFinderAR": "Arabic Property Finder description with bullet points for property details (NO EMOJIS, NO CONTACT INFO)",
+  "instagramEN": "English Instagram caption with emojis - contact info BEFORE hashtags:\n[Description]\n\nCall us today! 📞\nContact {Agent}\n{Phone}\n\n{Branch}\n{BranchPhone}\n\n#Hashtags",
+  "instagramAR": "Arabic Instagram caption with emojis - contact info BEFORE hashtags:\n[Description]\n\nاتصل بنا! 📞\nللتواصل {Agent}\n{Phone}\n\n{Branch}\n{BranchPhone}\n\n#Hashtags",
+  "websiteEN": "English website description with emojis - MUST END WITH contact block",
+  "websiteAR": "Arabic website description with emojis - MUST END WITH contact block"
 }`;
 
     // Agent mapping with branch information
@@ -293,22 +311,42 @@ Generate professional, attractive content that highlights the property's best fe
         generatedContent.propertyFinderTitleAR = generatedContent.propertyFinderTitleAR.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
       }
       
-      // Post-process to ensure contact info is appended to Instagram and Website
+      // Post-process to ensure contact info is properly placed
       const contactBlockEN = `\n\nCall us today for more details! 📞\nContact ${agentInfo.name}\n${agentPhone}\n\n${agentInfo.branch}\n${agentInfo.branchPhone}`;
       const contactBlockAR = `\n\nاتصل بنا اليوم لمزيد من التفاصيل! 📞\nللتواصل ${agentInfo.nameAR}\n${agentPhone}\n\n${agentInfo.branchAR}\n${agentInfo.branchPhone}`;
       
-      // Check if contact info is missing and append it
-      if (generatedContent.instagramEN && !generatedContent.instagramEN.includes(agentInfo.name)) {
-        generatedContent.instagramEN = generatedContent.instagramEN.replace(/\n\nCall us today.*$/s, '') + contactBlockEN;
+      // For Instagram: Insert contact block BEFORE hashtags
+      if (generatedContent.instagramEN) {
+        // Remove any existing contact block first
+        let cleanedInstagramEN = generatedContent.instagramEN.replace(/\n\nCall us today.*?(?=#|$)/s, '');
+        // Find hashtags section
+        const hashtagMatchEN = cleanedInstagramEN.match(/((?:\n|.)*?)((?:\s*#\w+)+\s*)$/);
+        if (hashtagMatchEN) {
+          generatedContent.instagramEN = hashtagMatchEN[1].trim() + contactBlockEN + '\n\n' + hashtagMatchEN[2].trim();
+        } else {
+          generatedContent.instagramEN = cleanedInstagramEN.trim() + contactBlockEN;
+        }
       }
-      if (generatedContent.instagramAR && !generatedContent.instagramAR.includes(agentInfo.nameAR)) {
-        generatedContent.instagramAR = generatedContent.instagramAR.replace(/\n\nاتصل بنا اليوم.*$/s, '') + contactBlockAR;
+      
+      if (generatedContent.instagramAR) {
+        // Remove any existing contact block first
+        let cleanedInstagramAR = generatedContent.instagramAR.replace(/\n\nاتصل بنا اليوم.*?(?=#|$)/s, '');
+        // Find hashtags section
+        const hashtagMatchAR = cleanedInstagramAR.match(/((?:\n|.)*?)((?:\s*#[\w\u0600-\u06FF_]+)+\s*)$/);
+        if (hashtagMatchAR) {
+          generatedContent.instagramAR = hashtagMatchAR[1].trim() + contactBlockAR + '\n\n' + hashtagMatchAR[2].trim();
+        } else {
+          generatedContent.instagramAR = cleanedInstagramAR.trim() + contactBlockAR;
+        }
       }
-      if (generatedContent.websiteEN && !generatedContent.websiteEN.includes(agentInfo.name)) {
-        generatedContent.websiteEN = generatedContent.websiteEN.replace(/\n\nCall us today.*$/s, '') + contactBlockEN;
+      
+      // For Website: Always force-append contact block
+      if (generatedContent.websiteEN) {
+        // Remove any existing contact block and re-add it properly
+        generatedContent.websiteEN = generatedContent.websiteEN.replace(/\n\nCall us today.*$/s, '').trim() + contactBlockEN;
       }
-      if (generatedContent.websiteAR && !generatedContent.websiteAR.includes(agentInfo.nameAR)) {
-        generatedContent.websiteAR = generatedContent.websiteAR.replace(/\n\nاتصل بنا اليوم.*$/s, '') + contactBlockAR;
+      if (generatedContent.websiteAR) {
+        generatedContent.websiteAR = generatedContent.websiteAR.replace(/\n\nاتصل بنا اليوم.*$/s, '').trim() + contactBlockAR;
       }
       
     } catch (parseError) {
