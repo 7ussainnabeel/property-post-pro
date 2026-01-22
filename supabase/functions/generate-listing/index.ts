@@ -328,10 +328,36 @@ Generate professional, attractive content that highlights the property's best fe
       const contactBlockEN = `\n\nCall us today for more details! 📞\nContact ${agentInfo.name}\n${agentPhone}\n\n${agentInfo.branch}\n${agentInfo.branchPhone}`;
       const contactBlockAR = `\n\nاتصل بنا اليوم لمزيد من التفاصيل! 📞\nللتواصل ${agentInfo.nameAR}\n${agentPhone}\n\n${agentInfo.branchAR}\n${agentInfo.branchPhone}`;
       
+      // Helper function to remove all contact information variations
+      const removeContactInfo = (text: string, isArabic = false) => {
+        if (!text) return text;
+        
+        if (isArabic) {
+          // Remove Arabic contact blocks - multiple patterns
+          return text
+            .replace(/\n*اتصل بنا.*?(?=\n\n#|\n#|$)/gs, '') // Contact block before hashtags
+            .replace(/\n*للتواصل.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '') // Contact with phone
+            .replace(/\n*رقم المكتب.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '') // Branch info
+            .replace(/اتصل بنا.*$/s, '') // Any remaining at end
+            .replace(/للتواصل.*$/s, '')
+            .replace(/رقم المكتب.*$/s, '');
+        } else {
+          // Remove English contact blocks - multiple patterns
+          return text
+            .replace(/\n*Call us.*?(?=\n\n#|\n#|$)/gs, '') // Contact block before hashtags
+            .replace(/\n*Contact .*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '') // Contact with phone
+            .replace(/\n*Saar Branch.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '') // Branch specific
+            .replace(/\n*Seef Office.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '')
+            .replace(/\n*Amwaj Island Branch.*?\+\d+.*?(?=\n\n#|\n#|$)/gs, '')
+            .replace(/Call us.*$/s, '') // Any remaining at end
+            .replace(/Contact .*$/s, '');
+        }
+      };
+      
       // For Instagram: Insert contact block BEFORE hashtags
       if (generatedContent.instagramEN) {
-        // Remove any existing contact block first
-        let cleanedInstagramEN = generatedContent.instagramEN.replace(/\n\nCall us today.*?(?=#|$)/s, '');
+        // Remove ALL existing contact info
+        let cleanedInstagramEN = removeContactInfo(generatedContent.instagramEN, false);
         // Find hashtags section
         const hashtagMatchEN = cleanedInstagramEN.match(/((?:\n|.)*?)((?:\s*#\w+)+\s*)$/);
         if (hashtagMatchEN) {
@@ -342,8 +368,8 @@ Generate professional, attractive content that highlights the property's best fe
       }
       
       if (generatedContent.instagramAR) {
-        // Remove any existing contact block first
-        let cleanedInstagramAR = generatedContent.instagramAR.replace(/\n\nاتصل بنا اليوم.*?(?=#|$)/s, '');
+        // Remove ALL existing contact info
+        let cleanedInstagramAR = removeContactInfo(generatedContent.instagramAR, true);
         // Find hashtags section
         const hashtagMatchAR = cleanedInstagramAR.match(/((?:\n|.)*?)((?:\s*#[\w\u0600-\u06FF_]+)+\s*)$/);
         if (hashtagMatchAR) {
@@ -353,13 +379,12 @@ Generate professional, attractive content that highlights the property's best fe
         }
       }
       
-      // For Website: Always force-append contact block
+      // For Website: Remove all contact info and re-add once
       if (generatedContent.websiteEN) {
-        // Remove any existing contact block and re-add it properly
-        generatedContent.websiteEN = generatedContent.websiteEN.replace(/\n\nCall us today.*$/s, '').trim() + contactBlockEN;
+        generatedContent.websiteEN = removeContactInfo(generatedContent.websiteEN, false).trim() + contactBlockEN;
       }
       if (generatedContent.websiteAR) {
-        generatedContent.websiteAR = generatedContent.websiteAR.replace(/\n\nاتصل بنا اليوم.*$/s, '').trim() + contactBlockAR;
+        generatedContent.websiteAR = removeContactInfo(generatedContent.websiteAR, true).trim() + contactBlockAR;
       }
       
     } catch (parseError) {
