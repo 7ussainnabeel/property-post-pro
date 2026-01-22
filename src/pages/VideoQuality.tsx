@@ -22,6 +22,28 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const CARLTON_STAFF = [
+  { name: 'Ahmed Al Aali', nameAR: 'أحمد العلي', phone: '36943000' },
+  { name: 'Hana Adel', nameAR: 'هناء عادل', phone: '36504411' },
+  { name: 'Hesham Ismaeel', nameAR: 'هشام اسماعيل', phone: '36503399' },
+  { name: 'Mirna Kamal', nameAR: 'ميرنه كمال', phone: '36960222' },
+  { name: 'Mohamed Abdulla', nameAR: 'محمد عبدالله', phone: '36744755' },
+  { name: 'Sara Ali', nameAR: 'سارة علي', phone: '36503388' },
+  { name: 'Violeta Abboud', nameAR: 'فيوليت عبود', phone: '36504477' },
+  { name: 'Husain Mansoor', nameAR: 'حسين منصور', phone: '38218600' },
+  { name: 'Abdulla Hasan', nameAR: 'عبدالله حسن', phone: '32319900' },
+  { name: 'Ali Hasan', nameAR: 'علي حسن', phone: '38213300' },
+  { name: 'Masoud Ali', nameAR: 'مسعود علي', phone: '36504499' },
+  { name: 'Ibrahim Mohamed', nameAR: 'إبراهيم محمد', phone: '36390222' }
+];
 
 interface VideoSubmission {
   id: string;
@@ -491,12 +513,22 @@ const VideoQuality = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm text-slate-300">Agent Name *</label>
-                  <Input
-                    placeholder="Enter agent name"
-                    value={agentName}
-                    onChange={(e) => setAgentName(e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
+                  <Select value={agentName} onValueChange={setAgentName}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue placeholder="Select agent" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-700 border-slate-600">
+                      {CARLTON_STAFF.map(staff => (
+                        <SelectItem 
+                          key={staff.phone} 
+                          value={staff.name}
+                          className="text-white hover:bg-slate-600"
+                        >
+                          {staff.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm text-slate-300">Property ID *</label>
