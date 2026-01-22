@@ -97,7 +97,7 @@ IMPORTANT RULES:
    ☎️ +٩٧٣ ١٧٥٩ ١٩٩٩"
 
 10. Property Finder descriptions should be professional, detailed, and completely emoji-free
-11. PROPERTY FINDER FORMAT - Property details MUST be listed as bullet points using • symbol:
+11. PROPERTY FINDER FORMAT - Property details MUST be listed as bullet points using • symbol with EACH BULLET POINT ON A NEW LINE:
     Example format for Property Finder:
     "[Opening paragraph about the property]
     
@@ -115,6 +115,8 @@ IMPORTANT RULES:
     • [Feature 3]
     
     [Closing paragraph with call to action]"
+    
+    CRITICAL: Every bullet point (•) MUST be on its own separate line with a newline character before it. Do NOT put multiple bullet points on the same line.
 
 EMOJI USAGE RULES (FOR INSTAGRAM AND WEBSITE ONLY - NOT FOR PROPERTY FINDER):
 - Property Finder (propertyFinderEN, propertyFinderAR): ABSOLUTELY FORBIDDEN - NO EMOJIS ALLOWED UNDER ANY CIRCUMSTANCES
@@ -299,10 +301,21 @@ Generate professional, attractive content that highlights the property's best fe
       const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F000}-\u{1F02F}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{FE00}-\u{FE0F}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}]/gu;
       
       if (generatedContent.propertyFinderEN) {
-        generatedContent.propertyFinderEN = generatedContent.propertyFinderEN.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
+        // Remove emojis but preserve newlines - only collapse multiple spaces, not newlines
+        generatedContent.propertyFinderEN = generatedContent.propertyFinderEN
+          .replace(emojiRegex, '')
+          .replace(/[^\S\n]+/g, ' ') // Replace multiple spaces (but not newlines) with single space
+          .replace(/\n /g, '\n') // Remove space after newline
+          .replace(/ \n/g, '\n') // Remove space before newline
+          .trim();
       }
       if (generatedContent.propertyFinderAR) {
-        generatedContent.propertyFinderAR = generatedContent.propertyFinderAR.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
+        generatedContent.propertyFinderAR = generatedContent.propertyFinderAR
+          .replace(emojiRegex, '')
+          .replace(/[^\S\n]+/g, ' ')
+          .replace(/\n /g, '\n')
+          .replace(/ \n/g, '\n')
+          .trim();
       }
       if (generatedContent.propertyFinderTitleEN) {
         generatedContent.propertyFinderTitleEN = generatedContent.propertyFinderTitleEN.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
