@@ -156,12 +156,12 @@ Respond ONLY with valid JSON in this exact format:
 {
   "propertyFinderTitleEN": "Catchy English title for Property Finder (max 100 chars)",
   "propertyFinderTitleAR": "Arabic title for Property Finder (max 100 chars)",
-  "propertyFinderEN": "English Property Finder description",
-  "propertyFinderAR": "Arabic Property Finder description",
-  "instagramEN": "English Instagram caption with emojis and hashtags",
-  "instagramAR": "Arabic Instagram caption with emojis and hashtags",
-  "websiteEN": "English website description",
-  "websiteAR": "Arabic website description"
+  "propertyFinderEN": "English Property Finder description (NO EMOJIS, NO CONTACT INFO)",
+  "propertyFinderAR": "Arabic Property Finder description (NO EMOJIS, NO CONTACT INFO)",
+  "instagramEN": "English Instagram caption with emojis and hashtags - MUST END WITH:\n\nCall us today for more details! 📞\nContact {Agent Name}\n{Agent Phone}\n\n{Branch Name}\n{Branch Phone}",
+  "instagramAR": "Arabic Instagram caption with emojis and hashtags - MUST END WITH:\n\nاتصل بنا اليوم لمزيد من التفاصيل! 📞\nللتواصل {Agent Arabic Name}\n{Agent Phone}\n\n{Branch Arabic Name}\n{Branch Phone}",
+  "websiteEN": "English website description - MUST END WITH:\n\nCall us today for more details! 📞\nContact {Agent Name}\n{Agent Phone}\n\n{Branch Name}\n{Branch Phone}",
+  "websiteAR": "Arabic website description - MUST END WITH:\n\nاتصل بنا اليوم لمزيد من التفاصيل! 📞\nللتواصل {Agent Arabic Name}\n{Agent Phone}\n\n{Branch Arabic Name}\n{Branch Phone}"
 }`;
 
     // Agent mapping with branch information
