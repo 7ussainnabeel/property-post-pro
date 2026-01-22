@@ -74,26 +74,51 @@ IMPORTANT RULES:
    - NEVER include "Call us", "Contact", agent names, phone numbers, or branch info in your response
 
 10. Property Finder descriptions should be professional, detailed, and completely emoji-free
-11. PROPERTY FINDER FORMAT - Property details MUST be listed as bullet points using • symbol with EACH BULLET POINT ON A NEW LINE:
-    Example format for Property Finder:
-    "[Opening paragraph about the property]
+
+11. PROPERTY FINDER STRUCTURE (MUST FOLLOW THIS EXACT FORMAT):
     
-    Property Details:
-    • Location: [Location]
-    • Size: [Size] sqm
-    • Bedrooms: [Number]
-    • Bathrooms: [Number]
-    • Furnishing: [Status]
-    • Price: [Price] [Currency]
+    Property Finder descriptions MUST follow this professional structure:
     
-    Key Features:
-    • [Feature 1]
-    • [Feature 2]
-    • [Feature 3]
+    [Opening Paragraph]
+    - Compelling introduction highlighting property type, category, and key selling points
+    - Use sophisticated language (e.g., "Experience unmatched elegance", "Discover exceptional luxury")
+    - Include location and main features
     
-    [Closing paragraph with call to action]"
+    Property Features: (or Property Details:)
+    - 4 Large en-suite bedrooms with built-in wardrobes
+    - Maids Room with private bathroom
+    - 5 Stylish Bathrooms in total
+    - Expansive Living Area with floor-to-ceiling windows
+    - Gourmet Kitchen fully fitted with premium appliances
+    [Each feature on a new line with - or • bullet]
     
-    CRITICAL: Every bullet point (•) MUST be on its own separate line with a newline character before it. Do NOT put multiple bullet points on the same line.
+    Exclusive Amenities: (or Building Facilities: for apartments)
+    - Breathtaking Sea Views from multiple vantage points
+    - Access to Swimming Pool, Gym, and Recreational Facilities
+    - Private Covered Parking
+    - 24/7 Security and Concierge Services
+    [Each amenity on a new line with - or • bullet]
+    
+    Prime Location - [Area Name]
+    [2-3 sentences about the area, its prestige, and connectivity]
+    
+    - Key destination 1
+    - Key destination 2
+    - Quick access to major highways and business hubs
+    
+    _______________________________________________________________
+    
+    **Asking Price BD [Price] (Negotiable) or **Monthly Rent BD [Price]
+    
+    CRITICAL FORMATTING RULES:
+    • Use "Property Features:" or "Property Details:" as section header
+    • Use "Exclusive Amenities:" for villas/houses or "Building Facilities:" for apartments
+    • Each bullet point MUST start with - or • and be on its own line
+    • Use descriptive adjectives (Large, Stylish, Expansive, Gourmet, Premium, Elegant)
+    • Include the separator line _______________________________________________________________ before price
+    • Format price as **Asking Price BD [amount] (Negotiable) or **Monthly Rent BD [amount]
+    • NO contact information - it will be added automatically
+    • NO emojis anywhere in Property Finder content
 
 EMOJI USAGE RULES (FOR INSTAGRAM AND WEBSITE ONLY - NOT FOR PROPERTY FINDER):
 - Property Finder (propertyFinderEN, propertyFinderAR): ABSOLUTELY FORBIDDEN - NO EMOJIS ALLOWED UNDER ANY CIRCUMSTANCES
