@@ -424,10 +424,10 @@ const VideoQuality = () => {
   const handleEditSave = async () => {
     if (!editingVideo) return;
 
-    if (!editYoutubeUrl.trim() && !editPropertyUrl.trim()) {
+    if (!editPropertyUrl.trim()) {
       toast({
-        title: "URL Required",
-        description: "Please enter at least a YouTube URL or Property URL",
+        title: "Property URL Required",
+        description: "Please enter the property URL",
         variant: "destructive",
       });
       return;
@@ -825,7 +825,7 @@ const VideoQuality = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm text-slate-300">YouTube URL</label>
+              <label className="text-sm text-slate-300">YouTube URL (optional)</label>
               <Input
                 placeholder="https://www.youtube.com/watch?v=..."
                 value={editYoutubeUrl}
@@ -834,7 +834,7 @@ const VideoQuality = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-slate-300">Property URL</label>
+              <label className="text-sm text-slate-300">Property URL *</label>
               <Input
                 placeholder="https://example.com/property/..."
                 value={editPropertyUrl}
