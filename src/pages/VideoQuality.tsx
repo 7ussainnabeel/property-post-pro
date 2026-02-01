@@ -211,6 +211,15 @@ const VideoQuality = () => {
       return;
     }
 
+    if (!propertyUrl.trim()) {
+      toast({
+        title: "Property URL Required",
+        description: "Please enter the property URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedFile) {
       toast({
         title: "Video Required",
@@ -552,7 +561,7 @@ const VideoQuality = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm text-slate-300">Property URL (optional)</label>
+                <label className="text-sm text-slate-300">Property URL *</label>
                 <Input
                   placeholder="https://example.com/property/..."
                   value={propertyUrl}
