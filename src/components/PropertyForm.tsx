@@ -331,11 +331,30 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
     // Check if all required fields are filled
     const hasMinimumData = hasBasicData && hasVillaApartmentData;
     
+    // Debug logging
+    console.log('Auto-generate check:', {
+      hasBasicData,
+      isVillaOrApartment,
+      hasVillaApartmentData,
+      hasMinimumData,
+      isLoading,
+      propertyType: formData.propertyType,
+      category: formData.category,
+      location: formData.location,
+      size: formData.size,
+      price: formData.price,
+      furnishingStatus: formData.furnishingStatus,
+      agent: formData.agent,
+      bedrooms: formData.bedrooms,
+      bathrooms: formData.bathrooms
+    });
+    
     // Don't generate if already loading or no minimum data
     if (!hasMinimumData || isLoading) return;
 
     // Debounce the generation by 1.5 seconds
     const timeoutId = setTimeout(() => {
+      console.log('Triggering auto-generate with data:', formData);
       onGenerate(formData);
     }, 1500);
 
