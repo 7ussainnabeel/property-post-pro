@@ -83,6 +83,10 @@ const VideoQuality = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [playingVideo, setPlayingVideo] = useState<VideoSubmission | null>(null);
   const [analyzingVideoId, setAnalyzingVideoId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [videoToDelete, setVideoToDelete] = useState<{ id: string; videoFileUrl: string | null } | null>(null);
+  const [deleteUsername, setDeleteUsername] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
 
   const getOrientationBadgeStyle = (orientation: string | null) => {
@@ -274,16 +278,28 @@ const VideoQuality = () => {
     }
   };
 
-  const deleteVideo = async (id: string, videoFileUrl: string | null) => {
+  const deleteVideo = async (username: string) => {
+    if (!videoToDelete) return;
+
+    if (!username.trim()) {
+      toast({
+        title: "Username Required",
+        description: "Please enter your username to confirm deletion",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDeleting(true);
     try {
       // Soft delete - mark as deleted instead of removing
       const { error } = await supabase
         .from("video_submissions")
         .update({
           deleted_at: new Date().toISOString(),
-          deleted_by: "User" // You can replace this with actual user identification
+          deleted_by: username.trim()
         })
-        .eq("id", id);
+        .eq("id", videoToDelete.id);
 
       if (error) throw error;
 
@@ -292,6 +308,9 @@ const VideoQuality = () => {
         description: "Video moved to deleted videos. You can restore it from the recovery page.",
       });
 
+      setDeleteDialogOpen(false);
+      setVideoToDelete(null);
+      setDeleteUsername("");
       fetchVideos();
     } catch (error: any) {
       toast({
@@ -299,7 +318,15 @@ const VideoQuality = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  const handleDeleteClick = (id: string, videoFileUrl: string | null) => {
+    setVideoToDelete({ id, videoFileUrl });
+    setDeleteUsername("");
+    setDeleteDialogOpen(true);
   };
 
   const analyzeVideo = async (video: VideoSubmission) => {
@@ -815,7 +842,7 @@ const VideoQuality = () => {
                             <Button
                               variant="destructive"
                               size="icon"
-                              onClick={() => deleteVideo(video.id, video.video_file_url)}
+                              onClick={() => handleDeleteClick(video.id, video.video_file_url)}
                               title="Delete submission"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -917,6 +944,74 @@ const VideoQuality = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setPlayingVideo(null)} className="border-slate-600">
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setDeleteDialogOpen(false);
+          setVideoToDelete(null);
+          setDeleteUsername("");
+        }
+      }}>
+        <DialogContent className="bg-slate-800 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-red-500" />
+              Confirm Delete
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-slate-300">
+              This video will be moved to deleted videos. You can restore it later from the recovery page.
+            </p>
+            <div className="space-y-2">
+              <label className="text-sm text-slate-300">Enter your username to confirm *</label>
+              <Input
+                placeholder="Your username"
+                value={deleteUsername}
+                onChange={(e) => setDeleteUsername(e.target.value)}
+                className="bg-slate-700 border-slate-600 text-white"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && deleteUsername.trim()) {
+                    deleteVideo(deleteUsername);
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setVideoToDelete(null);
+                setDeleteUsername("");
+              }} 
+              className="border-slate-600"
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => deleteVideo(deleteUsername)}
+              disabled={deleting || !deleteUsername.trim()}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Video
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
