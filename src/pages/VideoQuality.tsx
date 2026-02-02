@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Video, Plus, Trash2, Copy, CheckCircle, Loader2, Edit2, Upload, Link as LinkIcon, Download, Search } from "lucide-react";
+import { ArrowLeft, Video, Plus, Trash2, Copy, CheckCircle, Loader2, Edit2, Upload, Link as LinkIcon, Download, Search, Archive } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Table,
@@ -99,6 +99,7 @@ const VideoQuality = () => {
       const { data, error } = await supabase
         .from("video_submissions")
         .select("*")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -275,24 +276,20 @@ const VideoQuality = () => {
 
   const deleteVideo = async (id: string, videoFileUrl: string | null) => {
     try {
-      // Delete from storage if it's an uploaded file
-      if (videoFileUrl) {
-        const path = videoFileUrl.split("/videos/")[1];
-        if (path) {
-          await supabase.storage.from("videos").remove([path]);
-        }
-      }
-
+      // Soft delete - mark as deleted instead of removing
       const { error } = await supabase
         .from("video_submissions")
-        .delete()
+        .update({
+          deleted_at: new Date().toISOString(),
+          deleted_by: "User" // You can replace this with actual user identification
+        })
         .eq("id", id);
 
       if (error) throw error;
 
       toast({
         title: "Video Deleted",
-        description: "Video submission has been removed",
+        description: "Video moved to deleted videos. You can restore it from the recovery page.",
       });
 
       fetchVideos();
@@ -497,16 +494,24 @@ const VideoQuality = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link to="/">
-            <Button variant="outline" size="icon" className="border-slate-600 hover:bg-slate-700">
-              <ArrowLeft className="h-4 w-4" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="outline" size="icon" className="border-slate-600 hover:bg-slate-700">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div className="flex items-center gap-3">
+              <Video className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold text-white">Video Quality Check</h1>
+            </div>
+          </div>
+          <Link to="/deleted-videos">
+            <Button variant="outline" className="border-slate-600 hover:bg-slate-700 text-white">
+              <Archive className="h-4 w-4 mr-2" />
+              Deleted Videos
             </Button>
           </Link>
-          <div className="flex items-center gap-3">
-            <Video className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-white">Video Quality Check</h1>
-          </div>
         </div>
 
         {/* Add Video Form */}

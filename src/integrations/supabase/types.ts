@@ -19,12 +19,15 @@ export type Database = {
           agent_name: string | null
           ai_feedback: string | null
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           id: string
           notes: string | null
           orientation: string | null
           overall_rating: number | null
           property_id: string | null
+          property_url: string | null
           quality_status: string | null
           reviewed_at: string | null
           stability_rating: number | null
@@ -37,12 +40,15 @@ export type Database = {
           agent_name?: string | null
           ai_feedback?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           notes?: string | null
           orientation?: string | null
           overall_rating?: number | null
           property_id?: string | null
+          property_url?: string | null
           quality_status?: string | null
           reviewed_at?: string | null
           stability_rating?: number | null
@@ -55,12 +61,15 @@ export type Database = {
           agent_name?: string | null
           ai_feedback?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           notes?: string | null
           orientation?: string | null
           overall_rating?: number | null
           property_id?: string | null
+          property_url?: string | null
           quality_status?: string | null
           reviewed_at?: string | null
           stability_rating?: number | null
