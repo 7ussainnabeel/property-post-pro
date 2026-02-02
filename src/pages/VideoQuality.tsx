@@ -782,17 +782,29 @@ const VideoQuality = () => {
                               <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() => {
-                                  const link = document.createElement('a');
-                                  link.href = video.video_file_url!;
-                                  link.download = `${video.title || 'video'}.mp4`;
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  document.body.removeChild(link);
-                                  toast({
-                                    title: "Download Started",
-                                    description: "Video download has been initiated.",
-                                  });
+                                onClick={async () => {
+                                  try {
+                                    const response = await fetch(video.video_file_url!);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = `${video.title || 'video'}.mp4`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    window.URL.revokeObjectURL(url);
+                                    toast({
+                                      title: "Download Started",
+                                      description: "Video download has been initiated.",
+                                    });
+                                  } catch (error) {
+                                    toast({
+                                      title: "Download Failed",
+                                      description: "Failed to download the video. Please try again.",
+                                      variant: "destructive",
+                                    });
+                                  }
                                 }}
                                 className="border-slate-600 hover:bg-slate-700"
                                 title="Download video"

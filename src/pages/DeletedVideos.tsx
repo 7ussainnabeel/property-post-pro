@@ -229,10 +229,10 @@ const DeletedVideos = () => {
         </div>
 
         {videos.length > 0 && (
-          <Alert className="mb-6 bg-blue-950/50 border-blue-500">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Recovery Center</AlertTitle>
-            <AlertDescription>
+          <Alert className="mb-6 bg-amber-950/50 border-amber-500">
+            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertTitle className="text-amber-300">Recovery Center</AlertTitle>
+            <AlertDescription className="text-amber-200">
               These videos have been deleted but can still be restored. Permanent deletion will remove them forever.
             </AlertDescription>
           </Alert>
