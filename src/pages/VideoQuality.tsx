@@ -507,7 +507,7 @@ const VideoQuality = () => {
             </div>
           </div>
           <Link to="/deleted-videos">
-            <Button variant="outline" className="border-slate-600 hover:bg-slate-700 text-white">
+            <Button variant="outline" className="border-red-500/50 bg-red-950/30 hover:bg-red-900/40 text-red-100 hover:border-red-400">
               <Archive className="h-4 w-4 mr-2" />
               Deleted Videos
             </Button>
