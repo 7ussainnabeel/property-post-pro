@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { PropertyForm } from '@/components/PropertyForm';
 import { GeneratedContent } from '@/components/GeneratedContent';
 import { PropertyInput, GeneratedContent as GeneratedContentType } from '@/types/property';
-import { Building2, Sparkles, Video } from 'lucide-react';
+import { Building2, Sparkles, Video, History } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,12 @@ import { Button } from '@/components/ui/button';
 const Index = () => {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContentType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [propertyData, setPropertyData] = useState<PropertyInput | null>(null);
   const loadingToastId = useRef<string | number | null>(null);
 
   const handleGenerate = async (data: PropertyInput) => {
     setIsLoading(true);
+    setPropertyData(data);
     loadingToastId.current = toast.loading('Generating listings...');
     
     try {
@@ -44,6 +46,44 @@ const Index = () => {
 
       if (result?.content) {
         setGeneratedContent(result.content);
+        
+        // Save to database
+        try {
+          const { error: dbError } = await supabase
+            .from('generated_listings')
+            .insert({
+              property_type: data.propertyType,
+              category: data.category,
+              listing_type: data.listingType,
+              location: data.location,
+              size: data.size || null,
+              bedrooms: data.bedrooms || null,
+              bathrooms: data.bathrooms || null,
+              price: data.price,
+              currency: data.currency,
+              furnishing_status: data.furnishingStatus || null,
+              amenities: data.amenities || [],
+              ewa_included: data.ewaIncluded || false,
+              land_classification: data.landClassification || null,
+              unique_selling_points: data.uniqueSellingPoints || null,
+              agent: data.agent || null,
+              property_finder_title_en: result.content.propertyFinderTitleEN || null,
+              property_finder_en: result.content.propertyFinderEN || null,
+              property_finder_title_ar: result.content.propertyFinderTitleAR || null,
+              property_finder_ar: result.content.propertyFinderAR || null,
+              instagram_en: result.content.instagramEN || null,
+              instagram_ar: result.content.instagramAR || null,
+              website_en: result.content.websiteEN || null,
+              website_ar: result.content.websiteAR || null,
+            });
+          
+          if (dbError) {
+            console.error('Error saving to database:', dbError);
+          }
+        } catch (saveError) {
+          console.error('Error saving to history:', saveError);
+        }
+        
         if (loadingToastId.current) toast.dismiss(loadingToastId.current);
         toast.success('Content generated successfully!');
       }
@@ -60,12 +100,18 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="gradient-hero py-6 px-4 text-center relative">
-        {/* Video Quality Link */}
-        <div className="absolute top-4 right-4">
+        {/* Navigation Links */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
           <Link to="/video-quality">
-            <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+            <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-full">
               <Video className="h-4 w-4 mr-2" />
               Video Quality
+            </Button>
+          </Link>
+          <Link to="/history">
+            <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-full">
+              <History className="h-4 w-4 mr-2" />
+              History
             </Button>
           </Link>
         </div>

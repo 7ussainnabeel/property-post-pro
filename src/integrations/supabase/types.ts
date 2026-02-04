@@ -14,6 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
+      generated_listings: {
+        Row: {
+          agent: string | null
+          amenities: string[] | null
+          bathrooms: number | null
+          bedrooms: number | null
+          category: string
+          created_at: string
+          currency: string
+          deleted_at: string | null
+          deleted_by: string | null
+          ewa_included: boolean | null
+          furnishing_status: string | null
+          id: string
+          instagram_ar: string | null
+          instagram_en: string | null
+          is_favorite: boolean | null
+          land_classification: string | null
+          listing_type: string
+          location: string
+          notes: string | null
+          price: string
+          property_finder_ar: string | null
+          property_finder_en: string | null
+          property_finder_title_ar: string | null
+          property_finder_title_en: string | null
+          property_type: string
+          size: number | null
+          unique_selling_points: string | null
+          user_id: string | null
+          website_ar: string | null
+          website_en: string | null
+        }
+        Insert: {
+          agent?: string | null
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          category: string
+          created_at?: string
+          currency: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          ewa_included?: boolean | null
+          furnishing_status?: string | null
+          id?: string
+          instagram_ar?: string | null
+          instagram_en?: string | null
+          is_favorite?: boolean | null
+          land_classification?: string | null
+          listing_type: string
+          location: string
+          notes?: string | null
+          price: string
+          property_finder_ar?: string | null
+          property_finder_en?: string | null
+          property_finder_title_ar?: string | null
+          property_finder_title_en?: string | null
+          property_type: string
+          size?: number | null
+          unique_selling_points?: string | null
+          user_id?: string | null
+          website_ar?: string | null
+          website_en?: string | null
+        }
+        Update: {
+          agent?: string | null
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          category?: string
+          created_at?: string
+          currency?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          ewa_included?: boolean | null
+          furnishing_status?: string | null
+          id?: string
+          instagram_ar?: string | null
+          instagram_en?: string | null
+          is_favorite?: boolean | null
+          land_classification?: string | null
+          listing_type?: string
+          location?: string
+          notes?: string | null
+          price?: string
+          property_finder_ar?: string | null
+          property_finder_en?: string | null
+          property_finder_title_ar?: string | null
+          property_finder_title_en?: string | null
+          property_type?: string
+          size?: number | null
+          unique_selling_points?: string | null
+          user_id?: string | null
+          website_ar?: string | null
+          website_en?: string | null
+        }
+        Relationships: []
+      }
       video_submissions: {
         Row: {
           agent_name: string | null

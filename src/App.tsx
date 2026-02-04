@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import VideoQuality from "./pages/VideoQuality";
 import DeletedVideos from "./pages/DeletedVideos";
+import History from "./pages/History";
+import DeletedDescriptions from "./pages/DeletedDescriptions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,6 +20,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/deleted-descriptions" element={<DeletedDescriptions />} />
           <Route path="/video-quality" element={<VideoQuality />} />
           <Route path="/deleted-videos" element={<DeletedVideos />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
