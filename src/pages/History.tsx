@@ -437,27 +437,24 @@ export default function HistoryPage() {
       </main>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={(open) => {
-        if (!open) {
-          setDeleteDialogOpen(false);
-          setItemToDelete(null);
-          setDeleteUsername('');
-        }
-      }}>
-        <DialogContent>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Trash2 className="h-5 w-5 text-red-500" />
+              <Trash2 className="h-5 w-5 text-destructive" />
               Confirm Delete
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               This listing will be moved to deleted descriptions. You can restore it later from the recovery page.
             </p>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Enter your username to confirm *</label>
+              <label htmlFor="username" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Enter your username to confirm *
+              </label>
               <Input
+                id="username"
                 placeholder="Your username"
                 value={deleteUsername}
                 onChange={(e) => setDeleteUsername(e.target.value)}
@@ -466,11 +463,13 @@ export default function HistoryPage() {
                     deleteItem(deleteUsername);
                   }
                 }}
+                autoFocus
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-end gap-2">
             <Button 
+              type="button"
               variant="outline" 
               onClick={() => {
                 setDeleteDialogOpen(false);
@@ -482,6 +481,7 @@ export default function HistoryPage() {
               Cancel
             </Button>
             <Button 
+              type="button"
               variant="destructive" 
               onClick={() => deleteItem(deleteUsername)}
               disabled={deleting || !deleteUsername.trim()}
