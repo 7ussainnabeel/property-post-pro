@@ -54,7 +54,6 @@ const Index = () => {
           const { error: dbError } = await supabase
             .from('generated_listings')
             .insert({
-              property_type: data.propertyType,
               category: data.category,
               listing_type: data.listingType,
               location: data.location,
@@ -78,7 +77,8 @@ const Index = () => {
               instagram_ar: result.content.instagramAR || null,
               website_en: result.content.websiteEN || null,
               website_ar: result.content.websiteAR || null,
-            });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any);
           
           if (dbError) {
             console.error('Error saving to database:', dbError);

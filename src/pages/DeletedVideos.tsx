@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,7 +57,7 @@ const DeletedVideos = () => {
   const [permanentDeleting, setPermanentDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchDeletedVideos = async () => {
+  const fetchDeletedVideos = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -68,20 +68,21 @@ const DeletedVideos = () => {
 
       if (error) throw error;
       setVideos(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error fetching deleted videos",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchDeletedVideos();
-  }, []);
+  }, [fetchDeletedVideos]);
 
   const restoreVideo = async (id: string) => {
     setRestoring(id);
@@ -102,10 +103,11 @@ const DeletedVideos = () => {
       });
 
       fetchDeletedVideos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error restoring video",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -137,10 +139,11 @@ const DeletedVideos = () => {
       });
 
       fetchDeletedVideos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error deleting video",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -166,10 +169,11 @@ const DeletedVideos = () => {
       });
 
       fetchDeletedVideos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error restoring videos",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }

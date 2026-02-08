@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,7 +98,8 @@ const VideoQuality = () => {
     return 'border-slate-600 text-slate-400';
   };
 
-  const fetchVideos = async () => {
+  const fetchVideos = useCallback(async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from("video_submissions")
@@ -108,20 +109,21 @@ const VideoQuality = () => {
 
       if (error) throw error;
       setVideos(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error fetching videos",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchVideos();
-  }, []);
+  }, [fetchVideos]);
 
   const validateYoutubeUrl = (url: string): boolean => {
     const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)[\w-]+/;
@@ -266,10 +268,11 @@ const VideoQuality = () => {
       }
       
       fetchVideos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error submitting video",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -312,10 +315,11 @@ const VideoQuality = () => {
       setVideoToDelete(null);
       setDeleteUsername("");
       fetchVideos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error deleting video",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -422,10 +426,11 @@ const VideoQuality = () => {
       });
 
       fetchVideos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to analyze video. Please try again.';
       toast({
         title: "Analysis Failed",
-        description: error.message || "Failed to analyze video. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -485,10 +490,11 @@ const VideoQuality = () => {
 
       handleEditClose();
       fetchVideos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error updating video",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

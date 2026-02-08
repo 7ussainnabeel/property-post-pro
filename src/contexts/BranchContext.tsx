@@ -1,13 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-export const BRANCHES = [
-  { id: 'manama', name: 'Manama Branch', color: 'from-blue-500 to-blue-600' },
-  { id: 'seef', name: 'Seef Branch', color: 'from-purple-500 to-purple-600' },
-  { id: 'saar', name: 'Saar Branch', color: 'from-green-500 to-green-600' },
-  { id: 'amwaj-island', name: 'Amwaj Island Branch', color: 'from-orange-500 to-orange-600' },
-] as const;
-
-export type BranchId = typeof BRANCHES[number]['id'];
+import { BRANCHES, BranchId, getBranchName } from '@/lib/branches';
 
 interface BranchContextType {
   selectedBranch: BranchId | null;
@@ -50,10 +43,6 @@ export function BranchProvider({ children }: { children: ReactNode }) {
   const setSelectedBranch = (branch: BranchId) => {
     setSelectedBranchState(branch);
     localStorage.setItem('selectedBranch', branch);
-  };
-
-  const getBranchName = (branchId: string | BranchId) => {
-    return BRANCHES.find(b => b.id === branchId)?.name || branchId;
   };
 
   return (

@@ -87,21 +87,29 @@ export default function HistoryPage() {
   const fetchHistory = async () => {
     setIsLoading(true);
     try {
-      let query = supabase
+      // Fetch all listings without branch filter in the query
+      // (filtering by branch will be done on client side)
+      const { data, error } = await supabase
         .from('generated_listings')
         .select('*')
-        .is('deleted_at', null);
-      
-      // Filter by branch if not showing all branches
-      if (!showAllBranches && selectedBranch) {
-        query = query.eq('branch', selectedBranch);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      setHistory(data || []);
+      // Cast data to array and map to ensure branch field is included
+      const items = (data as Array<Record<string, unknown>>) || [];
+      let historyData = items.map((item) => ({
+        ...item,
+        branch: (item.branch as string | null) || selectedBranch || null,
+      })) as HistoryItem[];
+      
+      // Filter by branch if needed
+      if (!showAllBranches && selectedBranch) {
+        historyData = historyData.filter(item => item.branch === selectedBranch);
+      }
+      
+      setHistory(historyData);
     } catch (error) {
       console.error('Error fetching history:', error);
       toast.error('Failed to load history');

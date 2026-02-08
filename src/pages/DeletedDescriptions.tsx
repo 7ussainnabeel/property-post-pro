@@ -86,21 +86,29 @@ export default function DeletedDescriptions() {
   const fetchDeletedItems = async () => {
     setIsLoading(true);
     try {
-      let query = supabase
+      // Fetch all deleted listings without branch filter in the query
+      // (filtering by branch will be done on client side)
+      const { data, error } = await supabase
         .from('generated_listings')
         .select('*')
-        .not('deleted_at', 'is', null);
-      
-      // Filter by branch if not showing all branches
-      if (!showAllBranches && selectedBranch) {
-        query = query.eq('branch', selectedBranch);
-      }
-      
-      const { data, error } = await query.order('deleted_at', { ascending: false });
+        .not('deleted_at', 'is', null)
+        .order('deleted_at', { ascending: false });
 
       if (error) throw error;
       
-      setDeletedItems(data || []);
+      // Cast data to array and map to ensure branch field is included
+      const items = (data as Array<Record<string, unknown>>) || [];
+      let deletedData = items.map((item) => ({
+        ...item,
+        branch: (item.branch as string | null) || selectedBranch || null,
+      })) as DeletedItem[];
+      
+      // Filter by branch if needed
+      if (!showAllBranches && selectedBranch) {
+        deletedData = deletedData.filter(item => item.branch === selectedBranch);
+      }
+      
+      setDeletedItems(deletedData);
     } catch (error) {
       console.error('Error fetching deleted items:', error);
       toast.error('Failed to load deleted listings');

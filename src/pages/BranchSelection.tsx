@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Building2, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
-import { BRANCHES, useBranch } from '@/contexts/BranchContext';
+import { BRANCHES, type BranchId } from '@/lib/branches';
+import { useBranch } from '@/contexts/BranchContext';
 
 export default function BranchSelection() {
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -14,14 +15,16 @@ export default function BranchSelection() {
   const handleBranchSelect = (branchId: string) => {
     setSelectedBranch(branchId);
     // Update context branch
-    setContextBranch(branchId as any);
-    const branchName = BRANCHES.find(b => b.id === branchId)?.name;
-    toast.success(`Welcome! You've selected ${branchName}`);
-    
-    // Navigate to home page after selection
-    setTimeout(() => {
-      navigate('/');
-    }, 500);
+    const branch = BRANCHES.find(b => b.id === branchId);
+    if (branch) {
+      setContextBranch(branch.id as BranchId);
+      toast.success(`Welcome! You've selected ${branch.name}`);
+      
+      // Navigate to home page after selection
+      setTimeout(() => {
+        navigate('/');
+      }, 500);
+    }
   };
 
   return (
