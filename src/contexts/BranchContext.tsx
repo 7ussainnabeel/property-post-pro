@@ -24,13 +24,27 @@ export function BranchProvider({ children }: { children: ReactNode }) {
   const [showAllBranches, setShowAllBranches] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('selectedBranch') as BranchId | null;
-    if (stored && BRANCHES.some(b => b.id === stored)) {
-      setSelectedBranchState(stored);
-    } else if (stored) {
-      // Clear invalid branch selection
-      localStorage.removeItem('selectedBranch');
-    }
+    const loadBranch = () => {
+      const stored = localStorage.getItem('selectedBranch') as BranchId | null;
+      if (stored && BRANCHES.some(b => b.id === stored)) {
+        setSelectedBranchState(stored);
+      } else if (stored) {
+        // Clear invalid branch selection
+        localStorage.removeItem('selectedBranch');
+      }
+    };
+
+    loadBranch();
+
+    // Listen for storage changes from other tabs/pages
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'selectedBranch') {
+        loadBranch();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const setSelectedBranch = (branch: BranchId) => {
