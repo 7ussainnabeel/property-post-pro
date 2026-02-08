@@ -75,7 +75,7 @@ export default function DeletedDescriptions() {
 
   useEffect(() => {
     fetchDeletedItems();
-  }, [showAllBranches]););
+  }, [showAllBranches]);
 
   useEffect(() => {
     filterItems();
