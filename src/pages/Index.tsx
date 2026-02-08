@@ -7,12 +7,14 @@ import { Building2, Sparkles, Video, History } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useBranch } from '@/contexts/BranchContext';
 
 const Index = () => {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContentType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [propertyData, setPropertyData] = useState<PropertyInput | null>(null);
   const loadingToastId = useRef<string | number | null>(null);
+  const { selectedBranch, getBranchName } = useBranch();
 
   const handleGenerate = async (data: PropertyInput) => {
     setIsLoading(true);
@@ -67,6 +69,7 @@ const Index = () => {
               land_classification: data.landClassification || null,
               unique_selling_points: data.uniqueSellingPoints || null,
               agent: data.agent || null,
+              branch: selectedBranch,
               property_finder_title_en: result.content.propertyFinderTitleEN || null,
               property_finder_en: result.content.propertyFinderEN || null,
               property_finder_title_ar: result.content.propertyFinderTitleAR || null,
@@ -112,6 +115,16 @@ const Index = () => {
             <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-full">
               <History className="h-4 w-4 mr-2" />
               History
+            </Button>
+          </Link>
+        </div>
+
+        {/* Branch Badge */}
+        <div className="absolute top-4 left-4">
+          <Link to="/branch-selection">
+            <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Building2 className="h-4 w-4 mr-2" />
+              {selectedBranch && getBranchName(selectedBranch)}
             </Button>
           </Link>
         </div>

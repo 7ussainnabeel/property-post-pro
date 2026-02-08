@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OutputCard } from '@/components/OutputCard';
+import { useBranch } from '@/contexts/BranchContext';
 import { 
   History, 
   Home, 
@@ -57,6 +58,7 @@ interface HistoryItem {
   amenities: string[] | null;
   deleted_at: string | null;
   deleted_by: string | null;
+  branch: string | null;
 }
 
 export default function HistoryPage() {
@@ -70,10 +72,11 @@ export default function HistoryPage() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [deleteUsername, setDeleteUsername] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const { selectedBranch, showAllBranches, setShowAllBranches, getBranchName } = useBranch();
 
   useEffect(() => {
     fetchHistory();
-  }, []);
+  }, [showAllBranches]);
 
   useEffect(() => {
     filterHistory();
@@ -83,11 +86,17 @@ export default function HistoryPage() {
   const fetchHistory = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('generated_listings')
         .select('*')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
+        .is('deleted_at', null);
+      
+      // Filter by branch if not showing all branches
+      if (!showAllBranches && selectedBranch) {
+        query = query.eq('branch', selectedBranch);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       
@@ -207,11 +216,22 @@ export default function HistoryPage() {
                   Generation History
                 </h1>
                 <p className="text-sm text-primary-foreground/80 mt-1">
-                  View and manage your previously generated property listings
+                  {showAllBranches 
+                    ? 'Viewing all branches' 
+                    : `Viewing ${selectedBranch && getBranchName(selectedBranch)} branch`}
                 </p>
               </div>
             </div>
             <div className="flex gap-2">
+              <Button
+                onClick={() => setShowAllBranches(!showAllBranches)}
+                variant="outline"
+                size="sm"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                {showAllBranches ? 'My Branch Only' : 'All Branches'}
+              </Button>
               <Button 
                 onClick={fetchHistory} 
                 variant="outline" 
@@ -333,6 +353,12 @@ export default function HistoryPage() {
                           <Calendar className="h-4 w-4" />
                           {format(new Date(item.created_at), 'MMM dd, yyyy HH:mm')}
                         </div>
+                        {showAllBranches && item.branch && (
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {getBranchName(item.branch as any)}
+                          </Badge>
+                        )}
                         {item.size && (
                           <div>{item.size} sqm</div>
                         )}
@@ -375,11 +401,12 @@ export default function HistoryPage() {
                       <TabsTrigger value="website">Website</TabsTrigger>
                     </TabsList>
                     
-                    <TabsContent value="propertyfinder" className="space-y-4 mt-4">
+                    <TabsContent value="propertyfinder" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       {item.property_finder_en && (
                         <OutputCard
                           title="Property Finder - English"
                           content={item.property_finder_en}
+                          propertyTitle={item.property_finder_title_en || undefined}
                           icon={<Building2 className="w-4 h-4" />}
                         />
                       )}
@@ -387,13 +414,14 @@ export default function HistoryPage() {
                         <OutputCard
                           title="Property Finder - عربي"
                           content={item.property_finder_ar}
+                          propertyTitle={item.property_finder_title_ar || undefined}
                           icon={<Building2 className="w-4 h-4" />}
                           isRTL
                         />
                       )}
                     </TabsContent>
                     
-                    <TabsContent value="instagram" className="space-y-4 mt-4">
+                    <TabsContent value="instagram" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       {item.instagram_en && (
                         <OutputCard
                           title="Instagram - English"
@@ -411,7 +439,7 @@ export default function HistoryPage() {
                       )}
                     </TabsContent>
                     
-                    <TabsContent value="website" className="space-y-4 mt-4">
+                    <TabsContent value="website" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       {item.website_en && (
                         <OutputCard
                           title="Website - English"

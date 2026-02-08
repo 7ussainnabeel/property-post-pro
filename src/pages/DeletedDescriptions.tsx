@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OutputCard } from '@/components/OutputCard';
+import { useBranch } from '@/contexts/BranchContext';
 import { 
   Archive, 
   Home, 
@@ -18,7 +19,8 @@ import {
   RefreshCw,
   RotateCcw,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Filter
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -59,6 +61,7 @@ interface DeletedItem {
   website_en: string | null;
   website_ar: string | null;
   amenities: string[] | null;
+  branch: string | null;
 }
 
 export default function DeletedDescriptions() {
@@ -68,10 +71,11 @@ export default function DeletedDescriptions() {
   const [searchQuery, setSearchQuery] = useState('');
   const [restoring, setRestoring] = useState<string | null>(null);
   const [permanentDeleting, setPermanentDeleting] = useState<string | null>(null);
+  const { selectedBranch, showAllBranches, setShowAllBranches, getBranchName } = useBranch();
 
   useEffect(() => {
     fetchDeletedItems();
-  }, []);
+  }, [showAllBranches]););
 
   useEffect(() => {
     filterItems();
@@ -81,11 +85,17 @@ export default function DeletedDescriptions() {
   const fetchDeletedItems = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('generated_listings')
         .select('*')
-        .not('deleted_at', 'is', null)
-        .order('deleted_at', { ascending: false });
+        .not('deleted_at', 'is', null);
+      
+      // Filter by branch if not showing all branches
+      if (!showAllBranches && selectedBranch) {
+        query = query.eq('branch', selectedBranch);
+      }
+      
+      const { data, error } = await query.order('deleted_at', { ascending: false });
 
       if (error) throw error;
       
@@ -174,19 +184,32 @@ export default function DeletedDescriptions() {
                   Deleted Listings
                 </h1>
                 <p className="text-sm text-primary-foreground/80 mt-1">
-                  Restore or permanently delete your listings
+                  {showAllBranches 
+                    ? 'Viewing all branches' 
+                    : `Viewing ${selectedBranch && getBranchName(selectedBranch)} branch`}
                 </p>
               </div>
             </div>
-            <Button 
-              onClick={fetchDeletedItems} 
-              variant="outline" 
-              size="sm" 
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowAllBranches(!showAllBranches)}
+                variant="outline"
+                size="sm"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                {showAllBranches ? 'My Branch Only' : 'All Branches'}
+              </Button>
+              <Button 
+                onClick={fetchDeletedItems} 
+                variant="outline" 
+                size="sm" 
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -267,6 +290,12 @@ export default function DeletedDescriptions() {
                           Deleted: {format(new Date(item.deleted_at), 'MMM dd, yyyy HH:mm')}
                         </div>
                         <div>By: {item.deleted_by}</div>
+                        {showAllBranches && item.branch && (
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {getBranchName(item.branch as any)}
+                          </Badge>
+                        )}
                         {item.size && <div>{item.size} sqm</div>}
                         {item.bedrooms && <div>{item.bedrooms} beds</div>}
                         {item.bathrooms && <div>{item.bathrooms} baths</div>}
@@ -337,11 +366,12 @@ export default function DeletedDescriptions() {
                       <TabsTrigger value="website">Website</TabsTrigger>
                     </TabsList>
                     
-                    <TabsContent value="propertyfinder" className="space-y-4 mt-4">
+                    <TabsContent value="propertyfinder" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       {item.property_finder_en && (
                         <OutputCard
                           title="Property Finder - English"
                           content={item.property_finder_en}
+                          propertyTitle={item.property_finder_title_en || undefined}
                           icon={<Building2 className="w-4 h-4" />}
                         />
                       )}
@@ -349,13 +379,14 @@ export default function DeletedDescriptions() {
                         <OutputCard
                           title="Property Finder - عربي"
                           content={item.property_finder_ar}
+                          propertyTitle={item.property_finder_title_ar || undefined}
                           icon={<Building2 className="w-4 h-4" />}
                           isRTL
                         />
                       )}
                     </TabsContent>
                     
-                    <TabsContent value="instagram" className="space-y-4 mt-4">
+                    <TabsContent value="instagram" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       {item.instagram_en && (
                         <OutputCard
                           title="Instagram - English"
@@ -373,7 +404,7 @@ export default function DeletedDescriptions() {
                       )}
                     </TabsContent>
                     
-                    <TabsContent value="website" className="space-y-4 mt-4">
+                    <TabsContent value="website" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       {item.website_en && (
                         <OutputCard
                           title="Website - English"
