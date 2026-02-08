@@ -187,7 +187,7 @@ export default function DeletedDescriptions() {
                 <p className="text-sm text-primary-foreground/80 mt-1">
                   {showAllBranches 
                     ? 'Viewing all branches' 
-                    : `Viewing ${selectedBranch && getBranchName(selectedBranch)} branch`}
+                    : selectedBranch && getBranchName(selectedBranch)}
                 </p>
               </div>
             </div>

@@ -4,13 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Building2, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
-
-const BRANCHES = [
-  { id: 'manama', name: 'Manama Branch', color: 'from-blue-500 to-blue-600' },
-  { id: 'seef', name: 'Seef Branch', color: 'from-purple-500 to-purple-600' },
-  { id: 'saar', name: 'Saar Branch', color: 'from-green-500 to-green-600' },
-  { id: 'amwaj-island', name: 'Amwaj Island Branch', color: 'from-orange-500 to-orange-600' },
-];
+import { BRANCHES } from '@/contexts/BranchContext';
 
 export default function BranchSelection() {
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);

@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export const BRANCHES = [
-  { id: 'dubai', name: 'Dubai', color: 'from-blue-500 to-blue-600' },
-  { id: 'abu-dhabi', name: 'Abu Dhabi', color: 'from-purple-500 to-purple-600' },
-  { id: 'sharjah', name: 'Sharjah', color: 'from-green-500 to-green-600' },
-  { id: 'ajman', name: 'Ajman', color: 'from-orange-500 to-orange-600' },
+  { id: 'manama', name: 'Manama Branch', color: 'from-blue-500 to-blue-600' },
+  { id: 'seef', name: 'Seef Branch', color: 'from-purple-500 to-purple-600' },
+  { id: 'saar', name: 'Saar Branch', color: 'from-green-500 to-green-600' },
+  { id: 'amwaj-island', name: 'Amwaj Island Branch', color: 'from-orange-500 to-orange-600' },
 ] as const;
 
 export type BranchId = typeof BRANCHES[number]['id'];
@@ -27,6 +27,9 @@ export function BranchProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem('selectedBranch') as BranchId | null;
     if (stored && BRANCHES.some(b => b.id === stored)) {
       setSelectedBranchState(stored);
+    } else if (stored) {
+      // Clear invalid branch selection
+      localStorage.removeItem('selectedBranch');
     }
   }, []);
 
