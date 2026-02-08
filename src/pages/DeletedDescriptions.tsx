@@ -75,7 +75,8 @@ export default function DeletedDescriptions() {
 
   useEffect(() => {
     fetchDeletedItems();
-  }, [showAllBranches]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAllBranches, selectedBranch]);
 
   useEffect(() => {
     filterItems();
@@ -293,7 +294,7 @@ export default function DeletedDescriptions() {
                         {showAllBranches && item.branch && (
                           <Badge variant="outline" className="flex items-center gap-1">
                             <Building2 className="h-3 w-3" />
-                            {getBranchName(item.branch as any)}
+                            {getBranchName(item.branch)}
                           </Badge>
                         )}
                         {item.size && <div>{item.size} sqm</div>}

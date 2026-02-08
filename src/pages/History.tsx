@@ -76,7 +76,8 @@ export default function HistoryPage() {
 
   useEffect(() => {
     fetchHistory();
-  }, [showAllBranches]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAllBranches, selectedBranch]);
 
   useEffect(() => {
     filterHistory();
@@ -356,7 +357,7 @@ export default function HistoryPage() {
                         {showAllBranches && item.branch && (
                           <Badge variant="outline" className="flex items-center gap-1">
                             <Building2 className="h-3 w-3" />
-                            {getBranchName(item.branch as any)}
+                            {getBranchName(item.branch)}
                           </Badge>
                         )}
                         {item.size && (

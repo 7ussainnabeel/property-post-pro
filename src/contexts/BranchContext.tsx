@@ -12,7 +12,7 @@ export type BranchId = typeof BRANCHES[number]['id'];
 interface BranchContextType {
   selectedBranch: BranchId | null;
   setSelectedBranch: (branch: BranchId) => void;
-  getBranchName: (branchId: BranchId) => string;
+  getBranchName: (branchId: string | BranchId) => string;
   showAllBranches: boolean;
   setShowAllBranches: (show: boolean) => void;
 }
@@ -35,7 +35,7 @@ export function BranchProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('selectedBranch', branch);
   };
 
-  const getBranchName = (branchId: BranchId) => {
+  const getBranchName = (branchId: string | BranchId) => {
     return BRANCHES.find(b => b.id === branchId)?.name || branchId;
   };
 
