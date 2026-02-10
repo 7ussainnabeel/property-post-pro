@@ -40,7 +40,10 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
   }, [receipt, open, selectedBranch]);
 
   const update = (field: string, value: any) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm(prev => {
+      const updated = { ...prev, [field]: value };
+      return updated;
+    });
   };
 
   const handleSave = async () => {
@@ -77,14 +80,14 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
   };
 
   const Field = ({ label, field, type = 'text', placeholder = '' }: { label: string; field: string; type?: string; placeholder?: string }) => (
-    <div className="space-y-1">
-      <Label className="text-xs">{label}</Label>
+    <div className="space-y-2">
+      <Label className="text-xs font-medium">{label}</Label>
       <Input
         type={type}
         value={form[field] || ''}
         onChange={(e) => update(field, e.target.value)}
         placeholder={placeholder}
-        className="h-9 text-sm"
+        className="h-10 text-sm"
       />
     </div>
   );
@@ -113,32 +116,34 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
 
         <ScrollArea className="h-[60vh] pr-4">
           <Tabs defaultValue="client" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="client" className="text-xs">Client & Payment</TabsTrigger>
               <TabsTrigger value="property" className="text-xs">Property</TabsTrigger>
               <TabsTrigger value="other" className="text-xs">Other Details</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="client" className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+            <TabsContent value="client" className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <Field label="Client Name" field="client_name" />
                 <Field label="CPR / Passport / CR No." field="client_id_number" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <Field label="Full Amount Due (BD)" field="full_amount_due_bd" type="number" />
                 <Field label="Amount Paid (BD)" field="amount_paid_bd" type="number" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <Field label="Balance Amount (BD)" field="balance_amount_bd" type="number" />
                 <Field label="Payment Date" field="payment_date" type="date" />
               </div>
-              <Field label="Amount Paid in Words" field="amount_paid_words" />
-              <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Field label="Amount Paid in Words" field="amount_paid_words" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <Field label="Receipt No." field="receipt_number" />
-                <div className="space-y-1">
-                  <Label className="text-xs">Payment Method</Label>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Payment Method</Label>
                   <Select value={form.payment_method || ''} onValueChange={(v) => update('payment_method', v)}>
-                    <SelectTrigger className="h-9">
+                    <SelectTrigger className="h-10">
                       <SelectValue placeholder="Select method" />
                     </SelectTrigger>
                     <SelectContent>
@@ -151,18 +156,20 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
                 </div>
               </div>
               {form.payment_method === 'CHEQUE' && (
-                <Field label="Cheque No." field="cheque_number" />
+                <div>
+                  <Field label="Cheque No." field="cheque_number" />
+                </div>
               )}
               {receiptType === 'commission' && (
                 <>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <Field label="Invoice Number" field="invoice_number" />
                     <Field label="Invoice Date" field="invoice_date" type="date" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Paid By</Label>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium">Paid By</Label>
                     <Select value={form.paid_by || ''} onValueChange={(v) => update('paid_by', v)}>
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger className="h-10">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -176,11 +183,11 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
                 </>
               )}
               {receiptType === 'deposit' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Transaction Type</Label>
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium">Transaction Type</Label>
                     <Select value={form.transaction_type || ''} onValueChange={(v) => update('transaction_type', v)}>
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger className="h-10">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -190,15 +197,15 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
                     </Select>
                   </div>
                   <Field label="Reservation Amount" field="reservation_amount" type="number" />
-                </div>
+                </>
               )}
             </TabsContent>
 
-            <TabsContent value="property" className="space-y-3">
-              <div className="space-y-1">
-                <Label className="text-xs">Property Type</Label>
+            <TabsContent value="property" className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Property Type</Label>
                 <Select value={form.property_type || ''} onValueChange={(v) => update('property_type', v)}>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-10">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
@@ -212,8 +219,8 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
               </div>
 
               {receiptType === 'commission' && (
-                <div className="space-y-1">
-                  <Label className="text-xs">Transaction Details</Label>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Transaction Details</Label>
                   <Textarea
                     value={form.transaction_details || ''}
                     onChange={(e) => update('transaction_details', e.target.value)}
@@ -225,62 +232,68 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
 
               {receiptType === 'deposit' && (
                 <>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-4">
                     <Field label="Property Details" field="property_details" />
                     <Field label="Title No." field="title_number" />
                     <Field label="Case No." field="case_number" />
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-4">
                     <Field label="Plot No." field="plot_number" />
                     <Field label="Property Size" field="property_size" />
                     <Field label="Size in M²" field="size_m2" />
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-4">
                     <Field label="Size in F²" field="size_f2" />
                     <Field label="No. of Roads" field="number_of_roads" />
                     <Field label="Price per F²" field="price_per_f2" />
                   </div>
-                  <Field label="Total Sales Price" field="total_sales_price" />
-                  <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Field label="Total Sales Price" field="total_sales_price" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <Field label="Property Address" field="property_address" />
                     <Field label="Unit No." field="unit_number" />
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-4">
                     <Field label="Bldg No." field="building_number" />
                     <Field label="Road No." field="road_number" />
                     <Field label="Block No." field="block_number" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <Field label="Property Location" field="property_location" />
                     <Field label="Land No." field="land_number" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <Field label="Project Name" field="project_name" />
                     <Field label="Area Name" field="area_name" />
                   </div>
-                  <Field label="Buyer Commission (BD)" field="buyer_commission_bd" />
+                  <div>
+                    <Field label="Buyer Commission (BD)" field="buyer_commission_bd" />
+                  </div>
+                  <div>
+                    <Field label="Agent Name" field="agent_name" />
+                  </div>
                 </>
               )}
             </TabsContent>
 
             <TabsContent value="other" className="space-y-3">
               <Field label="Agent Name" field="agent_name" />
-              <div className="space-y-1">
-                <Label className="text-xs">Branch</Label>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Branch</Label>
                 <Select value={form.branch || ''} onValueChange={(v) => update('branch', v)}>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-10">
                     <SelectValue placeholder="Select branch" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="manama">Manama</SelectItem>
-                    <SelectItem value="seef">Seef</SelectItem>
                     <SelectItem value="saar">Saar</SelectItem>
                     <SelectItem value="amwaj-island">Amwaj Island</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Special Note</Label>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Special Note</Label>
                 <Textarea
                   value={form.special_note || ''}
                   onChange={(e) => update('special_note', e.target.value)}
