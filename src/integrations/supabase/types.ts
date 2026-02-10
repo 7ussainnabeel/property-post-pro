@@ -20,6 +20,7 @@ export type Database = {
           amenities: string[] | null
           bathrooms: number | null
           bedrooms: number | null
+          branch: string | null
           category: string
           created_at: string
           currency: string
@@ -52,6 +53,7 @@ export type Database = {
           amenities?: string[] | null
           bathrooms?: number | null
           bedrooms?: number | null
+          branch?: string | null
           category: string
           created_at?: string
           currency: string
@@ -84,6 +86,7 @@ export type Database = {
           amenities?: string[] | null
           bathrooms?: number | null
           bedrooms?: number | null
+          branch?: string | null
           category?: string
           created_at?: string
           currency?: string
@@ -184,7 +187,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_invoice_number: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
