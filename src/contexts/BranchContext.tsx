@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { BRANCHES, BranchId, getBranchName } from '@/lib/branches';
 
 interface BranchContextType {
@@ -17,7 +18,24 @@ export function BranchProvider({ children }: { children: ReactNode }) {
   const [showAllBranches, setShowAllBranches] = useState(false);
 
   useEffect(() => {
-    const loadBranch = () => {
+    const loadBranch = async () => {
+      // First check if user has a branch in their profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('branch')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (profile?.branch && BRANCHES.some(b => b.id === profile.branch)) {
+          setSelectedBranchState(profile.branch as BranchId);
+          localStorage.setItem('selectedBranch', profile.branch);
+          return;
+        }
+      }
+
+      // Fall back to localStorage if no profile branch
       const stored = localStorage.getItem('selectedBranch') as BranchId | null;
       if (stored && BRANCHES.some(b => b.id === stored)) {
         setSelectedBranchState(stored);

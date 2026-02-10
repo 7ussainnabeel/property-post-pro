@@ -13,6 +13,7 @@ import DeletedDescriptions from "./pages/DeletedDescriptions";
 import BranchSelection from "./pages/BranchSelection";
 import Auth from "./pages/Auth";
 import Receipts from "./pages/Receipts";
+import DeletedReceipts from "./pages/receipts/DeletedReceipts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,25 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Admin-protected route wrapper
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading, isAdmin } = useAuth();
+  
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (!isAdmin) {
+    return <Navigate to="/receipts" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -60,6 +80,7 @@ const App = () => (
               <Route path="/video-quality" element={<ProtectedRoute><VideoQuality /></ProtectedRoute>} />
               <Route path="/deleted-videos" element={<ProtectedRoute><DeletedVideos /></ProtectedRoute>} />
               <Route path="/receipts" element={<AuthRoute><Receipts /></AuthRoute>} />
+              <Route path="/deleted-receipts" element={<AdminRoute><DeletedReceipts /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

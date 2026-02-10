@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { BRANCHES } from '@/lib/branches';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Building2, LogIn, UserPlus } from 'lucide-react';
@@ -13,6 +15,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [branch, setBranch] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -35,7 +38,12 @@ export default function Auth() {
         setLoading(false);
         return;
       }
-      const { error } = await signUp(email, password, fullName);
+      if (!branch) {
+        toast.error('Please select a branch.');
+        setLoading(false);
+        return;
+      }
+      const { error } = await signUp(email, password, fullName, branch);
       if (error) {
         toast.error(error.message);
       } else {
@@ -62,16 +70,33 @@ export default function Auth() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
-                  required={!isLogin}
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                    required={!isLogin}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="branch">Branch</Label>
+                  <Select value={branch} onValueChange={setBranch} required>
+                    <SelectTrigger id="branch">
+                      <SelectValue placeholder="Select your branch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BRANCHES.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

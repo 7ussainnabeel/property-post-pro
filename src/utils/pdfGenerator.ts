@@ -1,388 +1,258 @@
-import jsPDF from 'jspdf';
+/**
+ * Receipt PDF Generator
+ * 
+ * Fills existing PDF form templates with receipt data:
+ * 
+ * 1. COMMISSION RECEIPT - Uses public/PDF/CommissionReceipt.pdf template
+ * 2. DEPOSIT RECEIPT - Uses public/PDF/DepositReceipt.pdf template
+ * 
+ * The PDF templates must have fillable form fields with the following names:
+ * 
+ * Common fields:
+ * - client_name, client_id_number, full_amount_due_bd, amount_paid_bd
+ * - balance_amount_bd, payment_date, amount_paid_words, receipt_number
+ * - agent_name, branch, special_note
+ * - payment_method_benefit, payment_method_bank_tt, payment_method_cash, payment_method_cheque
+ * - cheque_number
+ * - property_type_land, property_type_flat, property_type_villa, property_type_building, property_type_other
+ * 
+ * Commission-specific fields:
+ * - invoice_number, invoice_date, transaction_details
+ * - paid_by_buyer, paid_by_seller, paid_by_landlord, paid_by_landlord_rep
+ * 
+ * Deposit-specific fields:
+ * - transaction_type_holding, transaction_type_partial, reservation_amount
+ * - property_details, title_number, case_number, plot_number, property_size
+ * - size_m2, size_f2, number_of_roads, price_per_f2, total_sales_price
+ * - property_address, unit_number, building_number, road_number, block_number
+ * - property_location, land_number, project_name, area_name, buyer_commission_bd
+ */
+
+import { PDFDocument } from 'pdf-lib';
 import { Receipt } from '@/types/receipt';
-import { getBranchName } from '@/lib/branches';
 
-const YELLOW = [255, 204, 0] as const;
-const NAVY = [26, 42, 74] as const;
-const WHITE = [255, 255, 255] as const;
-const BLACK = [0, 0, 0] as const;
-const GRAY = [200, 200, 200] as const;
-const LIGHT_GRAY = [245, 245, 245] as const;
+/**
+ * Loads a PDF template from the PDF folder
+ */
+async function loadPDFTemplate(templateName: string): Promise<ArrayBuffer> {
+  const response = await fetch(`/PDF/${templateName}`);
+  if (!response.ok) {
+    throw new Error(`Failed to load PDF template: ${templateName}`);
+  }
+  return await response.arrayBuffer();
+}
 
-function drawCheckbox(doc: jsPDF, x: number, y: number, checked: boolean) {
-  doc.setDrawColor(...BLACK);
-  doc.setLineWidth(0.3);
-  doc.rect(x, y, 4, 4);
-  if (checked) {
-    doc.setFillColor(...NAVY);
-    doc.rect(x + 0.5, y + 0.5, 3, 3, 'F');
+/**
+ * Safely fills a form field in the PDF
+ */
+let successCount = 0;
+let failCount = 0;
+
+function fillField(form: any, fieldName: string, value: any) {
+  try {
+    const field = form.getTextField(fieldName);
+    if (field && value !== null && value !== undefined) {
+      field.setText(String(value));
+      successCount++;
+      console.log(`✓ ${fieldName} = ${value}`);
+    }
+  } catch (error) {
+    failCount++;
+    // Only show warnings for fields that have actual values to fill
+    if (value) {
+      console.warn(`⚠ Missing field: ${fieldName}`);
+    }
   }
 }
 
-function drawHeader(doc: jsPDF) {
-  // Yellow header bar
-  doc.setFillColor(...YELLOW);
-  doc.rect(0, 0, 210, 30, 'F');
-
-  // Title
-  doc.setFontSize(11);
-  doc.setTextColor(...BLACK);
-  doc.text('سند إستلام', 15, 12);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('PAYMENT RECEIPT', 15, 20);
-
-  // Carlton logo area (right side)
-  doc.setFontSize(10);
-  doc.setTextColor(...NAVY);
-  doc.text('CARLTON REAL ESTATE', 155, 15, { align: 'center' });
+/**
+ * Safely checks a checkbox in the PDF
+ */
+function checkField(form: any, fieldName: string, isChecked: boolean) {
+  try {
+    const field = form.getCheckBox(fieldName);
+    if (field && isChecked) {
+      field.check();
+      successCount++;
+      console.log(`☑ ${fieldName}`);
+    }
+  } catch (error) {
+    if (isChecked) {
+      failCount++;
+      console.warn(`⚠ Missing checkbox: ${fieldName}`);
+    }
+  }
 }
 
-function drawFieldRow(doc: jsPDF, label: string, labelAr: string, value: string, x: number, y: number, width: number) {
-  doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
-  doc.text(labelAr, x, y);
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...BLACK);
-  doc.text(label, x, y + 4);
-  doc.setFont('helvetica', 'normal');
-
-  // Value line
-  doc.setDrawColor(...GRAY);
-  doc.setLineWidth(0.3);
-  doc.line(x, y + 7, x + width, y + 7);
-  doc.setFontSize(9);
-  doc.setTextColor(...NAVY);
-  doc.text(value || '', x + 1, y + 6);
-}
-
-function drawFooter(doc: jsPDF, receipt: Receipt) {
-  const y = 260;
-  const branchName = receipt.branch ? getBranchName(receipt.branch) : 'Seef';
-
-  // Thank you / Special note
-  doc.setFillColor(...LIGHT_GRAY);
-  doc.rect(10, y, 90, 20, 'F');
-  doc.setFontSize(8);
-  doc.setTextColor(...BLACK);
-  doc.text('شكراً لكم', 12, y + 5);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Thank You', 12, y + 9);
-  doc.setFont('helvetica', 'normal');
-
-  // Carlton accounts stamp area
-  doc.setFontSize(7);
-  doc.setTextColor(...NAVY);
-  doc.text('CARLTON REAL ESTATE', 55, y + 14);
-  doc.text('ACCOUNTS', 55, y + 17);
-  doc.setFont('helvetica', 'bold');
-  doc.text(branchName, 55, y + 20);
-  doc.setFont('helvetica', 'normal');
-
-  // Special note
-  doc.setDrawColor(...GRAY);
-  doc.rect(105, y, 95, 20);
-  doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
-  doc.text('ملاحظة خاصة', 107, y + 4);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...BLACK);
-  doc.text('SPECIAL NOTE:', 107, y + 8);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text(receipt.special_note || '', 107, y + 13, { maxWidth: 90 });
-
-  // Signature / Agent
-  const sy = y + 22;
-  doc.setDrawColor(...GRAY);
-  doc.rect(10, sy, 60, 10);
-  doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
-  doc.text('التوقيع', 12, sy + 4);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...BLACK);
-  doc.text('Signature', 12, sy + 8);
-  doc.setFont('helvetica', 'normal');
-
-  doc.rect(75, sy, 65, 10);
-  doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
-  doc.text('تمت هذه المعاملة بواسطة', 77, sy + 4);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...BLACK);
-  doc.text('THIS DEAL IS CONCLUDED BY', 77, sy + 8);
-  doc.setFont('helvetica', 'normal');
-
-  doc.rect(145, sy, 55, 10);
-  doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
-  doc.text('اسم الوسيط', 147, sy + 4);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...BLACK);
-  doc.text('AGENT NAME', 147, sy + 8);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...NAVY);
-  doc.text(receipt.agent_name || '', 147, sy + 6);
-
-  // Disclaimer
-  const dy = sy + 13;
-  doc.setFontSize(7);
-  doc.setTextColor(200, 0, 0);
-  doc.setFont('helvetica', 'bold');
-  doc.text('NOTE:', 10, dy);
-  doc.text('THIS RECEIPT IS INVALID FOR DISHONORED CHEQUES', 10, dy + 4);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text(`${branchName} Branch. CR. No. 20507-5`, 150, dy + 4);
-
-  // Bottom bar
-  doc.setFillColor(...NAVY);
-  doc.rect(0, 287, 210, 10, 'F');
-  doc.setFontSize(6);
-  doc.setTextColor(...WHITE);
-  doc.text('CarltonBahrain - www.icarlton.com - Carlton Real Estate - عقارات كارلتون', 105, 293, { align: 'center' });
+/**
+ * Lists all available form fields in the PDF for debugging
+ */
+function listFormFields(form: any) {
+  try {
+    const fields = form.getFields();
+    console.log('📋 PDF Form Fields:', fields.length, 'fields found');
+    
+    if (fields.length > 0) {
+      const fieldInfo = fields.map((field: any) => {
+        const name = field.getName();
+        const type = field.constructor.name;
+        return { Name: name, Type: type };
+      });
+      console.table(fieldInfo);
+    }
+    
+    return fields.map((f: any) => f.getName());
+  } catch (error) {
+    console.error('Error listing form fields:', error);
+    throw new Error('Could not read form fields from PDF. The PDF may not have proper AcroForm fields.');
+  }
 }
 
 export async function generateReceiptPDF(receipt: Receipt) {
-  const doc = new jsPDF('portrait', 'mm', 'a4');
+  try {
+    // Reset counters
+    successCount = 0;
+    failCount = 0;
+    
+    const isCommission = receipt.receipt_type === 'commission';
+    const templateName = isCommission ? 'CommissionReceipt.pdf' : 'DepositReceipt.pdf';
 
-  drawHeader(doc);
+    console.log(`🔄 Loading ${templateName}...`);
+    
+    // Load the PDF template
+    const templateBytes = await loadPDFTemplate(templateName);
+    const pdfDoc = await PDFDocument.load(templateBytes);
+    
+    // Try to get the form - this may fail if PDF doesn't have proper form fields
+    let form;
+    let availableFields: string[] = [];
+    
+    try {
+      form = pdfDoc.getForm();
+      console.log('✓ PDF form structure loaded');
+      availableFields = listFormFields(form);
+    } catch (formError) {
+      console.error('⚠️ Error accessing PDF form:', formError);
+      const errorMsg = formError instanceof Error ? formError.message : String(formError);
+      
+      if (errorMsg.includes('PDFDict') || errorMsg.includes('PDFRawStream')) {
+        throw new Error(`PDF structure error: The PDF file may not be a proper fillable form.\n\nTo fix this:\n1. Open your PDF in Adobe Acrobat Pro\n2. Go to Tools > Prepare Form\n3. Let Adobe detect and create form fields\n4. Save the PDF and replace it in public/PDF/ folder\n\nAlternatively, use PDFescape.com (free online tool) to add form fields.`);
+      }
+      
+      throw new Error(`Cannot read form fields: ${errorMsg}`);
+    }
+    
+    if (availableFields.length === 0) {
+      console.error('⚠️ No form fields found! The PDF must have fillable form fields.');
+      throw new Error('PDF template has no form fields. Please add fillable form fields to the PDF.');
+    }
 
-  // Receipt type heading
-  const isCommission = receipt.receipt_type === 'commission';
-  doc.setFillColor(...WHITE);
-  doc.setDrawColor(...GRAY);
-  doc.rect(10, 35, 190, 10);
-  doc.setFillColor(...YELLOW);
-  doc.rect(10, 35, 190, 0.5, 'F');
-  doc.setFontSize(10);
-  doc.setTextColor(...BLACK);
-  doc.text(isCommission ? 'مبلغ العمولة' : 'مبلغ العربون', 12, 40);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text(isCommission ? 'COMMISSION AMOUNT' : 'DEPOSIT AMOUNT', 12, 44);
-  doc.setFont('helvetica', 'normal');
+    console.log(`📝 Filling ${Object.keys(receipt).filter(k => receipt[k as keyof Receipt]).length} receipt fields...`);
 
-  let y = 52;
+    // Fill common fields (using actual PDF field names)
+    fillField(form, 'CLIENT NAME', receipt.client_name);
+    fillField(form, 'CR or CPR No', receipt.client_id_number);
+    fillField(form, 'FULL AMOUNT DUE IN BD', receipt.full_amount_due_bd);
+    fillField(form, 'AMOUNT PAID IN BD', receipt.amount_paid_bd);
+    fillField(form, 'BALANCE AMOUNT IN BD', receipt.balance_amount_bd);
+    fillField(form, 'PAYMENT DATE', receipt.payment_date);
+    fillField(form, 'AMOUNT PAID IN WORDS', receipt.amount_paid_words);
+    fillField(form, 'RECEIPT No', receipt.receipt_number);
+    fillField(form, 'AGENT NAME', receipt.agent_name);
+    // Branch field mapping TBD - Text1/Text3 purpose unclear
+    fillField(form, 'SPECIAL NOTE', receipt.special_note);
 
-  // Client info section
-  drawFieldRow(doc, 'CLIENT NAME', 'اسم العميل', receipt.client_name || '', 10, y, 90);
-  y += 12;
-  drawFieldRow(doc, 'CPR or PASSPORT or CR No.', 'الرقم الشخصي او الجواز او السجل التجاري', receipt.client_id_number || '', 10, y, 90);
-  drawFieldRow(doc, 'FULL AMOUNT DUE IN BD', 'المبلغ المستحق بالدينار', receipt.full_amount_due_bd?.toString() || '', 110, y, 90);
-  y += 12;
-  drawFieldRow(doc, 'PAYMENT DATE', 'تاريخ الدفع', receipt.payment_date || '', 10, y, 90);
+    // Payment method checkboxes (using actual PDF field names)
+    checkField(form, 'BF', receipt.payment_method === 'BENEFIT');
+    checkField(form, 'TT', receipt.payment_method === 'BANK TT');
+    checkField(form, 'Cash', receipt.payment_method === 'CASH');
+    checkField(form, 'Cheque', receipt.payment_method === 'CHEQUE');
+    
+    if (receipt.payment_method === 'CHEQUE') {
+      fillField(form, 'ChequeNumber', receipt.cheque_number);
+    }
 
-  // Highlighted Amount Paid
-  doc.setFillColor(...YELLOW);
-  doc.rect(110, y - 2, 90, 12, 'F');
-  doc.setFontSize(7);
-  doc.setTextColor(...BLACK);
-  doc.text('المبلغ المدفوع بالدينار', 112, y + 1);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.text('AMOUNT PAID IN BD', 112, y + 5);
-  doc.setFontSize(11);
-  doc.setTextColor(...NAVY);
-  doc.text(receipt.amount_paid_bd?.toString() || '', 112, y + 9);
-  doc.setFont('helvetica', 'normal');
-  y += 14;
+    // Property type checkboxes (using actual PDF field names)
+    checkField(form, 'Land', receipt.property_type === 'LAND');
+    checkField(form, 'Flat', receipt.property_type === 'FLAT');
+    checkField(form, 'Villa', receipt.property_type === 'VILLA');
+    checkField(form, 'Building', receipt.property_type === 'BUILDING');
+    checkField(form, 'Other', receipt.property_type === 'OTHER');
+    
+    if (receipt.property_type === 'OTHER' && receipt.property_type_other) {
+      fillField(form, 'OtherText', receipt.property_type_other);
+    }
 
-  drawFieldRow(doc, 'RECEIPT No.', 'رقم الرصيد', receipt.receipt_number || '', 10, y, 90);
-  drawFieldRow(doc, 'BALANCE AMOUNT IN BD', 'الباقي من المبلغ المستحق بالدينار', receipt.balance_amount_bd?.toString() || '', 110, y, 90);
-  y += 12;
+    if (isCommission) {
+      // Commission-specific fields (using actual PDF field names)
+      fillField(form, 'PAID AGAINST INVOICE No', receipt.invoice_number);
+      fillField(form, 'NVOICE DATE', receipt.invoice_date);
+      fillField(form, 'Transaction Details', receipt.transaction_details);
+      fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by);
+      
+      // Note: If your PDF has separate checkboxes for paid_by, update these field names
+      // For now, we're putting the paid_by value in REPRESENTATIVE NAME field
+    } else {
+      // Deposit-specific fields
+      checkField(form, 'transaction_type_holding', receipt.transaction_type === 'HOLDING DEPOSIT');
+      checkField(form, 'transaction_type_partial', receipt.transaction_type === 'PARTIAL PAYMENT');
+      fillField(form, 'reservation_amount', receipt.reservation_amount);
+      
+      // Property details
+      fillField(form, 'property_details', receipt.property_details);
+      fillField(form, 'title_number', receipt.title_number);
+      fillField(form, 'case_number', receipt.case_number);
+      fillField(form, 'plot_number', receipt.plot_number);
+      fillField(form, 'property_size', receipt.property_size);
+      fillField(form, 'size_m2', receipt.size_m2);
+      fillField(form, 'size_f2', receipt.size_f2);
+      fillField(form, 'number_of_roads', receipt.number_of_roads);
+      fillField(form, 'price_per_f2', receipt.price_per_f2);
+      fillField(form, 'total_sales_price', receipt.total_sales_price);
+      fillField(form, 'property_address', receipt.property_address);
+      fillField(form, 'unit_number', receipt.unit_number);
+      fillField(form, 'building_number', receipt.building_number);
+      fillField(form, 'road_number', receipt.road_number);
+      fillField(form, 'block_number', receipt.block_number);
+      fillField(form, 'property_location', receipt.property_location);
+      fillField(form, 'land_number', receipt.land_number);
+      fillField(form, 'project_name', receipt.project_name);
+      fillField(form, 'area_name', receipt.area_name);
+      fillField(form, 'buyer_commission_bd', receipt.buyer_commission_bd);
+    }
 
-  drawFieldRow(doc, 'AMOUNT PAID IN WORDS', 'المبلغ المدفوع بالكلمات', receipt.amount_paid_words || '', 10, y, 190);
-  y += 12;
+    // Show summary
+    console.log(`\n📊 Fill Summary: ${successCount} fields filled successfully${failCount > 0 ? `, ${failCount} warnings` : ''}`);
 
-  if (isCommission) {
-    drawFieldRow(doc, 'PAID AGAINST INVOICE No.', 'المبلغ المدفوع مقابل الفاتورة رقم', receipt.invoice_number || '', 10, y, 90);
-    drawFieldRow(doc, 'INVOICE DATE', 'تاريخ الفاتورة', receipt.invoice_date || '', 110, y, 90);
-    y += 14;
+    // Flatten the form to make it non-editable
+    if (availableFields.length > 0) {
+      form.flatten();
+      console.log('🔒 Form fields locked (flattened)');
+    }
+
+    // Save the PDF
+    const pdfBytes = await pdfDoc.save();
+    
+    // Generate filename
+    const receiptNum = receipt.receipt_number || receipt.id.slice(0, 8);
+    const receiptTypeLabel = isCommission ? 'Commission' : 'Deposit';
+    const clientName = receipt.client_name?.replace(/\s+/g, '_') || 'Client';
+    const filename = `${receiptTypeLabel}_Receipt_${receiptNum}_${clientName}.pdf`;
+
+    console.log(`✅ PDF Generated Successfully!`);
+    console.log(`   📄 Filename: ${filename}`);
+    console.log(`   ✓ ${successCount} fields populated`);
+
+    // Download the PDF
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('❌ Error generating PDF:', error);
+    throw error;
   }
-
-  // Payment Method checkboxes
-  doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
-  doc.text('طريقة الدفع', 10, y);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...BLACK);
-  doc.text('PAYMENT METHOD', 10, y + 4);
-  doc.setFont('helvetica', 'normal');
-
-  const methods = ['BENEFIT', 'BANK TT', 'CASH', 'CHEQUE'];
-  const methodLabels = ['بنفت', 'تحويل مصرفي', 'نقداً', 'شيك'];
-  methods.forEach((m, i) => {
-    const mx = 55 + i * 32;
-    doc.setFontSize(7);
-    doc.text(methodLabels[i], mx, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text(m, mx, y + 4);
-    doc.setFont('helvetica', 'normal');
-    drawCheckbox(doc, mx + 20, y - 1, receipt.payment_method === m);
-  });
-
-  // Cheque number
-  if (receipt.payment_method === 'CHEQUE') {
-    doc.setFontSize(7);
-    doc.text('رقم الشيك', 175, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text('CHEQUE No.', 175, y + 4);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text(receipt.cheque_number || '', 175, y + 8);
-  }
-  y += 12;
-
-  if (isCommission) {
-    // Paid By checkboxes
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    doc.text('تم الدفع', 10, y);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...BLACK);
-    doc.text('PAID BY', 10, y + 4);
-    doc.setFont('helvetica', 'normal');
-
-    const paidOptions = ['BUYER', 'SELLER', 'LANDLORD', 'LANDLORD REP.'];
-    const paidLabels = ['مشتري', 'بائع', 'مالك العقار', 'ممثل المالك'];
-    paidOptions.forEach((p, i) => {
-      const px = 55 + i * 32;
-      doc.setFontSize(7);
-      doc.text(paidLabels[i], px, y);
-      doc.setFont('helvetica', 'bold');
-      doc.text(p, px, y + 4);
-      doc.setFont('helvetica', 'normal');
-      drawCheckbox(doc, px + 22, y - 1, receipt.paid_by === p);
-    });
-    y += 12;
-  }
-
-  if (!isCommission) {
-    // Transaction type checkboxes for deposit
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    doc.text('نوع المعاملة', 10, y);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...BLACK);
-    doc.text('TRANSACTION TYPE', 10, y + 4);
-    doc.setFont('helvetica', 'normal');
-
-    const txTypes = ['HOLDING DEPOSIT', 'PARTIAL PAYMENT'];
-    const txLabels = ['عربون للمراجعة', 'دفعة جزئية'];
-    txTypes.forEach((t, i) => {
-      const tx = 65 + i * 45;
-      doc.setFontSize(7);
-      doc.text(txLabels[i], tx, y);
-      doc.setFont('helvetica', 'bold');
-      doc.text(t, tx, y + 4);
-      doc.setFont('helvetica', 'normal');
-      drawCheckbox(doc, tx + 35, y - 1, receipt.transaction_type === t);
-    });
-
-    doc.setFontSize(7);
-    doc.text('مبلغ الحجز', 160, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RESERVATION AMOUNT', 160, y + 4);
-    doc.setFont('helvetica', 'normal');
-    doc.setDrawColor(...GRAY);
-    doc.line(160, y + 7, 200, y + 7);
-    doc.setFontSize(8);
-    doc.text(receipt.reservation_amount?.toString() || '', 161, y + 6);
-    y += 12;
-  }
-
-  // Property Type checkboxes
-  doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
-  doc.text('نوع العقار', 10, y);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...BLACK);
-  doc.text('PROPERTY TYPE', 10, y + 4);
-  doc.setFont('helvetica', 'normal');
-
-  const propTypes = ['LAND', 'FLAT', 'VILLA', 'BUILDING', 'OTHER'];
-  const propLabels = ['أرض', 'شقة', 'فيلا', 'بناية', 'عقارات أخرى'];
-  propTypes.forEach((p, i) => {
-    const px = 50 + i * 28;
-    doc.setFontSize(7);
-    doc.text(propLabels[i], px, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text(p, px, y + 4);
-    doc.setFont('helvetica', 'normal');
-    drawCheckbox(doc, px + 16, y - 1, receipt.property_type === p);
-  });
-  y += 14;
-
-  if (isCommission) {
-    // Transaction details
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    doc.text('وصف المعاملة', 10, y);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...BLACK);
-    doc.text('TRANSACTION DETAILS:', 10, y + 4);
-    doc.setFont('helvetica', 'normal');
-    doc.setDrawColor(...GRAY);
-    doc.rect(10, y + 6, 190, 25);
-    doc.setFontSize(8);
-    doc.text(receipt.transaction_details || '', 12, y + 11, { maxWidth: 186 });
-  } else {
-    // Deposit property details
-    const fields = [
-      [
-        { label: 'PROPERTY DETAILS', ar: 'تفاصيل العقار', val: receipt.property_details },
-        { label: 'TITLE No.', ar: 'رقم الوثيقة', val: receipt.title_number },
-        { label: 'CASE No.', ar: 'رقم المقدمة', val: receipt.case_number },
-        { label: 'PLOT No.', ar: 'رقم القطعة', val: receipt.plot_number },
-      ],
-      [
-        { label: 'PROPERTY SIZE', ar: 'مساحة العقار', val: receipt.property_size },
-        { label: 'SIZE IN M²', ar: 'المساحة بالمتر²', val: receipt.size_m2 },
-        { label: 'SIZE IN F²', ar: 'مساحة بالقدم²', val: receipt.size_f2 },
-        { label: 'NO. OF ROADS', ar: 'عدد الشوارع', val: receipt.number_of_roads },
-      ],
-      [
-        { label: 'SALES PRICE DETAILS IN BD', ar: 'تفاصيل سعر البيع بالدينار', val: receipt.price_per_f2 },
-        { label: 'PROPERTY TOTAL SALES PRICE', ar: 'إجمالي سعر بيع العقار', val: receipt.total_sales_price },
-      ],
-      [
-        { label: 'PROPERTY ADDRESS', ar: 'عنوان العقار', val: receipt.property_address },
-        { label: 'UNIT No.', ar: 'رقم الوحدة', val: receipt.unit_number },
-        { label: 'BLDG No.', ar: 'رقم المبنى', val: receipt.building_number },
-        { label: 'ROAD No.', ar: 'رقم الشارع', val: receipt.road_number },
-        { label: 'BLOCK No.', ar: 'رقم المجمع', val: receipt.block_number },
-      ],
-      [
-        { label: 'PROPERTY LOCATION', ar: 'موقع العقار', val: receipt.property_location },
-        { label: 'LAND No.', ar: 'رقم الأرض', val: receipt.land_number },
-        { label: 'PROJECT NAME', ar: 'اسم المشروع او المخطط', val: receipt.project_name },
-        { label: 'AREA NAME', ar: 'اسم المنطقة', val: receipt.area_name },
-      ],
-    ];
-
-    fields.forEach((row) => {
-      const colW = 190 / row.length;
-      row.forEach((f, i) => {
-        drawFieldRow(doc, f.label, f.ar, f.val || '', 10 + i * colW, y, colW - 5);
-      });
-      y += 12;
-    });
-
-    // Buyer commission note
-    doc.setFontSize(6);
-    doc.setTextColor(...BLACK);
-    doc.text('OUR BUYER COMMISSION FOR THIS DEAL WILL BE 1.1% OF THE PROPERTY TOTAL PURCHASED PRICE INCLUSIVE OF VAT = BD:', 10, y);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.text(receipt.buyer_commission_bd || '', 190, y, { align: 'right' });
-    doc.setFont('helvetica', 'normal');
-  }
-
-  drawFooter(doc, receipt);
-
-  const filename = `${receipt.receipt_type}_receipt_${receipt.receipt_number || receipt.id.slice(0, 8)}.pdf`;
-  doc.save(filename);
 }
