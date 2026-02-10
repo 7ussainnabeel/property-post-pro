@@ -1,9 +1,13 @@
 
--- Create role enum
-CREATE TYPE public.app_role AS ENUM ('admin', 'user');
+-- Create role enum (only if it doesn't exist)
+DO $$ BEGIN
+  CREATE TYPE public.app_role AS ENUM ('admin', 'user');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- Create user_roles table FIRST
-CREATE TABLE public.user_roles (
+CREATE TABLE IF NOT EXISTS public.user_roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   role app_role NOT NULL,
@@ -11,6 +15,10 @@ CREATE TABLE public.user_roles (
 );
 
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist before recreating
+DROP POLICY IF EXISTS "Users can view own roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins can manage all roles" ON public.user_roles;
 
 -- Security definer function to check roles (before any policies use it)
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role app_role)
@@ -30,8 +38,14 @@ $$;
 CREATE POLICY "Users can view own roles" ON public.user_roles FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Admins can manage all roles" ON public.user_roles FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 
+-- Drop existing policies on profiles if they exist
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
+
 -- Create profiles table
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT,
@@ -49,8 +63,17 @@ CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING
 CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
 
+-- Drop existing policies on receipts if they exist
+DROP POLICY IF EXISTS "Users can view own receipts" ON public.receipts;
+DROP POLICY IF EXISTS "Admins can view all receipts" ON public.receipts;
+DROP POLICY IF EXISTS "Users can create receipts" ON public.receipts;
+DROP POLICY IF EXISTS "Users can update own receipts" ON public.receipts;
+DROP POLICY IF EXISTS "Admins can update all receipts" ON public.receipts;
+DROP POLICY IF EXISTS "Users can delete own receipts" ON public.receipts;
+DROP POLICY IF EXISTS "Admins can delete all receipts" ON public.receipts;
+
 -- Create receipts table
-CREATE TABLE public.receipts (
+CREATE TABLE IF NOT EXISTS public.receipts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE SET NULL,
   branch TEXT,
@@ -110,6 +133,11 @@ CREATE POLICY "Users can update own receipts" ON public.receipts FOR UPDATE USIN
 CREATE POLICY "Admins can update all receipts" ON public.receipts FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
 CREATE POLICY "Users can delete own receipts" ON public.receipts FOR DELETE USING (auth.uid() = user_id);
 CREATE POLICY "Admins can delete all receipts" ON public.receipts FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+-- Drop existing triggers if they exist
+DROP TRIGGER IF EXISTS update_receipts_updated_at ON public.receipts;
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
 -- Triggers
 CREATE TRIGGER update_receipts_updated_at
