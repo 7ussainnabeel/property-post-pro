@@ -177,37 +177,39 @@ export default function DeletedDescriptions() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="gradient-hero py-6 px-4">
+      <header className="gradient-hero py-4 md:py-6 px-4">
         <div className="container max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/history">
-                <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Back
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-display font-bold text-primary-foreground flex items-center gap-2">
-                  <Archive className="h-7 w-7" />
-                  Deleted Listings
-                </h1>
-                <p className="text-sm text-primary-foreground/80 mt-1">
-                  {showAllBranches 
-                    ? 'Viewing all branches' 
-                    : selectedBranch && getBranchName(selectedBranch)}
-                </p>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                <Link to="/history">
+                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 shrink-0">
+                    <ChevronLeft className="h-4 w-4 md:mr-1" />
+                    <span className="hidden sm:inline">Back</span>
+                  </Button>
+                </Link>
+                <div className="min-w-0">
+                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-display font-bold text-primary-foreground flex items-center gap-2">
+                    <Archive className="h-5 w-5 md:h-7 md:w-7 shrink-0" />
+                    <span className="truncate">Deleted Listings</span>
+                  </h1>
+                  <p className="text-xs sm:text-sm text-primary-foreground/80 mt-1 truncate">
+                    {showAllBranches 
+                      ? 'Viewing all branches' 
+                      : selectedBranch && getBranchName(selectedBranch)}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 onClick={() => setShowAllBranches(!showAllBranches)}
                 variant="outline"
                 size="sm"
                 className="bg-white/10 border-white/20 text-white hover:bg-white/20"
               >
-                <Filter className="h-4 w-4 mr-2" />
-                {showAllBranches ? 'My Branch Only' : 'All Branches'}
+                <Filter className="h-4 w-4 mr-1 md:mr-2" />
+                <span className="text-xs sm:text-sm">{showAllBranches ? 'My Branch' : 'All Branches'}</span>
               </Button>
               <Button 
                 onClick={fetchDeletedItems} 
@@ -215,8 +217,8 @@ export default function DeletedDescriptions() {
                 size="sm" 
                 className="bg-white/10 border-white/20 text-white hover:bg-white/20"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
+                <RefreshCw className="h-4 w-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Refresh</span>
               </Button>
             </div>
           </div>
@@ -236,19 +238,19 @@ export default function DeletedDescriptions() {
               className="pl-9"
             />
           </div>
-          <div className="mt-3 text-sm text-muted-foreground">
+          <div className="mt-3 text-xs sm:text-sm text-muted-foreground">
             {filteredItems.length} deleted listing(s)
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="container max-w-7xl mx-auto py-8 px-4">
+      <main className="container max-w-7xl mx-auto py-6 sm:py-8 px-4">
         {/* Warning Alert */}
         <Alert className="mb-6">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Deleted Listings</AlertTitle>
-          <AlertDescription>
+          <AlertTitle className="text-sm sm:text-base">Deleted Listings</AlertTitle>
+          <AlertDescription className="text-xs sm:text-sm">
             These listings have been soft-deleted. You can restore them or permanently delete them. 
             Permanent deletion cannot be undone.
           </AlertDescription>
@@ -259,10 +261,10 @@ export default function DeletedDescriptions() {
             <RefreshCw className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Archive className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No deleted listings</h3>
-            <p className="text-muted-foreground mb-6">
+          <div className="flex flex-col items-center justify-center py-20 px-4">
+            <Archive className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4" />
+            <h3 className="text-lg sm:text-xl font-semibold mb-2 text-center">No deleted listings</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 text-center">
               {searchQuery ? 'Try adjusting your search' : 'Your deleted listings will appear here'}
             </p>
             <Link to="/history">
@@ -273,62 +275,68 @@ export default function DeletedDescriptions() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-6">
+          <div className="grid gap-4 sm:gap-6">
             {filteredItems.map((item) => (
               <Card key={item.id} className="overflow-hidden border-destructive/50">
-                <CardHeader className="bg-destructive/5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="outline">{item.property_type}</Badge>
-                        <Badge variant="secondary">{item.category}</Badge>
-                        <Badge>{item.listing_type}</Badge>
-                        <Badge variant="destructive">Deleted</Badge>
+                <CardHeader className="bg-destructive/5 p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <Badge variant="outline" className="text-xs">{item.property_type}</Badge>
+                        <Badge variant="secondary" className="text-xs">{item.category}</Badge>
+                        <Badge className="text-xs">{item.listing_type}</Badge>
+                        <Badge variant="destructive" className="text-xs">Deleted</Badge>
                       </div>
-                      <CardTitle className="text-xl flex items-center gap-2">
-                        <Building2 className="h-5 w-5" />
-                        {item.property_finder_title_en || `${item.property_type} in ${item.location}`}
+                      <CardTitle className="text-base sm:text-lg md:text-xl flex items-center gap-2 mb-3">
+                        <Building2 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                        <span className="break-words">
+                          {item.property_finder_title_en || `${item.property_type} in ${item.location}`}
+                        </span>
                       </CardTitle>
-                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {item.location}
+                          <MapPin className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                          <span className="truncate">{item.location}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          Deleted: {format(new Date(item.deleted_at), 'MMM dd, yyyy HH:mm')}
+                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                          <span className="whitespace-nowrap">
+                            <span className="hidden sm:inline">Deleted: {format(new Date(item.deleted_at), 'MMM dd, yyyy HH:mm')}</span>
+                            <span className="sm:hidden">Del: {format(new Date(item.deleted_at), 'MMM dd')}</span>
+                          </span>
                         </div>
-                        <div>By: {item.deleted_by}</div>
+                        <div className="whitespace-nowrap">By: {item.deleted_by}</div>
                         {showAllBranches && item.branch && (
-                          <Badge variant="outline" className="flex items-center gap-1">
+                          <Badge variant="outline" className="flex items-center gap-1 text-xs">
                             <Building2 className="h-3 w-3" />
                             {getBranchName(item.branch)}
                           </Badge>
                         )}
-                        {item.size && <div>{item.size} sqm</div>}
-                        {item.bedrooms && <div>{item.bedrooms} beds</div>}
-                        {item.bathrooms && <div>{item.bathrooms} baths</div>}
-                        <div className="font-semibold text-foreground">
+                        {item.size && <div className="whitespace-nowrap">{item.size} sqm</div>}
+                        {item.bedrooms && <div className="whitespace-nowrap">{item.bedrooms} beds</div>}
+                        {item.bathrooms && <div className="whitespace-nowrap">{item.bathrooms} baths</div>}
+                        <div className="font-semibold text-foreground whitespace-nowrap">
                           {item.price} {item.currency}
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 justify-end sm:justify-start flex-wrap sm:flex-col">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => restoreItem(item.id)}
                         disabled={restoring === item.id}
-                        className="text-green-600 hover:text-green-700"
+                        className="text-green-600 hover:text-green-700 text-xs"
                       >
                         {restoring === item.id ? (
                           <>
-                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            Restoring...
+                            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
+                            <span className="hidden sm:inline">Restoring...</span>
+                            <span className="sm:hidden">...</span>
                           </>
                         ) : (
                           <>
-                            <RotateCcw className="h-4 w-4 mr-2" />
+                            <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                             Restore
                           </>
                         )}
@@ -339,10 +347,11 @@ export default function DeletedDescriptions() {
                             variant="outline"
                             size="sm"
                             disabled={permanentDeleting === item.id}
-                            className="text-destructive hover:text-destructive"
+                            className="text-destructive hover:text-destructive text-xs"
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Forever
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            <span className="hidden sm:inline">Delete Forever</span>
+                            <span className="sm:hidden">Delete</span>
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -367,12 +376,12 @@ export default function DeletedDescriptions() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="p-4 sm:p-6 sm:pt-6">
                   <Tabs defaultValue="propertyfinder" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="propertyfinder">Property Finder</TabsTrigger>
-                      <TabsTrigger value="instagram">Instagram</TabsTrigger>
-                      <TabsTrigger value="website">Website</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-3 h-auto">
+                      <TabsTrigger value="propertyfinder" className="text-xs sm:text-sm px-2 py-2">Property Finder</TabsTrigger>
+                      <TabsTrigger value="instagram" className="text-xs sm:text-sm px-2 py-2">Instagram</TabsTrigger>
+                      <TabsTrigger value="website" className="text-xs sm:text-sm px-2 py-2">Website</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="propertyfinder" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">

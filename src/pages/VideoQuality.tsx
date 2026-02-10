@@ -525,22 +525,22 @@ const VideoQuality = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link to="/">
-              <Button variant="outline" size="icon" className="border-slate-600 hover:bg-slate-700">
+              <Button variant="outline" size="icon" className="border-slate-600 hover:bg-slate-700 shrink-0">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <div className="flex items-center gap-3">
-              <Video className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold text-white">Video Quality Check</h1>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <Video className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">Video Quality Check</h1>
             </div>
           </div>
           <Link to="/deleted-videos">
-            <Button variant="outline" className="border-red-500/50 bg-red-950/30 hover:bg-red-900/40 text-red-100 hover:border-red-400">
+            <Button variant="outline" className="border-red-500/50 bg-red-950/30 hover:bg-red-900/40 text-red-100 hover:border-red-400 w-full sm:w-auto text-sm">
               <Archive className="h-4 w-4 mr-2" />
               Deleted Videos
             </Button>
@@ -548,20 +548,20 @@ const VideoQuality = () => {
         </div>
 
         {/* Add Video Form */}
-        <Card className="mb-8 bg-slate-800/50 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Plus className="h-5 w-5" />
+        <Card className="mb-6 sm:mb-8 bg-slate-800/50 border-slate-700">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               Upload Video
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+              <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm text-slate-300">Agent Name *</label>
+                  <label className="text-xs sm:text-sm text-slate-300">Agent Name *</label>
                   <Select value={agentName} onValueChange={setAgentName}>
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 sm:h-10 text-sm">
                       <SelectValue placeholder="Select agent" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-700 border-slate-600">
@@ -569,7 +569,7 @@ const VideoQuality = () => {
                         <SelectItem 
                           key={staff.phone} 
                           value={staff.name}
-                          className="text-white hover:bg-slate-600"
+                          className="text-white hover:bg-slate-600 text-sm"
                         >
                           {staff.name}
                         </SelectItem>
@@ -578,56 +578,56 @@ const VideoQuality = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-slate-300">Property ID *</label>
+                  <label className="text-xs sm:text-sm text-slate-300">Property ID *</label>
                   <Input
                     placeholder="Enter property ID"
                     value={propertyId}
                     onChange={(e) => setPropertyId(e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white"
+                    className="bg-slate-700 border-slate-600 text-white h-9 sm:h-10 text-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm text-slate-300">Title (optional)</label>
+                <label className="text-xs sm:text-sm text-slate-300">Title (optional)</label>
                 <Input
                   placeholder="Video title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="bg-slate-700 border-slate-600 text-white"
+                  className="bg-slate-700 border-slate-600 text-white h-9 sm:h-10 text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm text-slate-300">Property URL *</label>
+                <label className="text-xs sm:text-sm text-slate-300">Property URL *</label>
                 <Input
                   placeholder="https://example.com/property/..."
                   value={propertyUrl}
                   onChange={(e) => setPropertyUrl(e.target.value)}
-                  className="bg-slate-700 border-slate-600 text-white"
+                  className="bg-slate-700 border-slate-600 text-white h-9 sm:h-10 text-sm"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm text-slate-300">Video File * (Max 100MB)</label>
-                <div className="flex items-center gap-4">
+                <label className="text-xs sm:text-sm text-slate-300">Video File * (Max 100MB)</label>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                   <Input
                     ref={fileInputRef}
                     type="file"
                     accept="video/*"
                     onChange={handleFileSelect}
-                    className="bg-slate-700 border-slate-600 text-white file:bg-slate-600 file:text-white file:border-0 file:mr-4"
+                    className="bg-slate-700 border-slate-600 text-white file:bg-slate-600 file:text-white file:border-0 file:mr-2 sm:file:mr-4 text-xs sm:text-sm h-9 sm:h-10"
                   />
                   {selectedFile && (
-                    <Badge variant="secondary" className="shrink-0">
+                    <Badge variant="secondary" className="shrink-0 text-xs">
                       {selectedFile.name}
                     </Badge>
                   )}
                 </div>
               </div>
 
-              <Button type="submit" disabled={submitting} className="w-full md:w-auto">
+              <Button type="submit" disabled={submitting} className="w-full sm:w-auto text-sm h-9 sm:h-10">
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -646,10 +646,10 @@ const VideoQuality = () => {
 
         {/* Videos List */}
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white">Video Submissions ({videos.length})</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-white text-base sm:text-lg">Video Submissions ({videos.length})</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
             {/* Search Bar */}
             <div className="mb-4">
               <div className="relative">
@@ -658,13 +658,13 @@ const VideoQuality = () => {
                   placeholder="Search by agent name, property ID, or title..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-slate-700 border-slate-600 text-white pl-10"
+                  className="bg-slate-700 border-slate-600 text-white pl-10 h-9 sm:h-10 text-sm"
                 />
               </div>
             </div>
 
             {loading ? (
-              <div className="text-center py-8 text-slate-400">Loading videos...</div>
+              <div className="text-center py-8 text-slate-400 text-sm">Loading videos...</div>
             ) : (() => {
               // Filter videos based on search query
               const filteredVideos = videos.filter(video => {
@@ -678,11 +678,192 @@ const VideoQuality = () => {
               });
 
               return filteredVideos.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">
+                <div className="text-center py-8 text-slate-400 text-sm px-4">
                   {searchQuery ? "No videos found matching your search" : "No videos submitted yet. Upload a video above to get started."}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <>
+                  {/* Mobile Card View */}
+                  <div className="block lg:hidden space-y-4">
+                    {filteredVideos.map((video) => (
+                      <Card key={video.id} className="bg-slate-700/50 border-slate-600">
+                        <CardContent className="p-4 space-y-3">
+                          {/* Video Preview */}
+                          <div className="flex justify-center">
+                            {renderVideoPreview(video)}
+                          </div>
+                          
+                          {/* Video Info */}
+                          <div className="space-y-2 text-sm">
+                            <div>
+                              <span className="text-slate-400">Title: </span>
+                              <span className="text-white">{video.title || "-"}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-400">Agent: </span>
+                              <span className="text-white">{video.agent_name || "-"}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-400">Property ID: </span>
+                              <span className="text-white">{video.property_id || "-"}</span>
+                            </div>
+                            
+                            {/* AI Analysis */}
+                            <div>
+                              <span className="text-slate-400">AI Analysis: </span>
+                              {video.reviewed_at ? (
+                                <div className="mt-2 space-y-2">
+                                  <Badge 
+                                    variant="outline" 
+                                    className={`text-xs ${getOrientationBadgeStyle(video.orientation)}`}
+                                  >
+                                    {video.orientation || "Unknown"}
+                                  </Badge>
+                                  <div className="flex gap-4 text-xs">
+                                    <span className="text-slate-400">Stability: <span className="text-white font-medium">{video.stability_rating || 0}/5</span></span>
+                                    <span className="text-slate-400">Overall: <span className="text-white font-medium">{video.overall_rating || 0}/5</span></span>
+                                  </div>
+                                  {video.ai_feedback && (
+                                    <Button
+                                      variant="link"
+                                      size="sm"
+                                      className="h-auto p-0 text-xs text-blue-400 hover:text-blue-300"
+                                      onClick={() => {
+                                        toast({
+                                          title: "AI Analysis Feedback",
+                                          description: video.ai_feedback,
+                                          duration: 8000,
+                                        });
+                                      }}
+                                    >
+                                      View Details
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : (
+                                <Badge variant="outline" className="text-xs text-white border-slate-600 mt-1">
+                                  Not analyzed
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* YouTube URL */}
+                            <div>
+                              <span className="text-slate-400">YouTube: </span>
+                              {video.youtube_url ? (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <LinkIcon className="h-3 w-3 text-green-400 shrink-0" />
+                                  <span className="text-green-400 text-xs truncate">{video.youtube_url}</span>
+                                </div>
+                              ) : (
+                                <Badge variant="outline" className="text-white border-slate-600 text-xs mt-1">
+                                  Not added
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Actions */}
+                          <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-600">
+                            {video.video_file_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => analyzeVideo(video)}
+                                disabled={analyzingVideoId === video.id}
+                                className="border-slate-600 hover:bg-slate-700 text-xs flex-1 min-w-[100px]"
+                              >
+                                {analyzingVideoId === video.id ? (
+                                  <>
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                    Analyzing
+                                  </>
+                                ) : (
+                                  <>
+                                    <Video className="h-3 w-3 mr-1" />
+                                    Analyze
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditOpen(video)}
+                              className="border-slate-600 hover:bg-slate-700 text-xs flex-1 min-w-[100px]"
+                            >
+                              <Edit2 className="h-3 w-3 mr-1" />
+                              Edit URLs
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                copyYoutubeUrl(video.youtube_url);
+                                if (video.youtube_url) {
+                                  setCopiedId(video.id);
+                                  setTimeout(() => setCopiedId(null), 2000);
+                                }
+                              }}
+                              className="border-slate-600 hover:bg-slate-700 text-xs"
+                              disabled={!video.youtube_url}
+                            >
+                              {copiedId === video.id ? (
+                                <CheckCircle className="h-3 w-3 text-green-500" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                            {video.video_file_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={async () => {
+                                  try {
+                                    const response = await fetch(video.video_file_url!);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = `${video.title || 'video'}.mp4`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    window.URL.revokeObjectURL(url);
+                                    toast({
+                                      title: "Download Started",
+                                      description: "Video download has been initiated.",
+                                    });
+                                  } catch (error) {
+                                    toast({
+                                      title: "Download Failed",
+                                      description: "Failed to download the video. Please try again.",
+                                      variant: "destructive",
+                                    });
+                                  }
+                                }}
+                                className="border-slate-600 hover:bg-slate-700 text-xs"
+                              >
+                                <Download className="h-3 w-3" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteClick(video.id, video.video_file_url)}
+                              className="text-xs"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-slate-700">
@@ -860,6 +1041,7 @@ const VideoQuality = () => {
                   </TableBody>
                 </Table>
               </div>
+                </>
               );
             })()}
           </CardContent>

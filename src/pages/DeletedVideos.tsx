@@ -196,23 +196,23 @@ const DeletedVideos = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link to="/video-quality">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-                <ArrowLeft className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 shrink-0">
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-              <Trash2 className="h-8 w-8" />
-              Deleted Video Recovery
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <Trash2 className="h-6 w-6 sm:h-8 sm:w-8" />
+              <span className="truncate">Deleted Video Recovery</span>
             </h1>
           </div>
           {videos.length > 0 && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" className="bg-green-600 hover:bg-green-700 text-white border-green-600">
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                <Button variant="outline" className="bg-green-600 hover:bg-green-700 text-white border-green-600 w-full sm:w-auto text-xs sm:text-sm">
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                   Restore All
                 </Button>
               </AlertDialogTrigger>
@@ -235,8 +235,8 @@ const DeletedVideos = () => {
         {videos.length > 0 && (
           <Alert className="mb-6 bg-amber-950/50 border-amber-500">
             <AlertCircle className="h-4 w-4 text-amber-500" />
-            <AlertTitle className="text-amber-300">Recovery Center</AlertTitle>
-            <AlertDescription className="text-amber-200">
+            <AlertTitle className="text-amber-300 text-sm sm:text-base">Recovery Center</AlertTitle>
+            <AlertDescription className="text-amber-200 text-xs sm:text-sm">
               These videos have been deleted but can still be restored. Permanent deletion will remove them forever.
             </AlertDescription>
           </Alert>
@@ -250,30 +250,125 @@ const DeletedVideos = () => {
                 placeholder="Search by title, agent, property ID, or deleted by..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400"
+                className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 h-9 sm:h-10 text-sm"
               />
             </div>
           </div>
         )}
 
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-white text-base sm:text-lg">
               Deleted Videos ({filteredVideos.length})
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
             {loading ? (
-              <div className="text-center py-8 text-slate-400">
+              <div className="text-center py-8 text-slate-400 text-sm">
                 Loading deleted videos...
               </div>
             ) : filteredVideos.length === 0 ? (
-              <div className="text-center py-8 text-slate-400">
+              <div className="text-center py-8 text-slate-400 text-sm px-4">
                 {searchQuery ? "No matching deleted videos found" : "No deleted videos found"}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
+              <>
+                {/* Mobile Card View */}
+                <div className="block lg:hidden space-y-4">
+                  {filteredVideos.map((video) => (
+                    <Card key={video.id} className="bg-slate-700/50 border-slate-600">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="space-y-2 text-sm">
+                          <div>
+                            <span className="text-slate-400">Title: </span>
+                            <span className="text-white">{video.title || "Untitled"}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400">Agent: </span>
+                            <span className="text-white">{video.agent_name || "N/A"}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400">Property ID: </span>
+                            <span className="text-white">{video.property_id || "N/A"}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400">Deleted: </span>
+                            <span className="text-white">{video.deleted_at ? formatDate(video.deleted_at) : "N/A"}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400">Deleted By: </span>
+                            <span className="text-white">{video.deleted_by || "Unknown"}</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-600">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => restoreVideo(video.id)}
+                            disabled={restoring === video.id}
+                            className="bg-green-600 hover:bg-green-700 text-white border-green-600 flex-1 min-w-[120px] text-xs"
+                          >
+                            {restoring === video.id ? (
+                              <>
+                                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                                Restoring...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Restore
+                              </>
+                            )}
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                disabled={permanentDeleting === video.id}
+                                className="flex-1 min-w-[120px] text-xs"
+                              >
+                                {permanentDeleting === video.id ? (
+                                  <>
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Delete Forever
+                                  </>
+                                )}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the video
+                                  "{video.title || 'Untitled'}" and remove all associated data from storage.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => permanentDelete(video.id, video.video_file_url)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete Forever
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                {/* Desktop Table View */}
+                <div className="hidden lg:block overflow-x-auto">
+              <Table>
                   <TableHeader>
                     <TableRow className="border-slate-700 hover:bg-slate-700/50">
                       <TableHead className="text-slate-300">Title</TableHead>
@@ -363,6 +458,7 @@ const DeletedVideos = () => {
                   </TableBody>
                 </Table>
               </div>
+                </>
             )}
           </CardContent>
         </Card>
