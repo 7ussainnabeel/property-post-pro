@@ -211,26 +211,24 @@ export default function HistoryPage() {
       {/* Header */}
       <header className="gradient-hero py-4 md:py-6 px-4">
         <div className="container max-w-7xl mx-auto">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 md:gap-4 min-w-0">
-                <Link to="/">
-                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 shrink-0">
-                    <ChevronLeft className="h-4 w-4 md:mr-1" />
-                    <span className="hidden sm:inline">Back</span>
-                  </Button>
-                </Link>
-                <div className="min-w-0">
-                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-display font-bold text-primary-foreground flex items-center gap-2">
-                    <History className="h-5 w-5 md:h-7 md:w-7 shrink-0" />
-                    <span className="truncate">Generation History</span>
-                  </h1>
-                  <p className="text-xs sm:text-sm text-primary-foreground/80 mt-1 truncate">
-                    {showAllBranches 
-                      ? 'Viewing all branches' 
-                      : selectedBranch && getBranchName(selectedBranch)}
-                  </p>
-                </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2 md:gap-4 min-w-0">
+              <Link to="/">
+                <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 shrink-0">
+                  <ChevronLeft className="h-4 w-4 md:mr-1" />
+                  <span className="hidden sm:inline">Back</span>
+                </Button>
+              </Link>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-display font-bold text-primary-foreground flex items-center gap-2">
+                  <History className="h-5 w-5 md:h-7 md:w-7 shrink-0" />
+                  <span className="truncate">Generation History</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-primary-foreground/80 mt-1 truncate">
+                  {showAllBranches 
+                    ? 'Viewing all branches' 
+                    : selectedBranch && getBranchName(selectedBranch)}
+                </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -413,8 +411,7 @@ export default function HistoryPage() {
                     <TabsList className="grid w-full grid-cols-3 h-auto">
                       <TabsTrigger value="propertyfinder" className="text-xs sm:text-sm px-2 py-2">Property Finder</TabsTrigger>
                       <TabsTrigger value="instagram" className="text-xs sm:text-sm px-2 py-2">Instagram</TabsTrigger>
-                      <TabsTrigger value="website" className="text-xs sm:text-sm px-2 py-2am">Instagram</TabsTrigger>
-                      <TabsTrigger value="website">Website</TabsTrigger>
+                      <TabsTrigger value="website" className="text-xs sm:text-sm px-2 py-2">Website</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="propertyfinder" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
