@@ -116,6 +116,210 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          branch: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          branch?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          branch?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      receipts: {
+        Row: {
+          agent_name: string | null
+          amount_paid_bd: number | null
+          amount_paid_words: string | null
+          area_name: string | null
+          balance_amount_bd: number | null
+          block_number: string | null
+          branch: string | null
+          building_number: string | null
+          buyer_commission_bd: string | null
+          case_number: string | null
+          cheque_number: string | null
+          client_id_number: string | null
+          client_name: string | null
+          created_at: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          full_amount_due_bd: number | null
+          id: string
+          invoice_date: string | null
+          invoice_number: string | null
+          land_number: string | null
+          number_of_roads: string | null
+          paid_by: string | null
+          payment_date: string | null
+          payment_method: string | null
+          pdf_url: string | null
+          plot_number: string | null
+          price_per_f2: string | null
+          project_name: string | null
+          property_address: string | null
+          property_details: string | null
+          property_location: string | null
+          property_size: string | null
+          property_type: string | null
+          receipt_number: string | null
+          receipt_type: string
+          reservation_amount: number | null
+          road_number: string | null
+          size_f2: string | null
+          size_m2: string | null
+          special_note: string | null
+          title_number: string | null
+          total_sales_price: string | null
+          transaction_details: string | null
+          transaction_type: string | null
+          unit_number: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          agent_name?: string | null
+          amount_paid_bd?: number | null
+          amount_paid_words?: string | null
+          area_name?: string | null
+          balance_amount_bd?: number | null
+          block_number?: string | null
+          branch?: string | null
+          building_number?: string | null
+          buyer_commission_bd?: string | null
+          case_number?: string | null
+          cheque_number?: string | null
+          client_id_number?: string | null
+          client_name?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          full_amount_due_bd?: number | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          land_number?: string | null
+          number_of_roads?: string | null
+          paid_by?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          pdf_url?: string | null
+          plot_number?: string | null
+          price_per_f2?: string | null
+          project_name?: string | null
+          property_address?: string | null
+          property_details?: string | null
+          property_location?: string | null
+          property_size?: string | null
+          property_type?: string | null
+          receipt_number?: string | null
+          receipt_type: string
+          reservation_amount?: number | null
+          road_number?: string | null
+          size_f2?: string | null
+          size_m2?: string | null
+          special_note?: string | null
+          title_number?: string | null
+          total_sales_price?: string | null
+          transaction_details?: string | null
+          transaction_type?: string | null
+          unit_number?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          agent_name?: string | null
+          amount_paid_bd?: number | null
+          amount_paid_words?: string | null
+          area_name?: string | null
+          balance_amount_bd?: number | null
+          block_number?: string | null
+          branch?: string | null
+          building_number?: string | null
+          buyer_commission_bd?: string | null
+          case_number?: string | null
+          cheque_number?: string | null
+          client_id_number?: string | null
+          client_name?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          full_amount_due_bd?: number | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          land_number?: string | null
+          number_of_roads?: string | null
+          paid_by?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          pdf_url?: string | null
+          plot_number?: string | null
+          price_per_f2?: string | null
+          project_name?: string | null
+          property_address?: string | null
+          property_details?: string | null
+          property_location?: string | null
+          property_size?: string | null
+          property_type?: string | null
+          receipt_number?: string | null
+          receipt_type?: string
+          reservation_amount?: number | null
+          road_number?: string | null
+          size_f2?: string | null
+          size_m2?: string | null
+          special_note?: string | null
+          title_number?: string | null
+          total_sales_price?: string | null
+          transaction_details?: string | null
+          transaction_type?: string | null
+          unit_number?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_submissions: {
         Row: {
           agent_name: string | null
@@ -188,9 +392,16 @@ export type Database = {
     }
     Functions: {
       generate_invoice_number: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -317,6 +528,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
