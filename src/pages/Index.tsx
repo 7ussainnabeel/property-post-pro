@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { PropertyForm } from '@/components/PropertyForm';
 import { GeneratedContent } from '@/components/GeneratedContent';
 import { PropertyInput, GeneratedContent as GeneratedContentType } from '@/types/property';
-import { Building2, Sparkles, Video, History } from 'lucide-react';
+import { Building2, Sparkles, Video, History, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -117,6 +117,12 @@ const Index = () => {
             
             {/* Navigation Links */}
             <div className="flex gap-2">
+              <Link to="/receipts">
+                <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                  <FileText className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Receipts</span>
+                </Button>
+              </Link>
               <Link to="/video-quality">
                 <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                   <Video className="h-4 w-4 md:mr-2" />
