@@ -58,7 +58,7 @@ export default function Auth() {
       <Card className="w-full max-w-md sm:max-w-lg">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <img src="/CarltonLogo.png" alt="Carlton Real Estate" className="h-10" />
+            <img src="/LOGO.png" alt="Carlton Real Estate" className="h-10" />
           </div>
           <CardTitle className="text-xl sm:text-2xl font-display">
             {isLogin ? 'Sign In' : 'Create Account'}
