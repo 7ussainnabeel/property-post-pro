@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,7 @@ import { Plus, ChevronLeft, FileText, Edit, Trash2, Download, LogOut, Search, Fi
 import { Receipt } from '@/types/receipt';
 import ReceiptFormDialog from '@/components/receipts/ReceiptFormDialog';
 import { generateReceiptPDF } from '@/utils/pdfGenerator';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default function Receipts() {
   const { user, signOut, isAdmin, isAccountant } = useAuth();
@@ -32,6 +33,8 @@ export default function Receipts() {
   const [previewReceipt, setPreviewReceipt] = useState<Receipt | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [receiptToDelete, setReceiptToDelete] = useState<string | null>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  useThemeColor(heroRef);
 
   const canViewAllBranches = isAdmin || isAccountant;
 
@@ -228,7 +231,7 @@ export default function Receipts() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="gradient-hero py-4 md:py-6 px-4">
+      <header ref={heroRef} className="gradient-hero py-4 md:py-6 px-4">
         <div className="container max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2 md:gap-4 min-w-0">

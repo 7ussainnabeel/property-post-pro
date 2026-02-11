@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { ArrowLeft, Video, Plus, Trash2, Copy, CheckCircle, Loader2, Edit2, Upload, Link as LinkIcon, Download, Search, Archive } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -88,6 +89,7 @@ const VideoQuality = () => {
   const [deleteUsername, setDeleteUsername] = useState("");
   const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
+  useThemeColor(undefined, '#0f172a', '#0f172a');
 
   const getOrientationBadgeStyle = (orientation: string | null) => {
     if (orientation === 'Horizontal') {

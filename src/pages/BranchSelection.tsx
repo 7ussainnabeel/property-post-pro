@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ export default function BranchSelection() {
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const navigate = useNavigate();
   const { setSelectedBranch: setContextBranch } = useBranch();
+  useThemeColor(undefined, '#f5f7fa', '#f5f7fa');
 
   const handleBranchSelect = (branchId: string) => {
     setSelectedBranch(branchId);
