@@ -20,12 +20,13 @@
  * - invoice_number, invoice_date, transaction_details
  * - paid_by_buyer, paid_by_seller, paid_by_landlord, paid_by_landlord_rep
  * 
- * Deposit-specific fields:
- * - transaction_type_holding, transaction_type_partial, reservation_amount
- * - property_details, title_number, case_number, plot_number, property_size
- * - size_m2, size_f2, number_of_roads, price_per_f2, total_sales_price
- * - property_address, unit_number, building_number, road_number, block_number
- * - property_location, land_number, project_name, area_name, buyer_commission_bd
+ * Deposit-specific fields (actual PDF field names):
+ * - Check Box1 (Holding Deposit), Check Box2 (Partial Payment), Check Box3 (Reservation Amount)
+ * - Title Number, Case Number, Plot Number, Size in Square Metres, Size in Feet Metres
+ * - Number of Roads, Price in Square Feet, Total Sales Price
+ * - Text2 (Property Address), Unit Number, Building Number, Road Number, Block Number
+ * - Land Number, Project Name, Area Name, Total Buyer Commission
+ * - Button5 (Other property type), OtherText (Other property type name)
  */
 
 import { PDFDocument } from 'pdf-lib';
@@ -150,7 +151,7 @@ export async function generateReceiptPDF(receipt: Receipt) {
     console.log(`📝 Filling ${Object.keys(receipt).filter(k => receipt[k as keyof Receipt]).length} receipt fields...`);
 
     // Fill common fields (using actual PDF field names)
-    fillField(form, 'CLIENT NAME', receipt.client_name);
+    fillField(form, isCommission ? 'CLIENT NAME' : 'Text3', receipt.client_name);
     fillField(form, 'CR or CPR No', receipt.client_id_number);
     fillField(form, 'FULL AMOUNT DUE IN BD', receipt.full_amount_due_bd);
     fillField(form, 'AMOUNT PAID IN BD', receipt.amount_paid_bd);
@@ -159,7 +160,6 @@ export async function generateReceiptPDF(receipt: Receipt) {
     fillField(form, 'AMOUNT PAID IN WORDS', receipt.amount_paid_words);
     fillField(form, 'RECEIPT No', receipt.receipt_number);
     fillField(form, 'AGENT NAME', receipt.agent_name);
-    // Branch field mapping TBD - Text1/Text3 purpose unclear
     fillField(form, 'SPECIAL NOTE', receipt.special_note);
 
     // Payment method checkboxes (using actual PDF field names)
@@ -177,9 +177,10 @@ export async function generateReceiptPDF(receipt: Receipt) {
     checkField(form, 'Flat', receipt.property_type === 'FLAT');
     checkField(form, 'Villa', receipt.property_type === 'VILLA');
     checkField(form, 'Building', receipt.property_type === 'BUILDING');
-    checkField(form, 'Other', receipt.property_type === 'OTHER');
-    
-    // No property_type_other field in Receipt type; OTHER checkbox is sufficient
+    checkField(form, isCommission ? 'Other' : 'Button5', receipt.property_type === 'OTHER');
+    if (receipt.property_type === 'OTHER') {
+      fillField(form, 'OtherText', receipt.property_details || '');
+    }
 
     if (isCommission) {
       // Commission-specific fields (using actual PDF field names)
@@ -191,32 +192,30 @@ export async function generateReceiptPDF(receipt: Receipt) {
       // Note: If your PDF has separate checkboxes for paid_by, update these field names
       // For now, we're putting the paid_by value in REPRESENTATIVE NAME field
     } else {
-      // Deposit-specific fields
-      checkField(form, 'transaction_type_holding', receipt.transaction_type === 'HOLDING DEPOSIT');
-      checkField(form, 'transaction_type_partial', receipt.transaction_type === 'PARTIAL PAYMENT');
-      fillField(form, 'reservation_amount', receipt.reservation_amount);
+      // Deposit-specific fields - using actual PDF field names from inspection
+      checkField(form, 'Check Box1', receipt.transaction_type === 'HOLDING DEPOSIT');
+      checkField(form, 'Check Box2', receipt.transaction_type === 'PARTIAL PAYMENT');
+      checkField(form, 'Check Box3', receipt.transaction_type === 'RESERVATION AMOUNT');
+      fillField(form, 'Text4', receipt.reservation_amount);
       
-      // Property details
-      fillField(form, 'property_details', receipt.property_details);
-      fillField(form, 'title_number', receipt.title_number);
-      fillField(form, 'case_number', receipt.case_number);
-      fillField(form, 'plot_number', receipt.plot_number);
-      fillField(form, 'property_size', receipt.property_size);
-      fillField(form, 'size_m2', receipt.size_m2);
-      fillField(form, 'size_f2', receipt.size_f2);
-      fillField(form, 'number_of_roads', receipt.number_of_roads);
-      fillField(form, 'price_per_f2', receipt.price_per_f2);
-      fillField(form, 'total_sales_price', receipt.total_sales_price);
-      fillField(form, 'property_address', receipt.property_address);
-      fillField(form, 'unit_number', receipt.unit_number);
-      fillField(form, 'building_number', receipt.building_number);
-      fillField(form, 'road_number', receipt.road_number);
-      fillField(form, 'block_number', receipt.block_number);
-      fillField(form, 'property_location', receipt.property_location);
-      fillField(form, 'land_number', receipt.land_number);
-      fillField(form, 'project_name', receipt.project_name);
-      fillField(form, 'area_name', receipt.area_name);
-      fillField(form, 'buyer_commission_bd', receipt.buyer_commission_bd);
+      // Property details - using actual PDF field names from inspection
+      fillField(form, 'Title Number', receipt.title_number);
+      fillField(form, 'Case Number', receipt.case_number);
+      fillField(form, 'Plot Number', receipt.plot_number);
+      fillField(form, 'Size in Square Metres', receipt.size_m2);
+      fillField(form, 'Size in Feet Metres', receipt.size_f2);
+      fillField(form, 'Number of Roads', receipt.number_of_roads);
+      fillField(form, 'Price in Square Feet', receipt.price_per_f2);
+      fillField(form, 'Total Sales Price', receipt.total_sales_price);
+      fillField(form, 'Text2', receipt.property_address);
+      fillField(form, 'Unit Number', receipt.unit_number);
+      fillField(form, 'Building Number', receipt.building_number);
+      fillField(form, 'Road Number', receipt.road_number);
+      fillField(form, 'Block Number', receipt.block_number);
+      fillField(form, 'Land Number', receipt.land_number);
+      fillField(form, 'Project Name', receipt.project_name);
+      fillField(form, 'Area Name', receipt.area_name);
+      fillField(form, 'Total Buyer Commission', receipt.buyer_commission_bd);
     }
 
     // Show summary

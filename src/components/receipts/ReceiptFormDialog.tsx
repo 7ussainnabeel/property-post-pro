@@ -227,6 +227,7 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
                       <SelectContent>
                         <SelectItem value="HOLDING DEPOSIT">Holding Deposit</SelectItem>
                         <SelectItem value="PARTIAL PAYMENT">Partial Payment</SelectItem>
+                        <SelectItem value="RESERVATION AMOUNT">Reservation Amount</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
