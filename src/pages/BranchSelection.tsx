@@ -30,14 +30,14 @@ export default function BranchSelection() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Building2 className="h-12 w-12 text-primary" />
-            <h1 className="text-4xl font-display font-bold text-foreground">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+            <Building2 className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-foreground">
               Property Post Pro
             </h1>
           </div>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-base sm:text-lg text-muted-foreground px-4">
             Select your branch to get started
           </p>
         </div>
@@ -52,10 +52,10 @@ export default function BranchSelection() {
               onClick={() => handleBranchSelect(branch.id)}
             >
               <CardHeader>
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${branch.color} flex items-center justify-center mb-3`}>
-                  <MapPin className="h-6 w-6 text-white" />
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br ${branch.color} flex items-center justify-center mb-2 sm:mb-3`}>
+                  <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <CardTitle className="text-2xl">{branch.name}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{branch.name}</CardTitle>
                 <CardDescription>
                   Access {branch.name} branch dashboard
                 </CardDescription>

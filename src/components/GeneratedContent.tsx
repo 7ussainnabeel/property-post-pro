@@ -9,38 +9,39 @@ interface GeneratedContentProps {
 
 export function GeneratedContent({ content }: GeneratedContentProps) {
   return (
-    <div className="space-y-6 animate-slide-up">
-      <div className="text-center">
-        <h2 className="text-2xl font-display font-semibold text-foreground">
+    <div className="space-y-4 sm:space-y-6 animate-slide-up">
+      <div className="text-center px-2">
+        <h2 className="text-xl sm:text-2xl font-display font-semibold text-foreground">
           Generated Listings
         </h2>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">
           Click any output to copy to clipboard
         </p>
       </div>
 
       <Tabs defaultValue="propertyfinder" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-12 p-1 bg-muted/60">
+        <TabsList className="grid w-full grid-cols-3 h-auto sm:h-12 p-1 bg-muted/60">
           <TabsTrigger 
             value="propertyfinder" 
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-0"
           >
-            <Building2 className="w-4 h-4 mr-2" />
-            Property Finder
+            <Building2 className="w-4 h-4" />
+            <span className="text-xs sm:text-sm">Property Finder</span>
           </TabsTrigger>
           <TabsTrigger 
             value="instagram"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-0"
           >
-            <Instagram className="w-4 h-4 mr-2" />
-            Instagram
+            <Instagram className="w-4 h-4" />
+            <span className="text-xs sm:text-sm">Instagram</span>
           </TabsTrigger>
           <TabsTrigger 
             value="website"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-0"
           >
-            <Globe className="w-4 h-4 mr-2" />
-            Website & Others
+            <Globe className="w-4 h-4" />
+            <span className="text-xs sm:text-sm hidden sm:inline">Website & Others</span>
+            <span className="text-xs sm:text-sm sm:hidden">Website</span>
           </TabsTrigger>
         </TabsList>
 

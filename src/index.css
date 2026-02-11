@@ -110,6 +110,39 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    /* Smooth scrolling for all devices */
+    -webkit-overflow-scrolling: touch;
+    /* Improve text rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Better touch targets for mobile (exception for icons and small UI elements) */
+  button:not([data-size=\"icon\"]), 
+  a:not([data-size=\"icon\"]), 
+  [role=\"button\"]:not([data-size=\"icon\"]) {
+    @apply min-h-[44px];
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  @media screen and (max-width: 768px) {
+    input[type=\"text\"],
+    input[type=\"number\"],
+    input[type=\"email\"],
+    input[type=\"password\"],
+    textarea,
+    select {
+      font-size: 16px;
+    }
   }
 
   h1, h2, h3, h4, h5, h6 {

@@ -797,7 +797,7 @@ export function PropertyForm({ onGenerate, isLoading }: PropertyFormProps) {
           {/* Carlton Staff Agent */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Carlton Staff Agent</Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {CARLTON_STAFF.map(staff => (
                 <Button
                   key={staff.phone}
