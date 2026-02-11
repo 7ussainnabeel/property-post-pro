@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Receipt } from '@/types/receipt';
 import { Save } from 'lucide-react';
+import { CARLTON_STAFF } from '@/lib/staff';
 
 interface Props {
   open: boolean;
@@ -325,7 +326,21 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
             </div>
 
             <div style={{ display: activeTab === 'other' ? 'block' : 'none' }} className="space-y-3">
-              <Field label="Agent Name" field="agent_name" value={form.agent_name || ''} onChange={update} />
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Agent Name</Label>
+                <Select value={form.agent_name || ''} onValueChange={(v) => update('agent_name', v)}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Select agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CARLTON_STAFF.map((staff) => (
+                      <SelectItem key={staff.phone} value={staff.name}>
+                        {staff.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="field-special_note" className="text-xs font-medium">Special Note</Label>
                 <Textarea

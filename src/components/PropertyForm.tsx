@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, MapPin, Bed, Bath, DollarSign, Sofa, Sparkles, Zap, X, Layers, RefreshCw, Home, TrendingUp, Map, Briefcase, ShoppingBag, Store, Factory, Hospital, MapPinned, Trees, FolderKanban, FileCheck, Route, Droplets, FileText, Lightbulb, Plug, UtensilsCrossed, Users, Package, User, Leaf, Waves, Wind, Camera, Shield, Shirt, Snowflake, Dumbbell, Flame, Clapperboard, Cpu, DoorClosed, Car, Mountain, Dog, Wifi, Gamepad2, Bell, UserCheck, Expand, ShoppingCart, Cuboid } from 'lucide-react';
+import { CARLTON_STAFF } from '@/lib/staff';
 
 const PROPERTY_TYPES: PropertyType[] = [
   'Land', 'Villa', 'Apartment', 'Office', 'Shop', 'Store', 
@@ -211,20 +212,6 @@ const getAmenityIcon = (amenity: string) => {
   return iconMap[amenity] || Sparkles;
 };
 
-const CARLTON_STAFF = [
-  { name: 'Ahmed Al Aali', nameAR: 'أحمد العلي', phone: '36943000' },
-  { name: 'Hana Adel', nameAR: 'هناء عادل', phone: '36504411' },
-  { name: 'Hesham Ismaeel', nameAR: 'هشام اسماعيل', phone: '36503399' },
-  { name: 'Mirna Kamal', nameAR: 'ميرنه كمال', phone: '36960222' },
-  { name: 'Mohamed Abdulla', nameAR: 'محمد عبدالله', phone: '36744755' },
-  { name: 'Sara Ali', nameAR: 'سارة علي', phone: '36503388' },
-  { name: 'Violeta Abboud', nameAR: 'فيوليت عبود', phone: '36504477' },
-  { name: 'Husain Mansoor', nameAR: 'حسين منصور', phone: '38218600' },
-  { name: 'Abdulla Hasan', nameAR: 'عبدالله حسن', phone: '32319900' },
-  { name: 'Ali Hasan', nameAR: 'علي حسن', phone: '38213300' },
-  { name: 'Masoud Ali', nameAR: 'مسعود علي', phone: '36504499' },
-  { name: 'Ibrahim Mohamed', nameAR: 'إبراهيم محمد', phone: '36390222' }
-];
 
 // Get icon for each property type
 const getPropertyTypeIcon = (type: PropertyType) => {

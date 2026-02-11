@@ -14,6 +14,7 @@ import BranchSelection from "./pages/BranchSelection";
 import Auth from "./pages/Auth";
 import Receipts from "./pages/Receipts";
 import DeletedReceipts from "./pages/receipts/DeletedReceipts";
+import ReceiptAnalysis from "./pages/receipts/ReceiptAnalysis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,6 +81,7 @@ const App = () => (
               <Route path="/video-quality" element={<ProtectedRoute><VideoQuality /></ProtectedRoute>} />
               <Route path="/deleted-videos" element={<ProtectedRoute><DeletedVideos /></ProtectedRoute>} />
               <Route path="/receipts" element={<AuthRoute><Receipts /></AuthRoute>} />
+              <Route path="/receipt-analysis" element={<AdminRoute><ReceiptAnalysis /></AdminRoute>} />
               <Route path="/deleted-receipts" element={<AdminRoute><DeletedReceipts /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

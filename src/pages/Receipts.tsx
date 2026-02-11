@@ -12,10 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Plus, ChevronLeft, FileText, Edit, Trash2, Download, LogOut, Search, Filter, Archive, Upload, FileCheck, Eye, X } from 'lucide-react';
+import { Plus, ChevronLeft, FileText, Edit, Trash2, Download, LogOut, Search, Filter, Archive, Upload, FileCheck, Eye, X, TrendingUp } from 'lucide-react';
 import { Receipt } from '@/types/receipt';
 import ReceiptFormDialog from '@/components/receipts/ReceiptFormDialog';
-import { generateReceiptPDF } from '@/utils/pdfGenerator';
+import { generateReceiptPDF, generateReceiptPDFPreview } from '@/utils/pdfGenerator';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default function Receipts() {
@@ -31,6 +31,8 @@ export default function Receipts() {
   const [filterBranch, setFilterBranch] = useState<string>('all');
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [previewReceipt, setPreviewReceipt] = useState<Receipt | null>(null);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [pdfPreviewReceipt, setPdfPreviewReceipt] = useState<Receipt | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [receiptToDelete, setReceiptToDelete] = useState<string | null>(null);
   const heroRef = useRef<HTMLElement>(null);
@@ -122,6 +124,27 @@ export default function Receipts() {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error occurred';
       toast.error(`Failed to generate PDF: ${errorMsg}`);
     }
+  };
+
+  const handlePreviewPDF = async (receipt: Receipt) => {
+    try {
+      const pdfBytes = await generateReceiptPDFPreview(receipt);
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      setPdfPreviewUrl(url);
+      setPdfPreviewReceipt(receipt);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to generate PDF preview');
+      console.error(error);
+    }
+  };
+
+  const closePdfPreview = () => {
+    if (pdfPreviewUrl) {
+      URL.revokeObjectURL(pdfPreviewUrl);
+    }
+    setPdfPreviewUrl(null);
+    setPdfPreviewReceipt(null);
   };
 
   const handleUploadReceipt = async (receiptId: string, file: File) => {
@@ -253,11 +276,18 @@ export default function Receipts() {
             </div>
             <div className="flex flex-wrap gap-2">
               {isAdmin && (
-                <Link to="/deleted-receipts">
-                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                    <Archive className="h-4 w-4 mr-1" /> Deleted
-                  </Button>
-                </Link>
+                <>
+                  <Link to="/receipt-analysis">
+                    <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                      <TrendingUp className="h-4 w-4 mr-1" /> Analysis
+                    </Button>
+                  </Link>
+                  <Link to="/deleted-receipts">
+                    <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                      <Archive className="h-4 w-4 mr-1" /> Deleted
+                    </Button>
+                  </Link>
+                </>
               )}
               <Button onClick={handleCreate} size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 <Plus className="h-4 w-4 mr-1" /> New Receipt
@@ -355,7 +385,7 @@ export default function Receipts() {
         ) : (
           <div className="grid gap-4">
             {filteredReceipts.map((receipt) => (
-              <Card key={receipt.id} className="hover:shadow-md transition-shadow">
+              <Card key={receipt.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handlePreviewPDF(receipt)}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="min-w-0">
@@ -386,7 +416,7 @@ export default function Receipts() {
                         {receipt.agent_name ? ` ${receipt.agent_name}` : ''}
                       </p>
                     </div>
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                       <input
                         id={`file-input-${receipt.id}`}
                         type="file"
@@ -398,14 +428,24 @@ export default function Receipts() {
                           e.target.value = '';
                         }}
                       />
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handlePreviewPDF(receipt)}
+                        className="text-blue-600 hover:text-blue-700"
+                        title="Preview Receipt PDF"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       {receipt.payment_receipt_url && (
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => setPreviewReceipt(receipt)}
-                          className="text-blue-600 hover:text-blue-700"
+                          className="text-green-600 hover:text-green-700"
+                          title="View Uploaded Payment Receipt"
                         >
-                          <Eye className="h-4 w-4" />
+                          <FileCheck className="h-4 w-4" />
                         </Button>
                       )}
                       <Button 
@@ -414,6 +454,7 @@ export default function Receipts() {
                         onClick={() => triggerFileInput(receipt.id)}
                         disabled={uploadingId === receipt.id}
                         className={receipt.payment_receipt_url ? 'text-green-600 hover:text-green-700' : ''}
+                        title="Upload Payment Receipt"
                       >
                         {uploadingId === receipt.id ? (
                           <span className="h-4 w-4 animate-spin">⏳</span>
@@ -421,7 +462,12 @@ export default function Receipts() {
                           <Upload className="h-4 w-4" />
                         )}
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleExportPDF(receipt)}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleExportPDF(receipt)}
+                        title="Download Receipt PDF"
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
                       {canEditReceipt(receipt) ? (
@@ -471,6 +517,26 @@ export default function Receipts() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Generated PDF Preview Dialog */}
+      <Dialog open={!!pdfPreviewReceipt} onOpenChange={(open) => !open && closePdfPreview()}>
+        <DialogContent className="max-w-6xl max-h-[95vh]">
+          <DialogHeader>
+            <DialogTitle>
+              {pdfPreviewReceipt?.receipt_type === 'commission' ? 'Commission' : 'Deposit'} Receipt - {pdfPreviewReceipt?.client_name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            {pdfPreviewUrl && (
+              <iframe 
+                src={pdfPreviewUrl}
+                className="w-full h-[75vh] rounded-lg border"
+                title="Receipt PDF Preview"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Payment Receipt Preview Dialog */}
       <Dialog open={!!previewReceipt} onOpenChange={(open) => !open && setPreviewReceipt(null)}>
