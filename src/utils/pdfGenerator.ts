@@ -20,13 +20,15 @@
  * - invoice_number, invoice_date, transaction_details
  * - paid_by_buyer, paid_by_seller, paid_by_landlord, paid_by_landlord_rep
  * 
- * Deposit-specific fields (actual PDF field names):
- * - Check Box1 (Holding Deposit), Check Box2 (Partial Payment), Check Box3 (Reservation Amount)
- * - Title Number, Case Number, Plot Number, Size in Square Metres, Size in Feet Metres
- * - Number of Roads, Price in Square Feet, Total Sales Price
- * - Text2 (Property Address), Unit Number, Building Number, Road Number, Block Number
- * - Land Number, Project Name, Area Name, Total Buyer Commission
- * - Button5 (Other property type), OtherText (Other property type name)
+ * Deposit-specific fields (actual PDF field names - grouped by section):
+ * Transaction Type: Check Box1 (Holding), Check Box2 (Partial), Check Box3 (Reservation), Text4 (Amount)
+ * Property Details (section): Title Number, Case Number, Plot Number
+ * Property Size (section): Size in Square Metres, Size in Feet Metres, Number of Roads
+ * Sales Price Details in BD (section): Price in Square Feet, Total Sales Price
+ * Property Address (section): Text2, Unit Number, Building Number, Road Number, Block Number
+ * Property Location (section): Land Number, Project Name, Area Name
+ * Property Type: Land, Villa, Flat, Building, Button5 (Other checkbox), OtherText (Other description)
+ * Other: Total Buyer Commission, Text3 (Client Name)
  */
 
 import { PDFDocument } from 'pdf-lib';
@@ -174,12 +176,12 @@ export async function generateReceiptPDF(receipt: Receipt) {
 
     // Property type checkboxes (using actual PDF field names)
     checkField(form, 'Land', receipt.property_type === 'LAND');
-    checkField(form, 'Flat', receipt.property_type === 'FLAT');
     checkField(form, 'Villa', receipt.property_type === 'VILLA');
+    checkField(form, 'Flat', receipt.property_type === 'FLAT');
     checkField(form, 'Building', receipt.property_type === 'BUILDING');
     checkField(form, isCommission ? 'Other' : 'Button5', receipt.property_type === 'OTHER');
-    if (receipt.property_type === 'OTHER') {
-      fillField(form, 'OtherText', receipt.property_details || '');
+    if (receipt.property_type === 'OTHER' && receipt.property_type_other) {
+      fillField(form, 'OtherText', receipt.property_type_other);
     }
 
     if (isCommission) {

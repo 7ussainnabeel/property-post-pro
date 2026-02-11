@@ -14,6 +14,7 @@ export interface Receipt {
   payment_method: string | null;
   cheque_number: string | null;
   property_type: string | null;
+  property_type_other: string | null;
   agent_name: string | null;
   special_note: string | null;
   // Commission fields

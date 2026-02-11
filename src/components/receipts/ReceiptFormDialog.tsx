@@ -245,13 +245,16 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="LAND">Land</SelectItem>
-                    <SelectItem value="FLAT">Flat</SelectItem>
                     <SelectItem value="VILLA">Villa</SelectItem>
+                    <SelectItem value="FLAT">Flat</SelectItem>
                     <SelectItem value="BUILDING">Building</SelectItem>
                     <SelectItem value="OTHER">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              {form.property_type === 'OTHER' && (
+                <Field label="Other Property Type (specify)" field="property_type_other" value={form.property_type_other || ''} onChange={update} />
+              )}
 
               {receiptType === 'commission' && (
                 <div className="space-y-2">
@@ -268,46 +271,54 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
 
               {receiptType === 'deposit' && (
                 <>
-                  <div className="grid grid-cols-3 gap-4">
-                    <Field label="Property Details" field="property_details" value={form.property_details || ''} onChange={update} />
-                    <Field label="Title No." field="title_number" value={form.title_number || ''} onChange={update} />
-                    <Field label="Case No." field="case_number" value={form.case_number || ''} onChange={update} />
+                  <div className="space-y-1">
+                    <Label className="text-xs font-semibold text-primary">Property Details</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      <Field label="Title No." field="title_number" value={form.title_number || ''} onChange={update} />
+                      <Field label="Case No." field="case_number" value={form.case_number || ''} onChange={update} />
+                      <Field label="Plot No." field="plot_number" value={form.plot_number || ''} onChange={update} />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <Field label="Plot No." field="plot_number" value={form.plot_number || ''} onChange={update} />
-                    <Field label="Property Size" field="property_size" value={form.property_size || ''} onChange={update} />
-                    <Field label="Size in M²" field="size_m2" value={form.size_m2 || ''} onChange={update} />
+                  
+                  <div className="space-y-1">
+                    <Label className="text-xs font-semibold text-primary">Property Size</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      <Field label="Size in M²" field="size_m2" value={form.size_m2 || ''} onChange={update} />
+                      <Field label="Size in F²" field="size_f2" value={form.size_f2 || ''} onChange={update} />
+                      <Field label="No. of Roads" field="number_of_roads" value={form.number_of_roads || ''} onChange={update} />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <Field label="Size in F²" field="size_f2" value={form.size_f2 || ''} onChange={update} />
-                    <Field label="No. of Roads" field="number_of_roads" value={form.number_of_roads || ''} onChange={update} />
-                    <Field label="Price per F²" field="price_per_f2" value={form.price_per_f2 || ''} onChange={update} />
+                  
+                  <div className="space-y-1">
+                    <Label className="text-xs font-semibold text-primary">Sales Price Details in BD</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Field label="Price / F²" field="price_per_f2" value={form.price_per_f2 || ''} onChange={update} />
+                      <Field label="Property Total Sales Price" field="total_sales_price" value={form.total_sales_price || ''} onChange={update} />
+                    </div>
                   </div>
-                  <div>
-                    <Field label="Total Sales Price" field="total_sales_price" value={form.total_sales_price || ''} onChange={update} />
+                  
+                  <div className="space-y-1">
+                    <Label className="text-xs font-semibold text-primary">Property Address</Label>
+                    <div className="grid grid-cols-4 gap-4">
+                      <Field label="Unit No." field="unit_number" value={form.unit_number || ''} onChange={update} />
+                      <Field label="Bldg No." field="building_number" value={form.building_number || ''} onChange={update} />
+                      <Field label="Road No." field="road_number" value={form.road_number || ''} onChange={update} />
+                      <Field label="Block No." field="block_number" value={form.block_number || ''} onChange={update} />
+                    </div>
+                    <Field label="Full Address" field="property_address" value={form.property_address || ''} onChange={update} placeholder="Complete property address" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field label="Property Address" field="property_address" value={form.property_address || ''} onChange={update} />
-                    <Field label="Unit No." field="unit_number" value={form.unit_number || ''} onChange={update} />
+                  
+                  <div className="space-y-1">
+                    <Label className="text-xs font-semibold text-primary">Property Location</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      <Field label="Land No." field="land_number" value={form.land_number || ''} onChange={update} />
+                      <Field label="Project Name" field="project_name" value={form.project_name || ''} onChange={update} />
+                      <Field label="Area Name" field="area_name" value={form.area_name || ''} onChange={update} />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <Field label="Bldg No." field="building_number" value={form.building_number || ''} onChange={update} />
-                    <Field label="Road No." field="road_number" value={form.road_number || ''} onChange={update} />
-                    <Field label="Block No." field="block_number" value={form.block_number || ''} onChange={update} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field label="Property Location" field="property_location" value={form.property_location || ''} onChange={update} />
-                    <Field label="Land No." field="land_number" value={form.land_number || ''} onChange={update} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field label="Project Name" field="project_name" value={form.project_name || ''} onChange={update} />
-                    <Field label="Area Name" field="area_name" value={form.area_name || ''} onChange={update} />
-                  </div>
+                  
                   <div>
                     <Field label="Buyer Commission (BD)" field="buyer_commission_bd" value={form.buyer_commission_bd || ''} onChange={update} />
-                  </div>
-                  <div>
-                    <Field label="Agent Name" field="agent_name" value={form.agent_name || ''} onChange={update} />
                   </div>
                 </>
               )}
