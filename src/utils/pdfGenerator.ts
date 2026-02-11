@@ -179,9 +179,7 @@ export async function generateReceiptPDF(receipt: Receipt) {
     checkField(form, 'Building', receipt.property_type === 'BUILDING');
     checkField(form, 'Other', receipt.property_type === 'OTHER');
     
-    if (receipt.property_type === 'OTHER' && receipt.property_type_other) {
-      fillField(form, 'OtherText', receipt.property_type_other);
-    }
+    // No property_type_other field in Receipt type; OTHER checkbox is sufficient
 
     if (isCommission) {
       // Commission-specific fields (using actual PDF field names)
@@ -244,7 +242,7 @@ export async function generateReceiptPDF(receipt: Receipt) {
     console.log(`   ✓ ${successCount} fields populated`);
 
     // Download the PDF
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
