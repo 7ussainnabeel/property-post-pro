@@ -8,13 +8,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useBranch } from '@/contexts/BranchContext';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 const Index = () => {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContentType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [propertyData, setPropertyData] = useState<PropertyInput | null>(null);
   const loadingToastId = useRef<string | number | null>(null);
+  const heroRef = useRef<HTMLElement>(null);
   const { selectedBranch, getBranchName } = useBranch();
+  useThemeColor(heroRef);
 
   const handleGenerate = async (data: PropertyInput) => {
     setIsLoading(true);
@@ -102,7 +105,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="gradient-hero py-4 md:py-6 px-4 text-center">
+      <header ref={heroRef} className="gradient-hero py-4 md:py-6 px-4 text-center">
         {/* Navigation - Mobile Friendly */}
         <div className="container max-w-6xl mx-auto mb-4">
           <div className="flex flex-wrap items-center justify-between gap-2">

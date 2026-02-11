@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { BRANCHES } from '@/lib/branches';
@@ -19,6 +20,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  useThemeColor(undefined, '#f5f7fa', '#f5f7fa');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

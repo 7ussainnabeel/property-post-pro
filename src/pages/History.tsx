@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OutputCard } from '@/components/OutputCard';
 import { useBranch } from '@/contexts/BranchContext';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { 
   History, 
   Home, 
@@ -73,6 +74,8 @@ export default function HistoryPage() {
   const [deleteUsername, setDeleteUsername] = useState('');
   const [deleting, setDeleting] = useState(false);
   const { selectedBranch, showAllBranches, setShowAllBranches, getBranchName } = useBranch();
+  const heroRef = useRef<HTMLElement>(null);
+  useThemeColor(heroRef);
 
   useEffect(() => {
     fetchHistory();
@@ -209,7 +212,7 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="gradient-hero py-4 md:py-6 px-4">
+      <header ref={heroRef} className="gradient-hero py-4 md:py-6 px-4">
         <div className="container max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2 md:gap-4 min-w-0">
