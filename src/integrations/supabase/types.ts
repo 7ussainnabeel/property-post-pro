@@ -118,7 +118,7 @@ export type Database = {
       }
       profiles: {
         Row: {
-          branch: string | null
+          branch: Database["public"]["Enums"]["branch_type"] | null
           created_at: string | null
           email: string | null
           full_name: string | null
@@ -128,7 +128,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          branch?: string | null
+          branch?: Database["public"]["Enums"]["branch_type"] | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
@@ -138,7 +138,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          branch?: string | null
+          branch?: Database["public"]["Enums"]["branch_type"] | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
@@ -157,7 +157,7 @@ export type Database = {
           area_name: string | null
           balance_amount_bd: number | null
           block_number: string | null
-          branch: string | null
+          branch: Database["public"]["Enums"]["branch_type"] | null
           building_number: string | null
           buyer_commission_bd: string | null
           case_number: string | null
@@ -176,6 +176,7 @@ export type Database = {
           paid_by: string | null
           payment_date: string | null
           payment_method: string | null
+          payment_receipt_url: string | null
           pdf_url: string | null
           plot_number: string | null
           price_per_f2: string | null
@@ -207,7 +208,7 @@ export type Database = {
           area_name?: string | null
           balance_amount_bd?: number | null
           block_number?: string | null
-          branch?: string | null
+          branch?: Database["public"]["Enums"]["branch_type"] | null
           building_number?: string | null
           buyer_commission_bd?: string | null
           case_number?: string | null
@@ -226,6 +227,7 @@ export type Database = {
           paid_by?: string | null
           payment_date?: string | null
           payment_method?: string | null
+          payment_receipt_url?: string | null
           pdf_url?: string | null
           plot_number?: string | null
           price_per_f2?: string | null
@@ -257,7 +259,7 @@ export type Database = {
           area_name?: string | null
           balance_amount_bd?: number | null
           block_number?: string | null
-          branch?: string | null
+          branch?: Database["public"]["Enums"]["branch_type"] | null
           building_number?: string | null
           buyer_commission_bd?: string | null
           case_number?: string | null
@@ -276,6 +278,7 @@ export type Database = {
           paid_by?: string | null
           payment_date?: string | null
           payment_method?: string | null
+          payment_receipt_url?: string | null
           pdf_url?: string | null
           plot_number?: string | null
           price_per_f2?: string | null
@@ -401,7 +404,8 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "accountant"
+      branch_type: "seef" | "manama" | "saar" | "amwaj-island"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -529,7 +533,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "accountant"],
+      branch_type: ["seef", "manama", "saar", "amwaj-island"],
     },
   },
 } as const
