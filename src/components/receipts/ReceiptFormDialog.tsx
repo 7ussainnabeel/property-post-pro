@@ -47,6 +47,64 @@ const Field = memo(({ label, field, value, onChange, type = 'text', placeholder 
 
 Field.displayName = 'Field';
 
+// Convert number to words for Bahraini Dinar
+const numberToWords = (num: number): string => {
+  if (num === 0) return 'Zero';
+  
+  const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+  const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  
+  const convertLessThanThousand = (n: number): string => {
+    if (n === 0) return '';
+    if (n < 10) return ones[n];
+    if (n < 20) return teens[n - 10];
+    if (n < 100) {
+      const ten = Math.floor(n / 10);
+      const one = n % 10;
+      return tens[ten] + (one > 0 ? ' ' + ones[one] : '');
+    }
+    const hundred = Math.floor(n / 100);
+    const rest = n % 100;
+    return ones[hundred] + ' Hundred' + (rest > 0 ? ' and ' + convertLessThanThousand(rest) : '');
+  };
+  
+  if (num < 1000) return convertLessThanThousand(num);
+  
+  const thousands = Math.floor(num / 1000);
+  const remainder = num % 1000;
+  
+  let result = convertLessThanThousand(thousands) + ' Thousand';
+  if (remainder > 0) {
+    result += ' ' + convertLessThanThousand(remainder);
+  }
+  
+  return result;
+};
+
+const convertAmountToWords = (amount: string | number): string => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(numAmount) || numAmount < 0) return '';
+  
+  const dinars = Math.floor(numAmount);
+  const fils = Math.round((numAmount - dinars) * 1000);
+  
+  let result = '';
+  
+  if (dinars > 0) {
+    result += numberToWords(dinars) + ' Bahraini Dinar' + (dinars !== 1 ? 's' : '');
+  }
+  
+  if (fils > 0) {
+    if (dinars > 0) result += ' and ';
+    result += numberToWords(fils) + ' Fil' + (fils !== 1 ? 's' : '');
+  }
+  
+  if (result === '') return 'Zero Bahraini Dinars';
+  
+  return result + ' Only';
+};
+
 export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved }: Props) {
   const { user } = useAuth();
   const { selectedBranch } = useBranch();
@@ -69,6 +127,30 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
   const update = useCallback((field: string, value: any) => {
     setForm(prev => ({ ...prev, [field]: value }));
   }, []);
+
+  // Auto-calculate balance amount for commission receipts
+  useEffect(() => {
+    if (receiptType === 'commission') {
+      const fullAmount = parseFloat(form.full_amount_due_bd) || 0;
+      const paidAmount = parseFloat(form.amount_paid_bd) || 0;
+      const calculatedBalance = fullAmount - paidAmount;
+      
+      // Only update if the calculated value is different (avoid infinite loops)
+      if (calculatedBalance !== (parseFloat(form.balance_amount_bd) || 0)) {
+        setForm(prev => ({ ...prev, balance_amount_bd: calculatedBalance.toString() }));
+      }
+    }
+  }, [form.full_amount_due_bd, form.amount_paid_bd, receiptType, form.balance_amount_bd]);
+
+  // Auto-generate amount paid in words
+  useEffect(() => {
+    if (form.amount_paid_bd) {
+      const words = convertAmountToWords(form.amount_paid_bd);
+      if (words && words !== form.amount_paid_words) {
+        setForm(prev => ({ ...prev, amount_paid_words: words }));
+      }
+    }
+  }, [form.amount_paid_bd, form.amount_paid_words]);
 
   const handleSave = async () => {
     setSaving(true);

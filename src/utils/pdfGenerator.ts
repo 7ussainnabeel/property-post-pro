@@ -3,32 +3,39 @@
  * 
  * Fills existing PDF form templates with receipt data:
  * 
- * 1. COMMISSION RECEIPT - Uses public/PDF/CommissionReceipt.pdf template
- * 2. DEPOSIT RECEIPT - Uses public/PDF/DepositReceipt.pdf template
+ * 1. COMMISSION RECEIPT - Uses public/PDF/CommissionReceipt.pdf template (31 fields)
+ * 2. DEPOSIT RECEIPT - Uses public/PDF/DepositReceipt.pdf template (42 fields)
  * 
- * The PDF templates must have fillable form fields with the following names:
+ * COMMISSION RECEIPT FIELDS:
+ * -------------------------
+ * Common: AGENT NAME, CLIENT NAME, CR or CPR No, FULL AMOUNT DUE IN BD, PAYMENT DATE,
+ *         AMOUNT PAID IN BD, RECEIPT No, BALANCE AMOUNT IN BD (auto-calculated),
+ *         AMOUNT PAID IN WORDS (auto-generated), SPECIAL NOTE
  * 
- * Common fields:
- * - client_name, client_id_number, full_amount_due_bd, amount_paid_bd
- * - balance_amount_bd, payment_date, amount_paid_words, receipt_number
- * - agent_name, branch, special_note
- * - payment_method_benefit, payment_method_bank_tt, payment_method_cash, payment_method_cheque
- * - cheque_number
- * - property_type_land, property_type_flat, property_type_villa, property_type_building, property_type_other
+ * Payment: BF, TT, Cash, Cheque (checkboxes), ChequeNumber
  * 
- * Commission-specific fields:
- * - invoice_number, invoice_date, transaction_details
- * - paid_by_buyer, paid_by_seller, paid_by_landlord, paid_by_landlord_rep
+ * Property: Land, Villa, Flat, Building, Other (checkboxes), OtherText
  * 
- * Deposit-specific fields (actual PDF field names - grouped by section):
- * Transaction Type: Check Box1 (Holding), Check Box2 (Partial), Check Box3 (Reservation), Text4 (Amount)
- * Property Details (section): Title Number, Case Number, Plot Number
- * Property Size (section): Size in Square Metres, Size in Feet Metres, Number of Roads
- * Sales Price Details in BD (section): Price in Square Feet, Total Sales Price
- * Property Address (section): Text2, Unit Number, Building Number, Road Number, Block Number
- * Property Location (section): Land Number, Project Name, Area Name
- * Property Type: Land, Villa, Flat, Building, Button5 (Other checkbox), OtherText (Other description)
- * Other: Total Buyer Commission, Text3 (Client Name)
+ * Commission-specific:
+ *   - PAID AGAINST INVOICE No, NVOICE DATE
+ *   - Transaction Details (textarea)
+ *   - REPRESENTATIVE NAME (text field for paid_by)
+ *   - Button5 (Buyer), Button6 (Seller), Button7 (Landlord), Button8 (Landlord Rep.) checkboxes
+ * 
+ * DEPOSIT RECEIPT FIELDS:
+ * ----------------------
+ * Common: Same as Commission + Text3 (Client Name)
+ * 
+ * Transaction Type: Check Box1 (Holding), Check Box2 (Partial), Check Box3 (Reservation), 
+ *                   Text4 (Reservation Amount)
+ * 
+ * Property Details: Title Number, Case Number, Plot Number
+ * Property Size: Size in Square Metres, Size in Feet Metres, Number of Roads
+ * Sales Price: Price in Square Feet, Total Sales Price
+ * Property Address: Text2 (full address), Unit Number, Building Number, Road Number, Block Number
+ * Property Location: Land Number, Project Name, Area Name
+ * Property Type: Land, Villa, Flat, Building, Button5 (Other checkbox), OtherText
+ * Other: Total Buyer Commission
  */
 
 import { PDFDocument } from 'pdf-lib';
@@ -190,8 +197,11 @@ async function generateReceiptPDFBytes(receipt: Receipt): Promise<Uint8Array> {
     fillField(form, 'Transaction Details', receipt.transaction_details);
     fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by);
     
-    // Note: If your PDF has separate checkboxes for paid_by, update these field names
-    // For now, we're putting the paid_by value in REPRESENTATIVE NAME field
+    // Paid By checkboxes (Button5-Button8 in Commission Receipt PDF)
+    checkField(form, 'Button5', receipt.paid_by === 'BUYER');
+    checkField(form, 'Button6', receipt.paid_by === 'SELLER');
+    checkField(form, 'Button7', receipt.paid_by === 'LANDLORD');
+    checkField(form, 'Button8', receipt.paid_by === 'LANDLORD REP.');
   } else {
     // Deposit-specific fields - using actual PDF field names from inspection
     checkField(form, 'Check Box1', receipt.transaction_type === 'HOLDING DEPOSIT');
