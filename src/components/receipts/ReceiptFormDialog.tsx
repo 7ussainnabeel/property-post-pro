@@ -128,19 +128,17 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
     setForm(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  // Auto-calculate balance amount for commission receipts
+  // Auto-calculate balance amount for all receipts (commission and deposit)
   useEffect(() => {
-    if (receiptType === 'commission') {
-      const fullAmount = parseFloat(form.full_amount_due_bd) || 0;
-      const paidAmount = parseFloat(form.amount_paid_bd) || 0;
-      const calculatedBalance = fullAmount - paidAmount;
-      
-      // Only update if the calculated value is different (avoid infinite loops)
-      if (calculatedBalance !== (parseFloat(form.balance_amount_bd) || 0)) {
-        setForm(prev => ({ ...prev, balance_amount_bd: calculatedBalance.toString() }));
-      }
+    const fullAmount = parseFloat(form.full_amount_due_bd) || 0;
+    const paidAmount = parseFloat(form.amount_paid_bd) || 0;
+    const calculatedBalance = fullAmount - paidAmount;
+    
+    // Only update if the calculated value is different (avoid infinite loops)
+    if (calculatedBalance !== (parseFloat(form.balance_amount_bd) || 0)) {
+      setForm(prev => ({ ...prev, balance_amount_bd: calculatedBalance.toString() }));
     }
-  }, [form.full_amount_due_bd, form.amount_paid_bd, receiptType, form.balance_amount_bd]);
+  }, [form.full_amount_due_bd, form.amount_paid_bd, form.balance_amount_bd]);
 
   // Auto-generate amount paid in words
   useEffect(() => {

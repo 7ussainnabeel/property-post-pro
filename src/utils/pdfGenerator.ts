@@ -123,14 +123,33 @@ async function generateReceiptPDFBytes(receipt: Receipt): Promise<Uint8Array> {
   successCount = 0;
   failCount = 0;
   
-  const isCommission = receipt.receipt_type === 'commission';
+  // Normalize receipt type to handle case variations
+  const receiptType = receipt.receipt_type?.toLowerCase();
+  if (!receiptType || (receiptType !== 'commission' && receiptType !== 'deposit')) {
+    console.error('❌ Invalid or missing receipt_type:', receipt.receipt_type);
+    throw new Error(`Invalid receipt type: ${receipt.receipt_type}. Must be 'commission' or 'deposit'.`);
+  }
+  
+  const isCommission = receiptType === 'commission';
   const templateName = isCommission ? 'CommissionReceipt.pdf' : 'DepositReceipt.pdf';
 
-  console.log(`🔄 Loading ${templateName}...`);
+  console.log(`🔄 Loading ${templateName} for receipt type: ${receiptType}...`);
   
   // Load the PDF template
   const templateBytes = await loadPDFTemplate(templateName);
-  const pdfDoc = await PDFDocument.load(templateBytes);
+  
+  // Try to load PDF with options to handle potential structure issues
+  let pdfDoc;
+  try {
+    pdfDoc = await PDFDocument.load(templateBytes, {
+      updateMetadata: false,
+      ignoreEncryption: true,
+    });
+  } catch (loadError) {
+    console.error('❌ Failed to load PDF with options, trying default load...', loadError);
+    // If that fails, try without options as last resort
+    pdfDoc = await PDFDocument.load(templateBytes);
+  }
   
   // Try to get the form - this may fail if PDF doesn't have proper form fields
   let form;

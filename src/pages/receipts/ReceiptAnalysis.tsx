@@ -8,6 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
 import { ChevronLeft, TrendingUp, DollarSign, FileText, Users, Calendar, PieChart, BarChart3, LogOut } from 'lucide-react';
 import { Receipt } from '@/types/receipt';
@@ -17,14 +21,11 @@ export default function ReceiptAnalysis() {
   const { selectedBranch, getBranchName } = useBranch();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  const [fromDate, setFromDate] = useState<string>('');
+  const [toDate, setToDate] = useState<string>('');
   const [filterBranch, setFilterBranch] = useState<string>('all');
 
   const canViewAllBranches = isAdmin || isAccountant;
-
-  useEffect(() => {
-    fetchReceipts();
-  }, []);
 
   const fetchReceipts = async () => {
     setLoading(true);
@@ -48,13 +49,25 @@ export default function ReceiptAnalysis() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    fetchReceipts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const filteredReceipts = useMemo(() => {
     return receipts.filter(receipt => {
-      // Month filter
-      if (selectedMonth !== 'all') {
-        const receiptDate = new Date(receipt.payment_date || receipt.created_at);
-        const receiptMonth = `${receiptDate.getFullYear()}-${String(receiptDate.getMonth() + 1).padStart(2, '0')}`;
-        if (receiptMonth !== selectedMonth) return false;
+      const receiptDate = new Date(receipt.payment_date || receipt.created_at);
+      
+      // Date range filter
+      if (fromDate) {
+        const from = new Date(fromDate);
+        from.setHours(0, 0, 0, 0);
+        if (receiptDate < from) return false;
+      }
+      if (toDate) {
+        const to = new Date(toDate);
+        to.setHours(23, 59, 59, 999);
+        if (receiptDate > to) return false;
       }
 
       // Branch filter
@@ -62,7 +75,7 @@ export default function ReceiptAnalysis() {
 
       return true;
     });
-  }, [receipts, selectedMonth, filterBranch]);
+  }, [receipts, fromDate, toDate, filterBranch]);
 
   const analytics = useMemo(() => {
     const totalReceipts = filteredReceipts.length;
@@ -125,10 +138,18 @@ export default function ReceiptAnalysis() {
         return receiptMonth === monthKey;
       });
 
+      const commissionRevenue = monthReceipts
+        .filter(r => r.receipt_type === 'commission')
+        .reduce((sum, r) => sum + (r.amount_paid_bd || 0), 0);
+      
+      const depositRevenue = monthReceipts
+        .filter(r => r.receipt_type === 'deposit')
+        .reduce((sum, r) => sum + (r.amount_paid_bd || 0), 0);
+
       return {
         month: monthName,
-        count: monthReceipts.length,
-        revenue: monthReceipts.reduce((sum, r) => sum + (r.amount_paid_bd || 0), 0)
+        commission: commissionRevenue,
+        deposit: depositRevenue
       };
     }).reverse();
 
@@ -146,20 +167,18 @@ export default function ReceiptAnalysis() {
       propertyTypes,
       monthlyData
     };
-  }, [filteredReceipts, receipts]);
+  }, [filteredReceipts]);
 
-  // Generate month options for filter (last 12 months)
-  const monthOptions = useMemo(() => {
-    const options = [{ value: 'all', label: 'All Time' }];
-    const now = new Date();
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      options.push({ value, label });
-    }
-    return options;
-  }, []);
+  const chartConfig = {
+    commission: {
+      label: "Commission",
+      color: "hsl(221, 83%, 53%)", // Blue
+    },
+    deposit: {
+      label: "Deposit",
+      color: "hsl(142, 76%, 36%)", // Green
+    },
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -194,31 +213,71 @@ export default function ReceiptAnalysis() {
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-full sm:w-[200px]">
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Button
+                  variant={!fromDate && !toDate ? "default" : "outline"}
+                  onClick={() => {
+                    setFromDate('');
+                    setToDate('');
+                  }}
+                  className="h-10"
+                >
                   <Calendar className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Time Period" />
-                </SelectTrigger>
-                <SelectContent>
-                  {monthOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {canViewAllBranches && (
-                <Select value={filterBranch} onValueChange={setFilterBranch}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Branch" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Branches</SelectItem>
-                    {BRANCHES.map((branch) => (
-                      <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+                  All Time
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="from-date" className="text-xs font-medium">From Date</Label>
+                  <Input
+                    id="from-date"
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    className="h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="to-date" className="text-xs font-medium">To Date</Label>
+                  <Input
+                    id="to-date"
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    className="h-10"
+                  />
+                </div>
+                {canViewAllBranches && (
+                  <div className="space-y-2">
+                    <Label htmlFor="branch-filter" className="text-xs font-medium">Branch</Label>
+                    <Select value={filterBranch} onValueChange={setFilterBranch}>
+                      <SelectTrigger id="branch-filter" className="h-10">
+                        <SelectValue placeholder="Branch" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Branches</SelectItem>
+                        {BRANCHES.map((branch) => (
+                          <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div className="flex items-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setFromDate('');
+                      setToDate('');
+                      setFilterBranch('all');
+                    }}
+                    className="h-10 w-full"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -275,37 +334,68 @@ export default function ReceiptAnalysis() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Monthly Trend */}
-          <Card>
+          {/* Monthly Trend Bar Chart */}
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
                 Monthly Trend (Last 6 Months)
               </CardTitle>
               <CardDescription>
-                {filterBranch === 'all' ? 'All Branches' : getBranchName(filterBranch)}
+                Commission vs Deposit revenue by month • {filterBranch === 'all' ? 'All Branches' : getBranchName(filterBranch)}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {analytics.monthlyData.map((month, idx) => {
-                  const maxRevenue = Math.max(...analytics.monthlyData.map(m => m.revenue), 1);
-                  return (
-                    <div key={idx} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>{month.month}</span>
-                        <span className="font-semibold">{month.revenue.toFixed(2)} BD ({month.count})</span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full transition-all" 
-                          style={{ width: `${month.revenue > 0 ? Math.max(5, (month.revenue / maxRevenue) * 100) : 0}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <ChartContainer config={chartConfig} className="h-[300px] w-full">
+                <BarChart data={analytics.monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="month" 
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    label={{ value: 'Revenue (BD)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                  />
+                  <ChartTooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const commissionValue = Number(payload[0]?.value || 0);
+                        const depositValue = Number(payload[1]?.value || 0);
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid gap-2">
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-3 w-3 rounded" style={{ backgroundColor: 'hsl(221, 83%, 53%)' }} />
+                                  <span className="text-xs text-muted-foreground">Commission</span>
+                                </div>
+                                <span className="font-bold" style={{ color: 'hsl(221, 83%, 53%)' }}>{commissionValue.toFixed(2)} BD</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-3 w-3 rounded" style={{ backgroundColor: 'hsl(142, 76%, 36%)' }} />
+                                  <span className="text-xs text-muted-foreground">Deposit</span>
+                                </div>
+                                <span className="font-bold" style={{ color: 'hsl(142, 76%, 36%)' }}>{depositValue.toFixed(2)} BD</span>
+                              </div>
+                              <div className="flex justify-between gap-4 pt-1 border-t">
+                                <span className="text-xs font-medium">Total</span>
+                                <span className="font-bold">{(commissionValue + depositValue).toFixed(2)} BD</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar dataKey="commission" fill="var(--color-commission)" radius={[4, 4, 0, 0]} name="Commission" />
+                  <Bar dataKey="deposit" fill="var(--color-deposit)" radius={[4, 4, 0, 0]} name="Deposit" />
+                </BarChart>
+              </ChartContainer>
             </CardContent>
           </Card>
 

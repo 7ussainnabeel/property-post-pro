@@ -116,11 +116,12 @@ export default function Receipts() {
 
   const handleExportPDF = async (receipt: Receipt) => {
     try {
-      console.log('📄 Starting PDF export for receipt:', receipt.receipt_number || receipt.id.slice(0, 8));
+      console.log('� Exporting PDF for receipt:', receipt.receipt_number || receipt.id.slice(0, 8), 'Type:', receipt.receipt_type);
       await generateReceiptPDF(receipt);
-      toast.success('PDF downloaded successfully! Check browser console for details.');
+      toast.success('PDF downloaded successfully!');
+      console.log('✅ PDF exported successfully');
     } catch (err) {
-      console.error('❌ PDF generation failed:', err);
+      console.error('❌ PDF export failed:', err);
       const errorMsg = err instanceof Error ? err.message : 'Unknown error occurred';
       toast.error(`Failed to generate PDF: ${errorMsg}`);
     }
@@ -128,14 +129,16 @@ export default function Receipts() {
 
   const handlePreviewPDF = async (receipt: Receipt) => {
     try {
+      console.log('📄 Generating preview for receipt:', receipt.id, 'Type:', receipt.receipt_type);
       const pdfBytes = await generateReceiptPDFPreview(receipt);
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       setPdfPreviewUrl(url);
       setPdfPreviewReceipt(receipt);
+      console.log('✅ Preview generated successfully');
     } catch (error: any) {
+      console.error('❌ Preview generation failed:', error);
       toast.error(error.message || 'Failed to generate PDF preview');
-      console.error(error);
     }
   };
 
