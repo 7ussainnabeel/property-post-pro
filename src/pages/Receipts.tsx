@@ -131,7 +131,7 @@ export default function Receipts() {
     try {
       console.log('📄 Generating preview for receipt:', receipt.id, 'Type:', receipt.receipt_type);
       const pdfBytes = await generateReceiptPDFPreview(receipt);
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       setPdfPreviewUrl(url);
       setPdfPreviewReceipt(receipt);

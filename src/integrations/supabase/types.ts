@@ -186,6 +186,7 @@ export type Database = {
           property_location: string | null
           property_size: string | null
           property_type: string | null
+          property_type_other: string | null
           receipt_number: string | null
           receipt_type: string
           reservation_amount: number | null
@@ -237,6 +238,7 @@ export type Database = {
           property_location?: string | null
           property_size?: string | null
           property_type?: string | null
+          property_type_other?: string | null
           receipt_number?: string | null
           receipt_type: string
           reservation_amount?: number | null
@@ -288,6 +290,7 @@ export type Database = {
           property_location?: string | null
           property_size?: string | null
           property_type?: string | null
+          property_type_other?: string | null
           receipt_number?: string | null
           receipt_type?: string
           reservation_amount?: number | null
