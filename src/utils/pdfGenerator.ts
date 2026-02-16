@@ -118,6 +118,25 @@ function checkFieldAny(form: any, fieldNames: string[], isChecked: boolean) {
   console.warn(`  ⚠️  No matching checkbox for: ${fieldNames.join(' / ')}`);
 }
 
+/**
+ * Handle radio button groups where multiple options share the same field name
+ * Each option has a different export value (e.g., '0', '1', '2', '3', '4')
+ */
+function selectRadioOption(form: any, fieldName: string, exportValue: string) {
+  try {
+    const field = form.getRadioGroup(fieldName);
+    if (field) {
+      field.select(exportValue);
+      successCount++;
+      console.log(`  ☑ ${fieldName} = ${exportValue}`);
+      return true;
+    }
+  } catch {
+    // Not a radio group, might be individual checkboxes
+  }
+  return false;
+}
+
 function listFormFields(form: any): string[] {
   try {
     const fields = form.getFields();
@@ -178,13 +197,25 @@ function fillCommissionFields(form: any, receipt: Receipt) {
   fillField(form, 'PAID AGAINST INVOICE No', receipt.invoice_number);
   fillField(form, 'NVOICE DATE', receipt.invoice_date);
   fillField(form, 'Transaction Details', receipt.transaction_details);
-  fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by === 'OTHERS' ? receipt.paid_by_other : receipt.paid_by);
   
-  checkField(form, 'Button5', receipt.paid_by === 'BUYER');
-  checkField(form, 'Button6', receipt.paid_by === 'SELLER');
-  checkField(form, 'Button7', receipt.paid_by === 'LANDLORD');
-  checkField(form, 'Button8', receipt.paid_by === 'LANDLORD REP.');
-  checkField(form, 'Button9', receipt.paid_by === 'OTHERS');
+  // REPRESENTATIVE NAME field - only fill when Others is selected with manual entry
+  if (receipt.paid_by === 'OTHERS' && receipt.paid_by_other) {
+    fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by_other);
+  }
+  
+  // Paid By radio button group - all share field name "PB" with different export values
+  // Left to right: Buyer (0), Seller (1), Landlord (2), Landlord Rep (3), Others (4)
+  if (receipt.paid_by === 'BUYER') {
+    selectRadioOption(form, 'PB', '0');
+  } else if (receipt.paid_by === 'SELLER') {
+    selectRadioOption(form, 'PB', '1');
+  } else if (receipt.paid_by === 'LANDLORD') {
+    selectRadioOption(form, 'PB', '2');
+  } else if (receipt.paid_by === 'LANDLORD REP.') {
+    selectRadioOption(form, 'PB', '3');
+  } else if (receipt.paid_by === 'OTHERS') {
+    selectRadioOption(form, 'PB', '4');
+  }
 }
 
 function fillDepositFields(form: any, receipt: Receipt) {
