@@ -191,10 +191,10 @@ function fillDepositFields(form: any, receipt: Receipt) {
   checkFieldAny(form, ['Check Box3', 'CheckBox3'], receipt.transaction_type === 'RESERVATION AMOUNT');
   fillFieldAny(form, ['Text4', 'Reservation Amount'], receipt.reservation_amount);
   
-  // Property details
-  fillField(form, 'Title Number', receipt.title_number);
+  // Property details (PDF field names are swapped: 'Plot Number' field is at Title No position)
+  fillField(form, 'Plot Number', receipt.title_number);
   fillField(form, 'Case Number', receipt.case_number);
-  fillField(form, 'Plot Number', receipt.plot_number);
+  fillField(form, 'Title Number', receipt.plot_number);
   
   // Property size
   fillField(form, 'Size in Square Metres', receipt.size_m2);
