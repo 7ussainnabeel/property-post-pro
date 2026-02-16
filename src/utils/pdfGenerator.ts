@@ -203,18 +203,27 @@ function fillCommissionFields(form: any, receipt: Receipt) {
     fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by_other);
   }
   
-  // Paid By radio button group - all share field name "PB" with different export values
+  // Paid By - single field "PB" with multiple checkboxes by position
   // Left to right: Buyer (0), Seller (1), Landlord (2), Landlord Rep (3), Others (4)
-  if (receipt.paid_by === 'BUYER') {
-    selectRadioOption(form, 'PB', '0');
-  } else if (receipt.paid_by === 'SELLER') {
-    selectRadioOption(form, 'PB', '1');
-  } else if (receipt.paid_by === 'LANDLORD') {
-    selectRadioOption(form, 'PB', '2');
-  } else if (receipt.paid_by === 'LANDLORD REP.') {
-    selectRadioOption(form, 'PB', '3');
-  } else if (receipt.paid_by === 'OTHERS') {
-    selectRadioOption(form, 'PB', '4');
+  let paidByValue: string | null = null;
+  switch (receipt.paid_by) {
+    case 'BUYER': paidByValue = '0'; break;
+    case 'SELLER': paidByValue = '1'; break;
+    case 'LANDLORD': paidByValue = '2'; break;
+    case 'LANDLORD REP.': paidByValue = '3'; break;
+    case 'OTHERS': paidByValue = '4'; break;
+  }
+  
+  if (paidByValue !== null) {
+    // Try as radio group first
+    if (!selectRadioOption(form, 'PB', paidByValue)) {
+      // If not a radio group, try as individual checkboxes (fallback for different PDF versions)
+      checkField(form, 'Buyer', receipt.paid_by === 'BUYER');
+      checkField(form, 'Seller', receipt.paid_by === 'SELLER');
+      checkField(form, 'Landlord', receipt.paid_by === 'LANDLORD');
+      checkField(form, 'Landlord Rep', receipt.paid_by === 'LANDLORD REP.');
+      checkFieldAny(form, ['Others', 'Other'], receipt.paid_by === 'OTHERS');
+    }
   }
 }
 
@@ -332,12 +341,23 @@ async function generateReceiptPDFBytes(receipt: Receipt): Promise<Uint8Array> {
 
   console.log(`\n📊 Summary: ${successCount} filled, ${failCount} warnings`);
 
+  // Try to flatten the form, but continue without flattening if it fails
   if (availableFields.length > 0) {
-    form.flatten();
-    console.log('🔒 Form flattened');
+    try {
+      form.flatten();
+      console.log('🔒 Form flattened');
+    } catch (flattenError) {
+      console.warn('⚠️ Could not flatten form, saving with editable fields:', flattenError);
+    }
   }
 
-  return await pdfDoc.save();
+  try {
+    return await pdfDoc.save();
+  } catch (saveError) {
+    console.error('❌ Error saving PDF with current options, trying alternative save method...');
+    // Try saving without updating field appearances
+    return await pdfDoc.save({ updateFieldAppearances: false });
+  }
 }
 
 export async function generateReceiptPDF(receipt: Receipt) {
