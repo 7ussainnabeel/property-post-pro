@@ -174,6 +174,7 @@ export type Database = {
           land_number: string | null
           number_of_roads: string | null
           paid_by: string | null
+          paid_by_other: string | null
           payment_date: string | null
           payment_method: string | null
           payment_receipt_url: string | null
@@ -226,6 +227,7 @@ export type Database = {
           land_number?: string | null
           number_of_roads?: string | null
           paid_by?: string | null
+          paid_by_other?: string | null
           payment_date?: string | null
           payment_method?: string | null
           payment_receipt_url?: string | null
@@ -278,6 +280,7 @@ export type Database = {
           land_number?: string | null
           number_of_roads?: string | null
           paid_by?: string | null
+          paid_by_other?: string | null
           payment_date?: string | null
           payment_method?: string | null
           payment_receipt_url?: string | null

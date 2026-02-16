@@ -20,7 +20,7 @@
  *   - PAID AGAINST INVOICE No, NVOICE DATE
  *   - Transaction Details (textarea)
  *   - REPRESENTATIVE NAME (text field for paid_by)
- *   - Button5 (Buyer), Button6 (Seller), Button7 (Landlord), Button8 (Landlord Rep.) checkboxes
+ *   - Button5 (Buyer), Button6 (Seller), Button7 (Landlord), Button8 (Landlord Rep.), Button9 (Others) checkboxes
  * 
  * DEPOSIT RECEIPT FIELDS:
  * ----------------------
@@ -305,13 +305,16 @@ async function generateReceiptPDFBytes(receipt: Receipt): Promise<Uint8Array> {
     fillField(form, 'PAID AGAINST INVOICE No', receipt.invoice_number);
     fillField(form, 'NVOICE DATE', receipt.invoice_date);
     fillField(form, 'Transaction Details', receipt.transaction_details);
-    fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by);
     
-    // Paid By checkboxes (Button5-Button8 in Commission Receipt PDF)
+    // Fill REPRESENTATIVE NAME with custom name if paid_by is OTHERS, otherwise use paid_by value
+    fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by === 'OTHERS' ? receipt.paid_by_other : receipt.paid_by);
+    
+    // Paid By checkboxes (Button5-Button9 in Commission Receipt PDF)
     checkField(form, 'Button5', receipt.paid_by === 'BUYER');
     checkField(form, 'Button6', receipt.paid_by === 'SELLER');
     checkField(form, 'Button7', receipt.paid_by === 'LANDLORD');
     checkField(form, 'Button8', receipt.paid_by === 'LANDLORD REP.');
+    checkField(form, 'Button9', receipt.paid_by === 'OTHERS');
   } else {
     // Deposit-specific fields - using actual PDF field names from inspection
     checkField(form, 'Check Box1', receipt.transaction_type === 'HOLDING DEPOSIT');

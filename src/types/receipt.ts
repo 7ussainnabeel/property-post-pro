@@ -21,6 +21,7 @@ export interface Receipt {
   invoice_number: string | null;
   invoice_date: string | null;
   paid_by: string | null;
+  paid_by_other: string | null;
   transaction_details: string | null;
   // Deposit fields
   transaction_type: string | null;
