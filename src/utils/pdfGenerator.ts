@@ -45,11 +45,29 @@ import { Receipt } from '@/types/receipt';
  * Loads a PDF template from the PDF folder
  */
 async function loadPDFTemplate(templateName: string): Promise<ArrayBuffer> {
-  const response = await fetch(`/PDF/${templateName}`);
+  // Add cache busting and better error handling
+  const response = await fetch(`/PDF/${templateName}?t=${Date.now()}`, {
+    cache: 'no-cache',
+    headers: {
+      'Accept': 'application/pdf',
+    }
+  });
+  
   if (!response.ok) {
-    throw new Error(`Failed to load PDF template: ${templateName}`);
+    throw new Error(`Failed to load PDF template: ${templateName} (Status: ${response.status})`);
   }
-  return await response.arrayBuffer();
+  
+  const arrayBuffer = await response.arrayBuffer();
+  console.log(`✓ Loaded ${templateName}: ${arrayBuffer.byteLength} bytes`);
+  
+  // Validate it's a PDF
+  const uint8 = new Uint8Array(arrayBuffer);
+  const header = String.fromCharCode(...uint8.slice(0, 5));
+  if (!header.startsWith('%PDF-')) {
+    throw new Error(`Invalid PDF file: ${templateName} (Header: ${header})`);
+  }
+  
+  return arrayBuffer;
 }
 
 /**
@@ -64,13 +82,15 @@ function fillField(form: any, fieldName: string, value: any) {
     if (field && value !== null && value !== undefined) {
       field.setText(String(value));
       successCount++;
-      console.log(`✓ ${fieldName} = ${value}`);
+      console.log(`  ✓ ${fieldName} = ${value}`);
+    } else if (value !== null && value !== undefined) {
+      console.log(`  ⚠️  Field "${fieldName}" exists but has no value`);
     }
   } catch (error) {
     failCount++;
     // Only show warnings for fields that have actual values to fill
-    if (value) {
-      console.warn(`⚠ Missing field: ${fieldName}`);
+    if (value !== null && value !== undefined && value !== '') {
+      console.warn(`  ⚠️  Missing or invalid field: "${fieldName}" (attempted value: ${value})`);
     }
   }
 }
@@ -84,12 +104,12 @@ function checkField(form: any, fieldName: string, isChecked: boolean) {
     if (field && isChecked) {
       field.check();
       successCount++;
-      console.log(`☑ ${fieldName}`);
+      console.log(`  ☑ ${fieldName} = checked`);
     }
   } catch (error) {
     if (isChecked) {
       failCount++;
-      console.warn(`⚠ Missing checkbox: ${fieldName}`);
+      console.warn(`  ⚠️  Missing or invalid checkbox: "${fieldName}"`);
     }
   }
 }
@@ -123,6 +143,12 @@ async function generateReceiptPDFBytes(receipt: Receipt): Promise<Uint8Array> {
   successCount = 0;
   failCount = 0;
   
+  console.log('🚀 Starting PDF generation for receipt:', {
+    id: receipt.id,
+    receipt_number: receipt.receipt_number,
+    receipt_type: receipt.receipt_type,
+  });
+  
   // Normalize receipt type to handle case variations
   const receiptType = receipt.receipt_type?.toLowerCase();
   if (!receiptType || (receiptType !== 'commission' && receiptType !== 'deposit')) {
@@ -138,17 +164,35 @@ async function generateReceiptPDFBytes(receipt: Receipt): Promise<Uint8Array> {
   // Load the PDF template
   const templateBytes = await loadPDFTemplate(templateName);
   
-  // Try to load PDF with options to handle potential structure issues
+  // Try to load PDF with error handling for browser issues
   let pdfDoc;
   try {
+    // First attempt with safe options
     pdfDoc = await PDFDocument.load(templateBytes, {
       updateMetadata: false,
       ignoreEncryption: true,
     });
+    console.log(`✓ PDF loaded successfully with ${pdfDoc.getPageCount()} page(s)`);
   } catch (loadError) {
-    console.error('❌ Failed to load PDF with options, trying default load...', loadError);
-    // If that fails, try without options as last resort
-    pdfDoc = await PDFDocument.load(templateBytes);
+    console.error('❌ Failed to load PDF:', loadError);
+    
+    // Check if it's the specific PDFRef error
+    if (loadError instanceof Error && loadError.message.includes('PDFRef')) {
+      throw new Error(
+        `PDF structure error in ${templateName}. ` +
+        `This usually means the PDF file is corrupted or has invalid internal references. ` +
+        `Please regenerate the PDF form template. Error: ${loadError.message}`
+      );
+    }
+    
+    // For other errors, try default load as fallback
+    console.log('🔄 Retrying with default options...');
+    try {
+      pdfDoc = await PDFDocument.load(templateBytes);
+      console.log('✓ PDF loaded with default options');
+    } catch (secondError) {
+      throw new Error(`Cannot load ${templateName}: ${secondError instanceof Error ? secondError.message : String(secondError)}`);
+    }
   }
   
   // Try to get the form - this may fail if PDF doesn't have proper form fields
@@ -174,6 +218,32 @@ async function generateReceiptPDFBytes(receipt: Receipt): Promise<Uint8Array> {
     console.error('⚠️ No form fields found! The PDF must have fillable form fields.');
     throw new Error('PDF template has no form fields. Please add fillable form fields to the PDF.');
   }
+
+  // Log receipt data for debugging
+  console.log('📦 Receipt data received:', {
+    client_name: receipt.client_name,
+    client_id_number: receipt.client_id_number,
+    full_amount_due_bd: receipt.full_amount_due_bd,
+    amount_paid_bd: receipt.amount_paid_bd,
+    balance_amount_bd: receipt.balance_amount_bd,
+    payment_date: receipt.payment_date,
+    receipt_number: receipt.receipt_number,
+    agent_name: receipt.agent_name,
+    payment_method: receipt.payment_method,
+    property_type: receipt.property_type,
+    ...(receiptType === 'deposit' && {
+      transaction_type: receipt.transaction_type,
+      reservation_amount: receipt.reservation_amount,
+      title_number: receipt.title_number,
+      case_number: receipt.case_number,
+      plot_number: receipt.plot_number,
+      size_m2: receipt.size_m2,
+      size_f2: receipt.size_f2,
+      property_address: receipt.property_address,
+      project_name: receipt.project_name,
+      area_name: receipt.area_name,
+    }),
+  });
 
   console.log(`📝 Filling ${Object.keys(receipt).filter(k => receipt[k as keyof Receipt]).length} receipt fields...`);
 
