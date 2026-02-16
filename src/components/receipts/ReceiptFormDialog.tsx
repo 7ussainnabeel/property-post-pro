@@ -282,30 +282,20 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
                     <Field label="Invoice Number" field="invoice_number" value={form.invoice_number || ''} onChange={update} />
                     <Field label="Invoice Date" field="invoice_date" value={form.invoice_date || ''} onChange={update} type="date" />
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <Label className="text-xs font-medium">Paid By</Label>
-                    <RadioGroup value={form.paid_by || ''} onValueChange={(v) => update('paid_by', v)}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="BUYER" id="pb-buyer" />
-                        <Label htmlFor="pb-buyer" className="text-sm font-normal cursor-pointer">Buyer</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="SELLER" id="pb-seller" />
-                        <Label htmlFor="pb-seller" className="text-sm font-normal cursor-pointer">Seller</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="LANDLORD" id="pb-landlord" />
-                        <Label htmlFor="pb-landlord" className="text-sm font-normal cursor-pointer">Landlord</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="LANDLORD REP." id="pb-landlord-rep" />
-                        <Label htmlFor="pb-landlord-rep" className="text-sm font-normal cursor-pointer">Landlord Rep.</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="OTHERS" id="pb-others" />
-                        <Label htmlFor="pb-others" className="text-sm font-normal cursor-pointer">Others</Label>
-                      </div>
-                    </RadioGroup>
+                    <Select value={form.paid_by || ''} onValueChange={(v) => update('paid_by', v)}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BUYER">Buyer</SelectItem>
+                        <SelectItem value="SELLER">Seller</SelectItem>
+                        <SelectItem value="LANDLORD">Landlord</SelectItem>
+                        <SelectItem value="LANDLORD REP.">Landlord Rep.</SelectItem>
+                        <SelectItem value="OTHERS">Others</SelectItem>
+                      </SelectContent>
+                    </Select>
                     {form.paid_by === 'OTHERS' && (
                       <div className="mt-2">
                         <Input
