@@ -161,9 +161,12 @@ function fillPaymentMethod(form: any, receipt: Receipt) {
 }
 
 function fillPropertyType(form: any, receipt: Receipt, isCommission: boolean) {
+  // Property Type checkboxes - PDF field names are swapped
+  // Left to right: Land, Flat, Villa, Building, Other
+  // PDF fields: Land field at Land position, Villa field at Flat position, Flat field at Villa position
   checkField(form, 'Land', receipt.property_type === 'LAND');
-  checkField(form, 'Villa', receipt.property_type === 'VILLA');
-  checkField(form, 'Flat', receipt.property_type === 'FLAT');
+  checkField(form, 'Villa', receipt.property_type === 'FLAT');  // Villa field is at Flat position
+  checkField(form, 'Flat', receipt.property_type === 'VILLA');  // Flat field is at Villa position
   checkField(form, 'Building', receipt.property_type === 'BUILDING');
   checkFieldAny(form, isCommission ? ['Other'] : ['Button5', 'Other'], receipt.property_type === 'OTHER');
   if (receipt.property_type === 'OTHER' && receipt.property_type_other) {
