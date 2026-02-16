@@ -42,6 +42,22 @@ import { PDFDocument } from 'pdf-lib';
 import { Receipt } from '@/types/receipt';
 
 /**
+ * Maps branch ID to the PDF template file suffix.
+ * Default (manama/seef) uses the base template with no suffix.
+ */
+function getBranchTemplateSuffix(branch: string | null): string {
+  switch (branch) {
+    case 'saar':
+      return '_Saar';
+    case 'amwaj-island':
+      return '_Amwaj';
+    default:
+      // Manama and Seef use the default template
+      return '';
+  }
+}
+
+/**
  * Loads a PDF template from the PDF folder
  */
 async function loadPDFTemplate(templateName: string): Promise<ArrayBuffer> {
@@ -157,7 +173,12 @@ async function generateReceiptPDFBytes(receipt: Receipt): Promise<Uint8Array> {
   }
   
   const isCommission = receiptType === 'commission';
-  const templateName = isCommission ? 'CommissionReceipt.pdf' : 'DepositReceipt.pdf';
+  
+  // Select branch-specific template
+  const branchSuffix = getBranchTemplateSuffix(receipt.branch);
+  const templateName = isCommission 
+    ? `CommissionReceipt${branchSuffix}.pdf` 
+    : `DepositReceipt${branchSuffix}.pdf`;
 
   console.log(`🔄 Loading ${templateName} for receipt type: ${receiptType}...`);
   
