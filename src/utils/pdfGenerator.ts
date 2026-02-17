@@ -203,27 +203,37 @@ function fillCommissionFields(form: any, receipt: Receipt) {
     fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by_other);
   }
   
-  // Paid By - single radio group field "PB"
-  // Left to right: Buyer, Seller, Landlord, Landlord Rep
-  // Try multiple export value formats since PDFs vary
+  // Paid By - "PB" field: Buyer, Seller, Landlord, Landlord Rep (left to right)
   if (receipt.paid_by) {
-    const paidByMap: Record<string, string[]> = {
-      'BUYER': ['0', '1', 'Buyer'],
-      'SELLER': ['1', '2', 'Seller'],
-      'LANDLORD': ['2', '3', 'Landlord'],
-      'LANDLORD REP.': ['3', '4', 'Landlord Rep'],
+    // Order: index 0 = Buyer, 1 = Seller, 2 = Landlord, 3 = Landlord Rep
+    const paidByIndex: Record<string, number> = {
+      'BUYER': 0,
+      'SELLER': 1,
+      'LANDLORD': 2,
+      'LANDLORD REP.': 3,
     };
     
-    const candidates = paidByMap[receipt.paid_by];
-    if (candidates) {
+    const idx = paidByIndex[receipt.paid_by];
+    if (idx !== undefined) {
       let filled = false;
-      // Try as radio group with each possible export value
-      for (const val of candidates) {
-        if (selectRadioOption(form, 'PB', val)) {
-          filled = true;
-          break;
+      
+      // Try as radio group - detect available options and select by index
+      try {
+        const radioGroup = form.getRadioGroup('PB');
+        if (radioGroup) {
+          const options = radioGroup.getOptions();
+          console.log(`  📻 PB radio options:`, options);
+          if (options && options.length > idx) {
+            radioGroup.select(options[idx]);
+            successCount++;
+            console.log(`  ☑ PB = ${options[idx]} (index ${idx})`);
+            filled = true;
+          }
         }
+      } catch {
+        console.log('  ℹ PB is not a radio group, trying checkboxes...');
       }
+      
       // Fallback: try individual checkbox fields
       if (!filled) {
         checkField(form, 'Buyer', receipt.paid_by === 'BUYER');
