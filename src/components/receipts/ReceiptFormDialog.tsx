@@ -151,6 +151,51 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
     }
   }, [form.amount_paid_bd, form.amount_paid_words]);
 
+  // Auto-convert Size in M² to Size in F² (1 m² = 10.764 f²)
+  useEffect(() => {
+    if (receiptType === 'deposit' && form.size_m2) {
+      const sizeM2 = parseFloat(form.size_m2);
+      if (!isNaN(sizeM2) && sizeM2 > 0) {
+        const sizeF2 = (sizeM2 * 10.764).toFixed(2);
+        if (sizeF2 !== form.size_f2) {
+          setForm(prev => ({ ...prev, size_f2: sizeF2 }));
+        }
+      }
+    }
+  }, [form.size_m2, receiptType, form.size_f2]);
+
+  // Auto-calculate Property Total Sales Price (Size in M² × 10.764 × Price/F²)
+  useEffect(() => {
+    if (receiptType === 'deposit' && form.size_m2 && form.price_per_f2) {
+      const sizeM2 = parseFloat(form.size_m2);
+      const pricePerF2 = parseFloat(form.price_per_f2);
+      if (!isNaN(sizeM2) && !isNaN(pricePerF2) && sizeM2 > 0 && pricePerF2 > 0) {
+        const totalPrice = (sizeM2 * 10.764 * pricePerF2).toFixed(2);
+        if (totalPrice !== form.total_sales_price) {
+          setForm(prev => ({ ...prev, total_sales_price: totalPrice }));
+        }
+      }
+    }
+  }, [form.size_m2, form.price_per_f2, receiptType, form.total_sales_price]);
+
+  // Auto-populate Full Address from address components
+  useEffect(() => {
+    if (receiptType === 'deposit') {
+      const parts: string[] = [];
+      
+      if (form.unit_number) parts.push(`Unit ${form.unit_number}`);
+      if (form.building_number) parts.push(`Building ${form.building_number}`);
+      if (form.road_number) parts.push(`Road ${form.road_number}`);
+      if (form.block_number) parts.push(`Block ${form.block_number}`);
+      if (form.area_name) parts.push(form.area_name);
+      
+      const generatedAddress = parts.join(', ');
+      if (generatedAddress && generatedAddress !== form.property_address) {
+        setForm(prev => ({ ...prev, property_address: generatedAddress }));
+      }
+    }
+  }, [form.unit_number, form.building_number, form.road_number, form.block_number, form.area_name, receiptType, form.property_address]);
+
   const handleSave = async () => {
     setSaving(true);
     const { id, created_at, updated_at, deleted_at, deleted_by, ...rest } = form;
@@ -296,6 +341,15 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
                       </SelectContent>
                     </Select>
                   </div>
+                  {form.paid_by === 'LANDLORD REP.' && (
+                    <Field 
+                      label="Representative Name" 
+                      field="paid_by_other" 
+                      value={form.paid_by_other || ''} 
+                      onChange={update}
+                      placeholder="Enter representative's full name"
+                    />
+                  )}
                 </>
               )}
               {receiptType === 'deposit' && (
