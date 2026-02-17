@@ -198,31 +198,39 @@ function fillCommissionFields(form: any, receipt: Receipt) {
   fillField(form, 'NVOICE DATE', receipt.invoice_date);
   fillField(form, 'Transaction Details', receipt.transaction_details);
   
-  // REPRESENTATIVE NAME field - only fill when Others is selected with manual entry
-  if (receipt.paid_by === 'OTHERS' && receipt.paid_by_other) {
+  // REPRESENTATIVE NAME field
+  if (receipt.paid_by === 'LANDLORD REP.' && receipt.paid_by_other) {
     fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by_other);
   }
   
-  // Paid By - single field "PB" with multiple checkboxes by position
-  // Left to right: Buyer (0), Seller (1), Landlord (2), Landlord Rep (3), Others (4)
-  let paidByValue: string | null = null;
-  switch (receipt.paid_by) {
-    case 'BUYER': paidByValue = '0'; break;
-    case 'SELLER': paidByValue = '1'; break;
-    case 'LANDLORD': paidByValue = '2'; break;
-    case 'LANDLORD REP.': paidByValue = '3'; break;
-    case 'OTHERS': paidByValue = '4'; break;
-  }
-  
-  if (paidByValue !== null) {
-    // Try as radio group first
-    if (!selectRadioOption(form, 'PB', paidByValue)) {
-      // If not a radio group, try as individual checkboxes (fallback for different PDF versions)
-      checkField(form, 'Buyer', receipt.paid_by === 'BUYER');
-      checkField(form, 'Seller', receipt.paid_by === 'SELLER');
-      checkField(form, 'Landlord', receipt.paid_by === 'LANDLORD');
-      checkField(form, 'Landlord Rep', receipt.paid_by === 'LANDLORD REP.');
-      checkFieldAny(form, ['Others', 'Other'], receipt.paid_by === 'OTHERS');
+  // Paid By - single radio group field "PB"
+  // Left to right: Buyer, Seller, Landlord, Landlord Rep
+  // Try multiple export value formats since PDFs vary
+  if (receipt.paid_by) {
+    const paidByMap: Record<string, string[]> = {
+      'BUYER': ['0', '1', 'Buyer'],
+      'SELLER': ['1', '2', 'Seller'],
+      'LANDLORD': ['2', '3', 'Landlord'],
+      'LANDLORD REP.': ['3', '4', 'Landlord Rep'],
+    };
+    
+    const candidates = paidByMap[receipt.paid_by];
+    if (candidates) {
+      let filled = false;
+      // Try as radio group with each possible export value
+      for (const val of candidates) {
+        if (selectRadioOption(form, 'PB', val)) {
+          filled = true;
+          break;
+        }
+      }
+      // Fallback: try individual checkbox fields
+      if (!filled) {
+        checkField(form, 'Buyer', receipt.paid_by === 'BUYER');
+        checkField(form, 'Seller', receipt.paid_by === 'SELLER');
+        checkField(form, 'Landlord', receipt.paid_by === 'LANDLORD');
+        checkField(form, 'Landlord Rep', receipt.paid_by === 'LANDLORD REP.');
+      }
     }
   }
 }

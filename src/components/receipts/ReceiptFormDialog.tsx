@@ -293,20 +293,8 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
                         <SelectItem value="SELLER">Seller</SelectItem>
                         <SelectItem value="LANDLORD">Landlord</SelectItem>
                         <SelectItem value="LANDLORD REP.">Landlord Rep.</SelectItem>
-                        <SelectItem value="OTHERS">Others</SelectItem>
                       </SelectContent>
                     </Select>
-                    {form.paid_by === 'OTHERS' && (
-                      <div className="mt-2">
-                        <Input
-                          placeholder="Enter paid by name"
-                          value={form.paid_by_other || ''}
-                          onChange={(e) => update('paid_by_other', e.target.value)}
-                          className="h-10 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                    )}
                   </div>
                 </>
               )}
