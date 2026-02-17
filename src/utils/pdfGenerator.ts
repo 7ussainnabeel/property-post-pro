@@ -5,7 +5,7 @@
  * Supports branch-specific templates (Saar, Amwaj) with fallback field names.
  */
 
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFName } from 'pdf-lib';
 import { Receipt } from '@/types/receipt';
 
 // ─── Template Selection ────────────────────────────────────────────────────────
@@ -222,7 +222,7 @@ function fillCommissionFields(form: any, receipt: Receipt) {
       const pbFields = allFields.filter((f: any) => f.getName() === 'PB');
       console.log(`  📻 Found ${pbFields.length} PB field(s), type: ${pbFields[0]?.constructor?.name}`);
       
-      // Primary approach: Direct widget manipulation (most reliable)
+      // Primary approach: Direct widget manipulation via pdf-lib internals
       if (pbFields.length > 0) {
         try {
           const pbField = pbFields[0];
@@ -230,20 +230,38 @@ function fillCommissionFields(form: any, receipt: Receipt) {
           const widgets = acroField.getWidgets();
           console.log(`  📻 PB has ${widgets.length} widgets`);
           
-          // Log all widget onValues for debugging
+          // Each widget's appearance dict has an /N (normal) entry with named appearances
+          // The key that isn't /Off is the "on" value for that widget
           for (let i = 0; i < widgets.length; i++) {
             const w = widgets[i];
-            console.log(`  📻 Widget ${i} onValue: ${w.getOnValue?.()}`);
+            const apDict = w.getAppearances()?.normal;
+            if (apDict && typeof apDict.keys === 'function') {
+              const keys = apDict.keys().filter((k: any) => k.toString() !== '/Off');
+              console.log(`  📻 Widget ${i} appearance keys: ${keys.map((k: any) => k.toString())}`);
+            }
           }
           
           if (widgets.length > idx) {
-            const widget = widgets[idx];
-            const onValue = widget.getOnValue?.();
-            if (onValue) {
-              acroField.setValue(onValue);
-              successCount++;
-              console.log(`  ☑ PB set via widget onValue: ${onValue} (widget index ${idx})`);
-              filled = true;
+            const targetWidget = widgets[idx];
+            const apDict = targetWidget.getAppearances()?.normal;
+            if (apDict && typeof apDict.keys === 'function') {
+              const onKey = apDict.keys().find((k: any) => k.toString() !== '/Off');
+              if (onKey) {
+                // Set the field value to this widget's "on" value
+                const onValueName = onKey instanceof PDFName ? onKey : PDFName.of(onKey.toString().replace('/', ''));
+                acroField.dict.set(PDFName.of('V'), onValueName);
+                // Also set the appearance state on the target widget
+                targetWidget.dict.set(PDFName.of('AS'), onValueName);
+                // Set all other widgets to /Off
+                for (let i = 0; i < widgets.length; i++) {
+                  if (i !== idx) {
+                    widgets[i].dict.set(PDFName.of('AS'), PDFName.of('Off'));
+                  }
+                }
+                successCount++;
+                console.log(`  ☑ PB set to ${onValueName.toString()} (widget ${idx})`);
+                filled = true;
+              }
             }
           }
         } catch (e) {
