@@ -203,9 +203,9 @@ function fillCommissionFields(form: any, receipt: Receipt) {
     fillField(form, 'REPRESENTATIVE NAME', receipt.paid_by_other);
   }
   
-  // Paid By - "PB" field: Buyer, Seller, Landlord, Landlord Rep (left to right)
+  // Paid By - "PB" field: all checkboxes named "PB" 
+  // Left to right: Buyer(0), Seller(1), Landlord(2), Landlord Rep(3)
   if (receipt.paid_by) {
-    // Order: index 0 = Buyer, 1 = Seller, 2 = Landlord, 3 = Landlord Rep
     const paidByIndex: Record<string, number> = {
       'BUYER': 0,
       'SELLER': 1,
@@ -217,7 +217,12 @@ function fillCommissionFields(form: any, receipt: Receipt) {
     if (idx !== undefined) {
       let filled = false;
       
-      // Try as radio group - detect available options and select by index
+      // Log all fields named PB for debugging
+      const allFields = form.getFields();
+      const pbFields = allFields.filter((f: any) => f.getName() === 'PB');
+      console.log(`  📻 Found ${pbFields.length} PB field(s), type: ${pbFields[0]?.constructor?.name}`);
+      
+      // Approach 1: Try as radio group
       try {
         const radioGroup = form.getRadioGroup('PB');
         if (radioGroup) {
@@ -228,18 +233,72 @@ function fillCommissionFields(form: any, receipt: Receipt) {
             successCount++;
             console.log(`  ☑ PB = ${options[idx]} (index ${idx})`);
             filled = true;
+          } else if (options && options.length === 0) {
+            // Radio group with no named options - try common export values
+            const tryValues = [String(idx), String(idx + 1), `Choice${idx + 1}`, `Option${idx + 1}`];
+            for (const val of tryValues) {
+              try {
+                radioGroup.select(val);
+                successCount++;
+                console.log(`  ☑ PB = ${val} (guessed)`);
+                filled = true;
+                break;
+              } catch {
+                // try next value
+              }
+            }
           }
         }
-      } catch {
-        console.log('  ℹ PB is not a radio group, trying checkboxes...');
+      } catch (e) {
+        console.log('  ℹ PB is not a radio group:', e);
       }
       
-      // Fallback: try individual checkbox fields
+      // Approach 2: Try as checkbox (single field named PB)
+      if (!filled) {
+        try {
+          const checkbox = form.getCheckBox('PB');
+          if (checkbox) {
+            checkbox.check();
+            successCount++;
+            console.log(`  ☑ PB checkbox checked`);
+            filled = true;
+          }
+        } catch {
+          console.log('  ℹ PB is not a simple checkbox');
+        }
+      }
+      
+      // Approach 3: Try individual named checkboxes
       if (!filled) {
         checkField(form, 'Buyer', receipt.paid_by === 'BUYER');
         checkField(form, 'Seller', receipt.paid_by === 'SELLER');
         checkField(form, 'Landlord', receipt.paid_by === 'LANDLORD');
         checkField(form, 'Landlord Rep', receipt.paid_by === 'LANDLORD REP.');
+      }
+      
+      // Approach 4: Direct PDF widget manipulation as last resort
+      if (!filled && pbFields.length > 0) {
+        try {
+          const pbField = pbFields[0];
+          const acroField = pbField.acroField;
+          const widgets = acroField.getWidgets();
+          console.log(`  📻 PB has ${widgets.length} widgets`);
+          
+          if (widgets.length > idx) {
+            // For radio buttons, set the value on the field and mark the widget
+            const widget = widgets[idx];
+            const onValue = widget.getOnValue();
+            console.log(`  📻 Widget ${idx} onValue: ${onValue}`);
+            if (onValue) {
+              acroField.setValue(onValue);
+              successCount++;
+              console.log(`  ☑ PB set via widget onValue: ${onValue}`);
+              filled = true;
+            }
+          }
+        } catch (e) {
+          console.warn('  ⚠️ Direct widget manipulation failed:', e);
+        }
       }
     }
   }
