@@ -7,8 +7,10 @@ import { Building2, Sparkles, Video, History, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useBranch } from '@/contexts/BranchContext';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { BRANCHES, BranchId } from '@/lib/branches';
 
 const Index = () => {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContentType | null>(null);
@@ -16,7 +18,7 @@ const Index = () => {
   const [propertyData, setPropertyData] = useState<PropertyInput | null>(null);
   const loadingToastId = useRef<string | number | null>(null);
   const heroRef = useRef<HTMLElement>(null);
-  const { selectedBranch, getBranchName } = useBranch();
+  const { selectedBranch, getBranchName, setSelectedBranch } = useBranch();
   useThemeColor(heroRef);
 
   const handleGenerate = async (data: PropertyInput) => {
@@ -109,14 +111,29 @@ const Index = () => {
         {/* Navigation - Mobile Friendly */}
         <div className="container max-w-6xl mx-auto mb-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            {/* Branch Badge */}
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+            {/* Branch Selector */}
+            <Select 
+              value={selectedBranch || undefined} 
+              onValueChange={(value) => {
+                setSelectedBranch(value as BranchId);
+                toast.success(`Branch changed to ${getBranchName(value)}`);
+              }}
+            >
+              <SelectTrigger className="w-auto bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <Building2 className="h-4 w-4 mr-1 md:mr-2" />
-                <span className="hidden sm:inline">{selectedBranch ? getBranchName(selectedBranch) : 'Select Branch'}</span>
-                <span className="sm:hidden">{selectedBranch ? getBranchName(selectedBranch).split(' ')[0] : 'Branch'}</span>
-              </Button>
-            </Link>
+                <SelectValue>
+                  <span className="hidden sm:inline">{selectedBranch ? getBranchName(selectedBranch) : 'Select Branch'}</span>
+                  <span className="sm:hidden">{selectedBranch ? getBranchName(selectedBranch).split(' ')[0] : 'Branch'}</span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {BRANCHES.map((branch) => (
+                  <SelectItem key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             
             {/* Navigation Links */}
             <div className="flex gap-2">
