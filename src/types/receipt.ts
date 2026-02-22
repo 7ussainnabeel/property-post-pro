@@ -47,6 +47,7 @@ export interface Receipt {
   area_name: string | null;
   buyer_commission_bd: string | null;
   pdf_url: string | null;
+  created_by_email: string | null;
   payment_receipt_url: string | null;
   created_at: string;
   updated_at: string;

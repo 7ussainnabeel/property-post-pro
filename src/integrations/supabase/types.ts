@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      edit_duration_settings: {
+        Row: {
+          edit_duration_days: number
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          edit_duration_days?: number
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          edit_duration_days?: number
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       generated_listings: {
         Row: {
           agent: string | null
@@ -165,6 +186,7 @@ export type Database = {
           client_id_number: string | null
           client_name: string | null
           created_at: string | null
+          created_by_email: string | null
           deleted_at: string | null
           deleted_by: string | null
           full_amount_due_bd: number | null
@@ -218,6 +240,7 @@ export type Database = {
           client_id_number?: string | null
           client_name?: string | null
           created_at?: string | null
+          created_by_email?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           full_amount_due_bd?: number | null
@@ -271,6 +294,7 @@ export type Database = {
           client_id_number?: string | null
           client_name?: string | null
           created_at?: string | null
+          created_by_email?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           full_amount_due_bd?: number | null

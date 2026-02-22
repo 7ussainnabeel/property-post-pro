@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { BRANCHES } from '@/lib/branches';
+import { useBranch } from '@/contexts/BranchContext';
+import { BRANCHES, type BranchId } from '@/lib/branches';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Building2, LogIn, UserPlus, Home } from 'lucide-react';
+import { Building2, LogIn, UserPlus, Home, MapPin } from 'lucide-react';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,9 +19,17 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [branch, setBranch] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user } = useAuth();
+  const { selectedBranch, setSelectedBranch } = useBranch();
   const navigate = useNavigate();
   useThemeColor(undefined, '#f5f7fa', '#f5f7fa');
+
+  // If user is already logged in, show branch selection
+  useEffect(() => {
+    if (user && selectedBranch) {
+      navigate('/receipts');
+    }
+  }, [user, selectedBranch, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +41,11 @@ export default function Auth() {
         toast.error(error.message);
       } else {
         toast.success('Logged in successfully!');
-        navigate('/receipts');
+        // If branch already selected, go to receipts
+        if (localStorage.getItem('selectedBranch')) {
+          navigate('/receipts');
+        }
+        // Otherwise stay on page to select branch
       }
     } else {
       if (!email.endsWith('@icarlton.com')) {
@@ -54,6 +67,62 @@ export default function Auth() {
     }
     setLoading(false);
   };
+
+  const handleBranchSelect = (branchId: string) => {
+    const b = BRANCHES.find(br => br.id === branchId);
+    if (b) {
+      setSelectedBranch(b.id as BranchId);
+      toast.success(`Branch set to ${b.name}`);
+      setTimeout(() => navigate('/receipts'), 300);
+    }
+  };
+
+  // If logged in but no branch selected, show branch selection
+  if (user && !selectedBranch) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-4xl">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+              <img src="/LOGO.png" alt="Carlton Real Estate" className="h-10" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-foreground">
+              Select Your Branch
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground px-4 mt-2">
+              Welcome, {user.email}! Select your branch to continue.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {BRANCHES.map((b) => (
+              <Card
+                key={b.id}
+                className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
+                onClick={() => handleBranchSelect(b.id)}
+              >
+                <CardHeader>
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center mb-2 sm:mb-3`}>
+                    <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                  <CardTitle className="text-xl sm:text-2xl">{b.name}</CardTitle>
+                  <CardDescription>Access {b.name} dashboard</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full" variant="outline">Select Branch</Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If logged in and branch selected, redirect
+  if (user && selectedBranch) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
