@@ -27,7 +27,7 @@ export default function Auth() {
   // If user is already logged in, show branch selection
   useEffect(() => {
     if (user && selectedBranch) {
-      navigate('/receipts');
+      navigate('/dashboard');
     }
   }, [user, selectedBranch, navigate]);
 
@@ -41,9 +41,9 @@ export default function Auth() {
         toast.error(error.message);
       } else {
         toast.success('Logged in successfully!');
-        // If branch already selected, go to receipts
+        // If branch already selected, go to dashboard
         if (localStorage.getItem('selectedBranch')) {
-          navigate('/receipts');
+          navigate('/dashboard');
         }
         // Otherwise stay on page to select branch
       }
@@ -73,7 +73,7 @@ export default function Auth() {
     if (b) {
       setSelectedBranch(b.id as BranchId);
       toast.success(`Branch set to ${b.name}`);
-      setTimeout(() => navigate('/receipts'), 300);
+      setTimeout(() => navigate('/dashboard'), 300);
     }
   };
 
