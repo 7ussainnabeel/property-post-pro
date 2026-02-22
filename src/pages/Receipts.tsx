@@ -20,7 +20,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default function Receipts() {
   const { user, signOut, isAdmin, isAccountant, isITSupport } = useAuth();
-  const { selectedBranch, getBranchName, setSelectedBranch } = useBranch();
+  const { selectedBranch, getBranchName } = useBranch();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -45,8 +45,11 @@ export default function Receipts() {
   const canEditReceipt = (receipt: Receipt): boolean => {
     // Admin and IT Support can always edit
     if (isAdmin || isITSupport) return true;
+    
+    // Accountants cannot edit
+    if (isAccountant) return false;
 
-    // Check if receipt was created within the edit duration
+    // Regular users can edit within the edit duration
     const createdAt = new Date(receipt.created_at);
     const now = new Date();
     const daysDifference = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
@@ -276,25 +279,9 @@ export default function Receipts() {
                   <FileText className="h-5 w-5 md:h-7 md:w-7 shrink-0" />
                   <span className="truncate">Receipt Management</span>
                 </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <p className="text-xs sm:text-sm text-primary-foreground/80 truncate">
-                    {user?.email}
-                  </p>
-                  {selectedBranch && (
-                    <Select value={selectedBranch || ''} onValueChange={(v) => {
-                      setSelectedBranch(v as any);
-                    }}>
-                      <SelectTrigger className="h-6 text-xs bg-white/10 border-white/20 text-white w-auto min-w-[100px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {BRANCHES.map((b) => (
-                          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
+                <p className="text-xs sm:text-sm text-primary-foreground/80 mt-1 truncate">
+                  {user?.email}
+                </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -510,7 +497,7 @@ export default function Receipts() {
                           <Edit className="h-4 w-4" />
                         </Button>
                       )}
-                      {isAdmin && (
+                      {(isAdmin || isITSupport) && (
                         <Button variant="outline" size="sm" onClick={() => handleDelete(receipt.id)} className="text-destructive hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
                         </Button>

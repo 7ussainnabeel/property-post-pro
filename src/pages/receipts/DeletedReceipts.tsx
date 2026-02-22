@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function DeletedReceipts() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin, isAccountant, isITSupport } = useAuth();
   const { selectedBranch, getBranchName } = useBranch();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,13 +35,22 @@ export default function DeletedReceipts() {
   const [filterBranch, setFilterBranch] = useState<string>('all');
   const [previewReceipt, setPreviewReceipt] = useState<Receipt | null>(null);
 
+  const canViewAllBranches = isAdmin || isAccountant || isITSupport;
+  const canRestoreDelete = isAdmin || isITSupport;
+
   const fetchDeletedReceipts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('receipts' as any)
       .select('*')
-      .not('deleted_at', 'is', null)
-      .order('deleted_at', { ascending: false });
+      .not('deleted_at', 'is', null);
+
+    // Regular users only see receipts from their selected branch
+    if (!canViewAllBranches && selectedBranch) {
+      query = query.eq('branch', selectedBranch);
+    }
+
+    const { data, error } = await query.order('deleted_at', { ascending: false });
 
     if (error) {
       toast.error('Failed to load deleted receipts');
@@ -169,19 +178,21 @@ export default function DeletedReceipts() {
                   <SelectItem value="deposit">Deposit</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={filterBranch} onValueChange={setFilterBranch}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Branch" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Branches</SelectItem>
-                  {BRANCHES.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.id}>
-                      {branch.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {canViewAllBranches && (
+                <Select value={filterBranch} onValueChange={setFilterBranch}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Branch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Branches</SelectItem>
+                    {BRANCHES.map((branch) => (
+                      <SelectItem key={branch.id} value={branch.id}>
+                        {branch.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             {(searchQuery || filterType !== 'all' || filterBranch !== 'all') && (
               <div className="mt-3 text-sm text-muted-foreground">
@@ -259,43 +270,47 @@ export default function DeletedReceipts() {
                           <Eye className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleRestore(receipt.id)}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                      >
-                        <RotateCcw className="h-4 w-4 mr-1" /> Restore
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
+                      {canRestoreDelete && (
+                        <>
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRestore(receipt.id)}
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <RotateCcw className="h-4 w-4 mr-1" /> Restore
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Permanently Delete Receipt?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the receipt
-                              for {receipt.client_name || 'this client'} from the database.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handlePermanentDelete(receipt.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Permanently Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Permanently Delete Receipt?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the receipt
+                                  for {receipt.client_name || 'this client'} from the database.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handlePermanentDelete(receipt.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Permanently Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      )}
                     </div>
                   </div>
                 </CardContent>

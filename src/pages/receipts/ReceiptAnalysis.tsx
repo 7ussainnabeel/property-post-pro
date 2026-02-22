@@ -17,7 +17,7 @@ import { ChevronLeft, TrendingUp, DollarSign, FileText, Users, Calendar, PieChar
 import { Receipt } from '@/types/receipt';
 
 export default function ReceiptAnalysis() {
-  const { user, signOut, isAdmin, isAccountant } = useAuth();
+  const { user, signOut, isAdmin, isAccountant, isITSupport } = useAuth();
   const { selectedBranch, getBranchName } = useBranch();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export default function ReceiptAnalysis() {
   const [toDate, setToDate] = useState<string>('');
   const [filterBranch, setFilterBranch] = useState<string>('all');
 
-  const canViewAllBranches = isAdmin || isAccountant;
+  const canViewAllBranches = isAdmin || isAccountant || isITSupport;
 
   const fetchReceipts = async () => {
     setLoading(true);
