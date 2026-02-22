@@ -22,17 +22,12 @@ const queryClient = new QueryClient();
 // Protected route wrapper for branch-based pages
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
-  const selectedBranch = localStorage.getItem('selectedBranch');
   
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (!user) {
-    return <Navigate to="/" replace />;
-  }
-  
-  if (!selectedBranch) {
     return <Navigate to="/" replace />;
   }
   

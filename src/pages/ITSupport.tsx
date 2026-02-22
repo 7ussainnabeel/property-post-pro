@@ -10,15 +10,17 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { ChevronLeft, Shield, Users, Settings, FileText, LogOut, Search, Save, Key, Mail, UserCog } from 'lucide-react';
+import { ChevronLeft, Shield, Users, Settings, FileText, LogOut, Search, Save, Key, Mail, UserCog, UserPlus, Trash2, Phone } from 'lucide-react';
 
 interface UserProfile {
   user_id: string;
   full_name: string | null;
   email: string | null;
   branch: string | null;
+  phone_number: string | null;
   is_active: boolean | null;
   roles: string[];
 }
@@ -34,8 +36,16 @@ export default function ITSupport() {
   // User edit dialog
   const [editUser, setEditUser] = useState<UserProfile | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ fullName: '', email: '', branch: '', role: '', newPassword: '' });
+  const [editForm, setEditForm] = useState({ fullName: '', email: '', branch: '', phoneNumber: '', role: '', newPassword: '' });
   const [saving, setSaving] = useState(false);
+
+  // Create user dialog
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ fullName: '', email: '', branch: '', phoneNumber: '', role: 'user', password: '' });
+  const [creating, setCreating] = useState(false);
+
+  // Delete user state
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -67,6 +77,7 @@ export default function ITSupport() {
       full_name: p.full_name,
       email: p.email,
       branch: p.branch,
+      phone_number: p.phone_number,
       is_active: p.is_active,
       roles: roleMap[p.user_id] || ['user'],
     }));
@@ -110,6 +121,7 @@ export default function ITSupport() {
       fullName: u.full_name || '',
       email: u.email || '',
       branch: u.branch || '',
+      phoneNumber: u.phone_number || '',
       role: u.roles.find(r => r !== 'user') || 'user',
       newPassword: '',
     });
@@ -121,10 +133,18 @@ export default function ITSupport() {
     setSaving(true);
 
     try {
-      // Update profile (name & branch)
+      // Update profile (name, branch, and phone number)
+      console.log('Sending phone number:', editForm.phoneNumber);
       const { error: profileErr } = await supabase.functions.invoke('admin-update-user', {
-        body: { action: 'update_profile', targetUserId: editUser.user_id, fullName: editForm.fullName, branch: editForm.branch || null },
+        body: { 
+          action: 'update_profile', 
+          targetUserId: editUser.user_id, 
+          fullName: editForm.fullName, 
+          branch: editForm.branch || null,
+          phoneNumber: editForm.phoneNumber || null
+        },
       });
+      console.log('Profile update response:', profileErr);
       if (profileErr) throw profileErr;
 
       // Update email if changed
@@ -162,13 +182,102 @@ export default function ITSupport() {
     setSaving(false);
   };
 
+  const handleCreateUser = async () => {
+    if (!createForm.email || !createForm.password || !createForm.branch) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (!createForm.email.endsWith('@icarlton.com')) {
+      toast.error('Only @icarlton.com email addresses are allowed');
+      return;
+    }
+
+    setCreating(true);
+
+    try {
+      // Sign up the user
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: createForm.email,
+        password: createForm.password,
+        options: {
+          data: {
+            full_name: createForm.fullName,
+            branch: createForm.branch,
+            phone_number: createForm.phoneNumber,
+          },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      toast.success('User created successfully!');
+      setCreateDialogOpen(false);
+      setCreateForm({ fullName: '', email: '', branch: '', phoneNumber: '', role: 'user', password: '' });
+      fetchUsers();
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to create user';
+      toast.error(msg);
+    }
+
+    setCreating(false);
+  };
+
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    setDeleting(true);
+    try {
+      console.log('Attempting to delete user:', userId, userEmail);
+      const { data, error } = await supabase.functions.invoke('admin-update-user', {
+        body: { action: 'delete_user', targetUserId: userId },
+      });
+
+      console.log('Delete response:', { data, error });
+
+      if (error) {
+        console.error('Delete user error:', error);
+        throw new Error(error.message || 'Edge function error');
+      }
+
+      if (data?.error) {
+        console.error('Delete user data error:', data.error);
+        throw new Error(data.error);
+      }
+
+      toast.success(`User ${userEmail} deleted successfully`);
+      fetchUsers();
+    } catch (err: any) {
+      console.error('Delete user exception:', err);
+      const msg = err?.message || 'Failed to delete user';
+      toast.error(msg);
+    }
+    setDeleting(false);
+  };
+
+  const handleWhatsAppReset = (phoneNumber: string, userName: string) => {
+    if (!phoneNumber) {
+      toast.error('Phone number not available for this user');
+      return;
+    }
+
+    // Remove any non-digit characters and ensure it starts without country code
+    const cleanNumber = phoneNumber.replace(/\D/g, '');
+    const message = encodeURIComponent(
+      `Hello ${userName},\n\nYour password has been reset by IT Support. Please check your email for the new password.\n\nBest regards,\niCarlton IT Support`
+    );
+
+    // Open WhatsApp with Bahrain country code (+973)
+    const whatsappUrl = `https://wa.me/973${cleanNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   const filteredUsers = useMemo(() => {
     if (!searchQuery) return users;
     const q = searchQuery.toLowerCase();
     return users.filter(u =>
       u.full_name?.toLowerCase().includes(q) ||
       u.email?.toLowerCase().includes(q) ||
-      u.branch?.toLowerCase().includes(q)
+      u.branch?.toLowerCase().includes(q) ||
+      u.phone_number?.toLowerCase().includes(q)
     );
   }, [users, searchQuery]);
 
@@ -220,14 +329,20 @@ export default function ITSupport() {
           <TabsContent value="users">
             <Card className="mb-6">
               <CardContent className="p-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users by name, email, or branch..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search users by name, email, branch, or phone..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  <Button onClick={() => setCreateDialogOpen(true)} className="shrink-0">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Create User
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -254,9 +369,39 @@ export default function ITSupport() {
                             Branch: {u.branch ? BRANCHES.find(b => b.id === u.branch)?.name || u.branch : 'Not set'}
                           </p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => openEditUser(u)}>
-                          <UserCog className="h-4 w-4 mr-1" /> Manage
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => openEditUser(u)}>
+                            <UserCog className="h-4 w-4 mr-1" /> Manage
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                disabled={deleting || u.user_id === user?.id}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete User?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the user account for <strong>{u.email}</strong> and remove all associated data.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteUser(u.user_id, u.email || 'Unknown')}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete User
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -332,6 +477,16 @@ export default function ITSupport() {
               </Select>
             </div>
             <div className="space-y-2">
+              <Label><Phone className="h-3 w-3 inline mr-1" />Phone Number (WhatsApp)</Label>
+              <Input 
+                type="tel" 
+                placeholder="e.g., 33123456" 
+                value={editForm.phoneNumber} 
+                onChange={(e) => setEditForm(p => ({ ...p, phoneNumber: e.target.value }))} 
+              />
+              <p className="text-xs text-muted-foreground">Enter number without +973 (Bahrain code)</p>
+            </div>
+            <div className="space-y-2">
               <Label>Role</Label>
               <Select value={editForm.role} onValueChange={(v) => setEditForm(p => ({ ...p, role: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -347,8 +502,80 @@ export default function ITSupport() {
               <Label><Key className="h-3 w-3 inline mr-1" />Reset Password</Label>
               <Input type="password" placeholder="Leave blank to keep current" value={editForm.newPassword} onChange={(e) => setEditForm(p => ({ ...p, newPassword: e.target.value }))} />
             </div>
-            <Button onClick={handleSaveUser} disabled={saving} className="w-full">
-              {saving ? 'Saving...' : 'Save Changes'}
+            <div className="flex gap-2">
+              <Button onClick={handleSaveUser} disabled={saving} className="flex-1">
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+              <Button 
+                onClick={() => handleWhatsAppReset(editForm.phoneNumber, editForm.fullName || 'User')} 
+                variant="outline" 
+                disabled={!editForm.phoneNumber}
+                className="flex-1"
+              >
+                <Phone className="h-4 w-4 mr-2" />
+                WhatsApp
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create User Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New User</DialogTitle>
+            <DialogDescription>Add a new user to the system</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Full Name <span className="text-destructive">*</span></Label>
+              <Input value={createForm.fullName} onChange={(e) => setCreateForm(p => ({ ...p, fullName: e.target.value }))} placeholder="John Doe" />
+            </div>
+            <div className="space-y-2">
+              <Label><Mail className="h-3 w-3 inline mr-1" />Email <span className="text-destructive">*</span></Label>
+              <Input type="email" value={createForm.email} onChange={(e) => setCreateForm(p => ({ ...p, email: e.target.value }))} placeholder="user@icarlton.com" />
+              <p className="text-xs text-muted-foreground">Must be @icarlton.com</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Branch <span className="text-destructive">*</span></Label>
+              <Select value={createForm.branch} onValueChange={(v) => setCreateForm(p => ({ ...p, branch: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select branch" /></SelectTrigger>
+                <SelectContent>
+                  {BRANCHES.map(b => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label><Phone className="h-3 w-3 inline mr-1" />Phone Number (WhatsApp)</Label>
+              <Input 
+                type="tel" 
+                placeholder="e.g., 33123456" 
+                value={createForm.phoneNumber} 
+                onChange={(e) => setCreateForm(p => ({ ...p, phoneNumber: e.target.value }))} 
+              />
+              <p className="text-xs text-muted-foreground">Enter number without +973 (Bahrain code)</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select value={createForm.role} onValueChange={(v) => setCreateForm(p => ({ ...p, role: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="accountant">Accountant</SelectItem>
+                  <SelectItem value="it_support">IT Support</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label><Key className="h-3 w-3 inline mr-1" />Password <span className="text-destructive">*</span></Label>
+              <Input type="password" value={createForm.password} onChange={(e) => setCreateForm(p => ({ ...p, password: e.target.value }))} placeholder="Minimum 6 characters" />
+            </div>
+            <Button onClick={handleCreateUser} disabled={creating} className="w-full">
+              {creating ? 'Creating...' : 'Create User'}
             </Button>
           </div>
         </DialogContent>
