@@ -12,15 +12,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Plus, ChevronLeft, FileText, Edit, Trash2, Download, LogOut, Search, Filter, Archive, Upload, FileCheck, Eye, X, TrendingUp } from 'lucide-react';
+import { Plus, ChevronLeft, FileText, Edit, Trash2, Download, LogOut, Search, Filter, Archive, Upload, FileCheck, Eye, X, TrendingUp, Shield } from 'lucide-react';
 import { Receipt } from '@/types/receipt';
 import ReceiptFormDialog from '@/components/receipts/ReceiptFormDialog';
 import { generateReceiptPDF, generateReceiptPDFPreview } from '@/utils/pdfGenerator';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default function Receipts() {
-  const { user, signOut, isAdmin, isAccountant } = useAuth();
-  const { selectedBranch, getBranchName } = useBranch();
+  const { user, signOut, isAdmin, isAccountant, isITSupport } = useAuth();
+  const { selectedBranch, getBranchName, setSelectedBranch } = useBranch();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -36,21 +36,22 @@ export default function Receipts() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [receiptToDelete, setReceiptToDelete] = useState<string | null>(null);
   const heroRef = useRef<HTMLElement>(null);
+  const [editDurationDays, setEditDurationDays] = useState(3);
   useThemeColor(heroRef);
 
-  const canViewAllBranches = isAdmin || isAccountant;
+  const canViewAllBranches = isAdmin || isAccountant || isITSupport;
 
   // Check if a receipt can be edited
   const canEditReceipt = (receipt: Receipt): boolean => {
-    // Admin can always edit
-    if (isAdmin) return true;
+    // Admin and IT Support can always edit
+    if (isAdmin || isITSupport) return true;
 
-    // Check if receipt was created within the last 3 days
+    // Check if receipt was created within the edit duration
     const createdAt = new Date(receipt.created_at);
     const now = new Date();
     const daysDifference = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
     
-    return daysDifference <= 3;
+    return daysDifference <= editDurationDays;
   };
 
   const fetchReceipts = useCallback(async () => {
@@ -78,6 +79,9 @@ export default function Receipts() {
 
   useEffect(() => {
     fetchReceipts();
+    // Fetch edit duration
+    supabase.from('edit_duration_settings' as any).select('edit_duration_days').limit(1).maybeSingle()
+      .then(({ data }) => { if (data) setEditDurationDays((data as any).edit_duration_days); });
   }, [fetchReceipts]);
 
   const handleDelete = (id: string) => {
@@ -272,9 +276,25 @@ export default function Receipts() {
                   <FileText className="h-5 w-5 md:h-7 md:w-7 shrink-0" />
                   <span className="truncate">Receipt Management</span>
                 </h1>
-                <p className="text-xs sm:text-sm text-primary-foreground/80 mt-1 truncate">
-                  {user?.email}
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs sm:text-sm text-primary-foreground/80 truncate">
+                    {user?.email}
+                  </p>
+                  {selectedBranch && (
+                    <Select value={selectedBranch || ''} onValueChange={(v) => {
+                      setSelectedBranch(v as any);
+                    }}>
+                      <SelectTrigger className="h-6 text-xs bg-white/10 border-white/20 text-white w-auto min-w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BRANCHES.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -291,6 +311,13 @@ export default function Receipts() {
                     </Button>
                   </Link>
                 </>
+              )}
+              {isITSupport && (
+                <Link to="/it-support">
+                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                    <Shield className="h-4 w-4 mr-1" /> IT Support
+                  </Button>
+                </Link>
               )}
               <Button onClick={handleCreate} size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 <Plus className="h-4 w-4 mr-1" /> New Receipt
@@ -417,6 +444,7 @@ export default function Receipts() {
                         {receipt.amount_paid_bd ? `${receipt.amount_paid_bd} BD` : 'No amount'} • 
                         {receipt.payment_date ? ` ${new Date(receipt.payment_date).toLocaleDateString()}` : ' No date'} •
                         {receipt.agent_name ? ` ${receipt.agent_name}` : ''}
+                        {isAdmin && (receipt as any).created_by_email ? ` • Created by: ${(receipt as any).created_by_email}` : ''}
                       </p>
                     </div>
                     <div className="flex gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -478,7 +506,7 @@ export default function Receipts() {
                           <Edit className="h-4 w-4" />
                         </Button>
                       ) : (
-                        <Button variant="outline" size="sm" disabled title="Only admin can edit receipts older than 3 days">
+                        <Button variant="outline" size="sm" disabled title={`Only admin/IT can edit receipts older than ${editDurationDays} days`}>
                           <Edit className="h-4 w-4" />
                         </Button>
                       )}

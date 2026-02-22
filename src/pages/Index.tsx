@@ -110,7 +110,7 @@ const Index = () => {
         <div className="container max-w-6xl mx-auto mb-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             {/* Branch Badge */}
-            <Link to="/branch-selection">
+            <Link to="/auth">
               <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <Building2 className="h-4 w-4 mr-1 md:mr-2" />
                 <span className="hidden sm:inline">{selectedBranch ? getBranchName(selectedBranch) : 'Select Branch'}</span>

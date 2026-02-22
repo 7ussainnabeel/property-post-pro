@@ -8,6 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   isAccountant: boolean;
+  isITSupport: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string, branch: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -21,31 +22,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAccountant, setIsAccountant] = useState(false);
+  const [isITSupport, setIsITSupport] = useState(false);
 
-  const checkAdminRole = async (userId: string) => {
+  const checkRoles = async (userId: string) => {
     try {
       const { data } = await supabase
         .from('user_roles' as any)
         .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
-      setIsAdmin(!!data);
+        .eq('user_id', userId);
+      const roles = (data || []).map((r: any) => r.role);
+      setIsAdmin(roles.includes('admin'));
+      setIsAccountant(roles.includes('accountant'));
+      setIsITSupport(roles.includes('it_support'));
     } catch {
       setIsAdmin(false);
-    }
-  };
-  const checkAccountantRole = async (userId: string) => {
-    try {
-      const { data } = await supabase
-        .from('user_roles' as any)
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'accountant')
-        .maybeSingle();
-      setIsAccountant(!!data);
-    } catch (error) {
       setIsAccountant(false);
+      setIsITSupport(false);
     }
   };
   useEffect(() => {
@@ -53,13 +45,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        setTimeout(() => {
-          checkAdminRole(session.user.id);
-          checkAccountantRole(session.user.id);
-        }, 0);
+        setTimeout(() => checkRoles(session.user.id), 0);
       } else {
         setIsAdmin(false);
         setIsAccountant(false);
+        setIsITSupport(false);
       }
       setIsLoading(false);
     });
@@ -68,8 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        checkAdminRole(session.user.id);
-        checkAccountantRole(session.user.id);
+        checkRoles(session.user.id);
       }
       setIsLoading(false);
     });
@@ -99,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, isAccountant, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, isAccountant, isITSupport, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -10,11 +10,11 @@ import VideoQuality from "./pages/VideoQuality";
 import DeletedVideos from "./pages/DeletedVideos";
 import History from "./pages/History";
 import DeletedDescriptions from "./pages/DeletedDescriptions";
-import BranchSelection from "./pages/BranchSelection";
 import Auth from "./pages/Auth";
 import Receipts from "./pages/Receipts";
 import DeletedReceipts from "./pages/receipts/DeletedReceipts";
 import ReceiptAnalysis from "./pages/receipts/ReceiptAnalysis";
+import ITSupport from "./pages/ITSupport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const selectedBranch = localStorage.getItem('selectedBranch');
   
   if (!selectedBranch) {
-    return <Navigate to="/branch-selection" replace />;
+    return <Navigate to="/auth" replace />;
   }
   
   return <>{children}</>;
@@ -64,6 +64,25 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// IT Support route wrapper
+const ITSupportRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading, isITSupport } = useAuth();
+  
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (!isITSupport) {
+    return <Navigate to="/receipts" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -73,7 +92,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/branch-selection" element={<BranchSelection />} />
+              <Route path="/branch-selection" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
@@ -83,6 +102,7 @@ const App = () => (
               <Route path="/receipts" element={<AuthRoute><Receipts /></AuthRoute>} />
               <Route path="/receipt-analysis" element={<AdminRoute><ReceiptAnalysis /></AdminRoute>} />
               <Route path="/deleted-receipts" element={<AdminRoute><DeletedReceipts /></AdminRoute>} />
+              <Route path="/it-support" element={<ITSupportRoute><ITSupport /></ITSupportRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

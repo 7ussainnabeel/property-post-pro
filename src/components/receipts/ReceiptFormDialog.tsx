@@ -199,12 +199,17 @@ export default function ReceiptFormDialog({ open, onOpenChange, receipt, onSaved
   const handleSave = async () => {
     setSaving(true);
     const { id, created_at, updated_at, deleted_at, deleted_by, ...rest } = form;
-    const payload = {
+    const payload: Record<string, any> = {
       ...rest,
       receipt_type: receiptType,
       user_id: user?.id,
       branch: selectedBranch,
     };
+
+    // Add created_by_email only on creation
+    if (!receipt) {
+      payload.created_by_email = user?.email;
+    }
 
     let error;
     if (receipt) {
