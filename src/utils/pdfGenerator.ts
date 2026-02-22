@@ -14,6 +14,8 @@ function getBranchTemplateSuffix(branch: string | null): string {
   switch (branch) {
     case 'saar': return '_Saar';
     case 'amwaj-island': return '_Amwaj';
+    case 'manama': return '_Manama';
+    case 'seef': return '_Seef';
     default: return '';
   }
 }
