@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Building2, LogIn, UserPlus, Home, MapPin } from 'lucide-react';
+import { Building2, LogIn, UserPlus, MapPin } from 'lucide-react';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -208,13 +208,6 @@ export default function Auth() {
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </Button>
-          </div>
-          <div className="mt-2 text-center border-t pt-4">
-            <Link to="/">
-              <Button variant="outline" className="w-full" size="sm">
-                <Home className="h-4 w-4 mr-2" /> Return to Home
-              </Button>
-            </Link>
           </div>
         </CardContent>
       </Card>

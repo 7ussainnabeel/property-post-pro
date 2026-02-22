@@ -216,7 +216,7 @@ export default function HistoryPage() {
         <div className="container max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2 md:gap-4 min-w-0">
-              <Link to="/">
+              <Link to="/dashboard">
                 <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 shrink-0">
                   <ChevronLeft className="h-4 w-4 md:mr-1" />
                   <span className="hidden sm:inline">Back</span>

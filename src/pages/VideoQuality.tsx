@@ -531,7 +531,7 @@ const VideoQuality = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4">
-            <Link to="/">
+            <Link to="/dashboard">
               <Button variant="outline" size="icon" className="border-slate-600 hover:bg-slate-700 shrink-0">
                 <ArrowLeft className="h-4 w-4" />
               </Button>

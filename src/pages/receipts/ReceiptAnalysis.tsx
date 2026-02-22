@@ -213,70 +213,70 @@ export default function ReceiptAnalysis() {
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="space-y-4">
-              <div className="flex gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Quick Select</Label>
                 <Button
                   variant={!fromDate && !toDate ? "default" : "outline"}
                   onClick={() => {
                     setFromDate('');
                     setToDate('');
                   }}
-                  className="h-10"
+                  className="h-10 w-full"
                 >
                   <Calendar className="h-4 w-4 mr-2" />
                   All Time
                 </Button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="from-date" className="text-xs font-medium">From Date</Label>
+                <Input
+                  id="from-date"
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="to-date" className="text-xs font-medium">To Date</Label>
+                <Input
+                  id="to-date"
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+              {canViewAllBranches && (
                 <div className="space-y-2">
-                  <Label htmlFor="from-date" className="text-xs font-medium">From Date</Label>
-                  <Input
-                    id="from-date"
-                    type="date"
-                    value={fromDate}
-                    onChange={(e) => setFromDate(e.target.value)}
-                    className="h-10"
-                  />
+                  <Label htmlFor="branch-filter" className="text-xs font-medium">Branch</Label>
+                  <Select value={filterBranch} onValueChange={setFilterBranch}>
+                    <SelectTrigger id="branch-filter" className="h-10">
+                      <SelectValue placeholder="Branch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Branches</SelectItem>
+                      {BRANCHES.map((branch) => (
+                        <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="to-date" className="text-xs font-medium">To Date</Label>
-                  <Input
-                    id="to-date"
-                    type="date"
-                    value={toDate}
-                    onChange={(e) => setToDate(e.target.value)}
-                    className="h-10"
-                  />
-                </div>
-                {canViewAllBranches && (
-                  <div className="space-y-2">
-                    <Label htmlFor="branch-filter" className="text-xs font-medium">Branch</Label>
-                    <Select value={filterBranch} onValueChange={setFilterBranch}>
-                      <SelectTrigger id="branch-filter" className="h-10">
-                        <SelectValue placeholder="Branch" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Branches</SelectItem>
-                        {BRANCHES.map((branch) => (
-                          <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                <div className="flex items-end">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setFromDate('');
-                      setToDate('');
-                      setFilterBranch('all');
-                    }}
-                    className="h-10 w-full"
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
+              )}
+              <div className="space-y-2">
+                <Label className="text-xs font-medium invisible">Action</Label>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setFromDate('');
+                    setToDate('');
+                    setFilterBranch('all');
+                  }}
+                  className="h-10 w-full"
+                >
+                  Clear Filters
+                </Button>
               </div>
             </div>
           </CardContent>

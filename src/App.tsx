@@ -21,10 +21,19 @@ const queryClient = new QueryClient();
 
 // Protected route wrapper for branch-based pages
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
   const selectedBranch = localStorage.getItem('selectedBranch');
   
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+  
   if (!selectedBranch) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
   
   return <>{children}</>;
@@ -39,7 +48,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
   
   return <>{children}</>;
@@ -54,10 +63,48 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
   
   if (!isAdmin) {
+    return <Navigate to="/receipts" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Privileged route wrapper (Admin, Accountant, IT Support)
+const PrivilegedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading, isAdmin, isAccountant, isITSupport } = useAuth();
+  
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+  
+  if (!isAdmin && !isAccountant && !isITSupport) {
+    return <Navigate to="/receipts" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Admin or IT Support route wrapper
+const AdminOrITRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading, isAdmin, isITSupport } = useAuth();
+  
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+  
+  if (!isAdmin && !isITSupport) {
     return <Navigate to="/receipts" replace />;
   }
   
@@ -73,7 +120,7 @@ const ITSupportRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
   
   if (!isITSupport) {
@@ -92,15 +139,15 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/" element={<Auth />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
               <Route path="/deleted-descriptions" element={<ProtectedRoute><DeletedDescriptions /></ProtectedRoute>} />
               <Route path="/video-quality" element={<ProtectedRoute><VideoQuality /></ProtectedRoute>} />
               <Route path="/deleted-videos" element={<ProtectedRoute><DeletedVideos /></ProtectedRoute>} />
               <Route path="/receipts" element={<AuthRoute><Receipts /></AuthRoute>} />
-              <Route path="/receipt-analysis" element={<AdminRoute><ReceiptAnalysis /></AdminRoute>} />
-              <Route path="/deleted-receipts" element={<AdminRoute><DeletedReceipts /></AdminRoute>} />
+              <Route path="/receipt-analysis" element={<PrivilegedRoute><ReceiptAnalysis /></PrivilegedRoute>} />
+              <Route path="/deleted-receipts" element={<AdminOrITRoute><DeletedReceipts /></AdminOrITRoute>} />
               <Route path="/it-support" element={<ITSupportRoute><ITSupport /></ITSupportRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

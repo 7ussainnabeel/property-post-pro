@@ -268,7 +268,7 @@ export default function Receipts() {
         <div className="container max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2 md:gap-4 min-w-0">
-              <Link to="/">
+              <Link to="/dashboard">
                 <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 shrink-0">
                   <ChevronLeft className="h-4 w-4 md:mr-1" />
                   <span className="hidden sm:inline">Back</span>
@@ -285,19 +285,19 @@ export default function Receipts() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              {isAdmin && (
-                <>
-                  <Link to="/receipt-analysis">
-                    <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                      <TrendingUp className="h-4 w-4 mr-1" /> Analysis
-                    </Button>
-                  </Link>
-                  <Link to="/deleted-receipts">
-                    <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                      <Archive className="h-4 w-4 mr-1" /> Deleted
-                    </Button>
-                  </Link>
-                </>
+              {canViewAllBranches && (
+                <Link to="/receipt-analysis">
+                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                    <TrendingUp className="h-4 w-4 mr-1" /> Analysis
+                  </Button>
+                </Link>
+              )}
+              {(isAdmin || isITSupport) && (
+                <Link to="/deleted-receipts">
+                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                    <Archive className="h-4 w-4 mr-1" /> Deleted
+                  </Button>
+                </Link>
               )}
               {isITSupport && (
                 <Link to="/it-support">
@@ -306,9 +306,11 @@ export default function Receipts() {
                   </Button>
                 </Link>
               )}
-              <Button onClick={handleCreate} size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
-                <Plus className="h-4 w-4 mr-1" /> New Receipt
-              </Button>
+              {!isAccountant && (
+                <Button onClick={handleCreate} size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
+                  <Plus className="h-4 w-4 mr-1" /> New Receipt
+                </Button>
+              )}
               <Button onClick={signOut} variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <LogOut className="h-4 w-4 mr-1" /> Sign Out
               </Button>
