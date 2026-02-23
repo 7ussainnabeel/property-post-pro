@@ -259,13 +259,12 @@ export default function ITSupport() {
       return;
     }
 
-    // Remove any non-digit characters and ensure it starts without country code
     const cleanNumber = phoneNumber.replace(/\D/g, '');
+    const resetLink = `${window.location.origin}/`;
     const message = encodeURIComponent(
-      `Hello ${userName},\n\nYour password has been reset by IT Support. Please check your email for the new password.\n\nBest regards,\niCarlton IT Support`
+      `Hello ${userName},\n\nYour password has been reset by IT Support.\n\nPlease use the link below to sign in and reset your password:\n${resetLink}\n\nOnce signed in, you can use "Forgot Password?" on the login page to set a new password.\n\nBest regards,\niCarlton IT Support`
     );
 
-    // Open WhatsApp with Bahrain country code (+973)
     const whatsappUrl = `https://wa.me/973${cleanNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
   };

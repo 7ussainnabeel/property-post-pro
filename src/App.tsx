@@ -11,6 +11,7 @@ import DeletedVideos from "./pages/DeletedVideos";
 import History from "./pages/History";
 import DeletedDescriptions from "./pages/DeletedDescriptions";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Receipts from "./pages/Receipts";
 import DeletedReceipts from "./pages/receipts/DeletedReceipts";
 import ReceiptAnalysis from "./pages/receipts/ReceiptAnalysis";
@@ -135,6 +136,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
               <Route path="/deleted-descriptions" element={<ProtectedRoute><DeletedDescriptions /></ProtectedRoute>} />

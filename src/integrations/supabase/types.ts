@@ -145,6 +145,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean | null
+          phone_number: string | null
           updated_at: string | null
           user_id: string
         }
@@ -155,6 +156,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean | null
+          phone_number?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -165,6 +167,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean | null
+          phone_number?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -223,7 +226,7 @@ export type Database = {
           transaction_type: string | null
           unit_number: string | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           agent_name?: string | null
@@ -277,7 +280,7 @@ export type Database = {
           transaction_type?: string | null
           unit_number?: string | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           agent_name?: string | null
@@ -331,7 +334,7 @@ export type Database = {
           transaction_type?: string | null
           unit_number?: string | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }

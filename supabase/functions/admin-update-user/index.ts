@@ -136,9 +136,33 @@ Deno.serve(async (req) => {
         } else {
           console.log("✓ Cleared edit_duration_settings references");
         }
+
+        // Clear receipts user_id references
+        console.log("Step 2: Clearing receipts references...");
+        const { error: receiptsError } = await adminClient
+          .from("receipts")
+          .update({ user_id: null })
+          .eq("user_id", targetUserId);
+        if (receiptsError) {
+          console.error("Warning - Error clearing receipts:", receiptsError);
+        } else {
+          console.log("✓ Cleared receipts references");
+        }
+
+        // Clear generated_listings user_id references
+        console.log("Step 3: Clearing generated_listings references...");
+        const { error: listingsError } = await adminClient
+          .from("generated_listings")
+          .update({ user_id: null })
+          .eq("user_id", targetUserId);
+        if (listingsError) {
+          console.error("Warning - Error clearing listings:", listingsError);
+        } else {
+          console.log("✓ Cleared generated_listings references");
+        }
         
-        // Delete user roles first (foreign key constraint)
-        console.log("Step 2: Deleting user roles...");
+        // Delete user roles
+        console.log("Step 4: Deleting user roles...");
         const { error: rolesError } = await adminClient.from("user_roles").delete().eq("user_id", targetUserId);
         if (rolesError) {
           console.error("✗ Error deleting user roles:", rolesError);
@@ -147,7 +171,7 @@ Deno.serve(async (req) => {
         console.log("✓ Deleted user roles");
         
         // Delete profile
-        console.log("Step 3: Deleting profile...");
+        console.log("Step 5: Deleting profile...");
         const { error: profileError } = await adminClient.from("profiles").delete().eq("user_id", targetUserId);
         if (profileError) {
           console.error("✗ Error deleting profile:", profileError);
@@ -189,8 +213,9 @@ Deno.serve(async (req) => {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
