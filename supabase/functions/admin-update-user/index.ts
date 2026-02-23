@@ -137,16 +137,16 @@ Deno.serve(async (req) => {
           console.log("✓ Cleared edit_duration_settings references");
         }
 
-        // Clear receipts user_id references
-        console.log("Step 2: Clearing receipts references...");
+        // Nullify receipts user_id so receipts are preserved
+        console.log("Step 2: Preserving receipts (clearing user_id)...");
         const { error: receiptsError } = await adminClient
           .from("receipts")
-          .update({ user_id: null })
+          .update({ user_id: null, deleted_by: `deleted_user:${targetUserId}` })
           .eq("user_id", targetUserId);
         if (receiptsError) {
           console.error("Warning - Error clearing receipts:", receiptsError);
         } else {
-          console.log("✓ Cleared receipts references");
+          console.log("✓ Preserved receipts (user_id set to null)");
         }
 
         // Clear generated_listings user_id references
