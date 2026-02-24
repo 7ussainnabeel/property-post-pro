@@ -60,7 +60,7 @@ Example First Paragraphs:
 
 IMPORTANT RULES:
 1. For Instagram captions: Use emojis strategically, keep it catchy and engaging with a clear call-to-action
-2. For Property Finder: Generate BOTH a catchy title (max 100 chars) AND a detailed description optimized with Property Finder SEO keywords. CRITICAL GUARDRAIL: propertyFinderEN and propertyFinderAR fields MUST contain ZERO emojis - they must be pure text only. Any emoji in these fields is strictly FORBIDDEN and will cause rejection.
+2. For Property Finder: Generate BOTH a catchy title (max 50 chars) AND a detailed description (max 2000 chars) optimized with Property Finder SEO keywords. CRITICAL GUARDRAIL: propertyFinderEN and propertyFinderAR fields MUST contain ZERO emojis - they must be pure text only. Any emoji in these fields is strictly FORBIDDEN and will cause rejection. Always include BOTH square meters AND square feet for property size.
 3. For other websites: Use SEO-friendly, comprehensive descriptions
 4. Always translate locations to Arabic properly (e.g., Manama = المنامة, Riffa = الرفاع, Juffair = الجفير)
 5. Convert all numbers to Arabic numerals (٠١٢٣٤٥٦٧٨٩) in Arabic versions
@@ -96,7 +96,7 @@ IMPORTANT RULES:
     - Private Balconies/Terrace with [view type] views
     - High-Quality Furnishings and Designer Finishes (if furnished)
     - Central AC/Split AC throughout
-    - [Size] sqm of living space
+    - [Size] sqm ([Size] sq ft) of living space
     - Private/Covered Parking for [number] vehicles
     - Laundry room, Storage room (if applicable)
     [List EVERY property detail with descriptive adjectives]
@@ -128,13 +128,15 @@ IMPORTANT RULES:
     
     **Asking Price BD [Price] (Negotiable) or **Monthly Rent BD [Price]
     
+    IMPORTANT: Always include BOTH square meters and square feet in the description (e.g., "[X] sqm ([Y] sq ft)")
+    
     CRITICAL FORMATTING RULES:
     • Use "Property Features:" for main property details section
     • Use "Exclusive Amenities:" (villas) or "Building Facilities:" (apartments)
     • Each bullet MUST start with - or • on its own line
     • Use descriptive adjectives: Large, Spacious, Stylish, Expansive, Gourmet, Premium, Elegant, Modern
     • Be specific: "4 Large en-suite bedrooms" not "4 bedrooms"
-    • Include property size in sqm in Property Features
+    • Include property size in BOTH sqm AND sq ft: "[X] sqm ([Y] sq ft)" in Property Features
     • Always mention parking if available
     • Use separator line _______________________________________________________________ before price
     • Format: **Asking Price BD [amount] (Negotiable) for sale or **Monthly Rent BD [amount] for rent
@@ -196,10 +198,10 @@ For Instagram hashtags, include a mix of:
 
 Respond ONLY with valid JSON in this exact format:
 {
-  "propertyFinderTitleEN": "Catchy English title for Property Finder (max 100 chars)",
-  "propertyFinderTitleAR": "Arabic title for Property Finder (max 100 chars)",
-  "propertyFinderEN": "English Property Finder description with bullet points for property details (NO EMOJIS, NO CONTACT INFO)",
-  "propertyFinderAR": "Arabic Property Finder description with bullet points for property details (NO EMOJIS, NO CONTACT INFO)",
+  "propertyFinderTitleEN": "Catchy English title for Property Finder (max 50 chars)",
+  "propertyFinderTitleAR": "Arabic title for Property Finder (max 50 chars)",
+  "propertyFinderEN": "English Property Finder description with bullet points for property details (max 2000 chars, NO EMOJIS, NO CONTACT INFO, include both sqm and sq ft)",
+  "propertyFinderAR": "Arabic Property Finder description with bullet points for property details (max 2000 chars, NO EMOJIS, NO CONTACT INFO, include both sqm and sq ft)",
   "instagramEN": "English Instagram caption with emojis and hashtags ONLY - NO CONTACT INFO",
   "instagramAR": "Arabic Instagram caption with emojis and hashtags ONLY - NO CONTACT INFO",
   "websiteEN": "English website description with emojis ONLY - NO CONTACT INFO",
@@ -225,12 +227,15 @@ Respond ONLY with valid JSON in this exact format:
     const agentInfo = agentMap[property.agent] || { name: 'Carlton Real Estate', nameAR: 'كارلتون العقارية', branch: 'Carlton Real Estate', branchAR: 'كارلتون العقارية', branchPhone: '☎️ +973 1771 3000' };
     const agentPhone = property.agent || '17713000';
 
+    // Calculate square feet from square meters (1 sqm = 10.764 sq ft)
+    const sizeSqFt = property.size ? Math.round(property.size * 10.764) : null;
+
     const userPrompt = `Generate real estate listing content for this property:
 
 Property Type: ${property.propertyType}
 Category: ${property.category}
 Location: ${property.location}
-Size: ${property.size} sqm
+Size: ${property.size} sqm (${sizeSqFt} sq ft)
 ${property.landClassification ? `Land Classification: ${property.landClassification}` : ''}
 ${property.bedrooms ? `Bedrooms: ${property.bedrooms}` : ''}
 ${property.bathrooms ? `Bathrooms: ${property.bathrooms}` : ''}
@@ -308,6 +313,10 @@ Generate professional, attractive content that highlights the property's best fe
           .replace(/\n /g, '\n') // Remove space after newline
           .replace(/ \n/g, '\n') // Remove space before newline
           .trim();
+        // Limit to 2000 characters
+        if (generatedContent.propertyFinderEN.length > 2000) {
+          generatedContent.propertyFinderEN = generatedContent.propertyFinderEN.substring(0, 2000).trim();
+        }
       }
       if (generatedContent.propertyFinderAR) {
         generatedContent.propertyFinderAR = generatedContent.propertyFinderAR
@@ -316,12 +325,24 @@ Generate professional, attractive content that highlights the property's best fe
           .replace(/\n /g, '\n')
           .replace(/ \n/g, '\n')
           .trim();
+        // Limit to 2000 characters
+        if (generatedContent.propertyFinderAR.length > 2000) {
+          generatedContent.propertyFinderAR = generatedContent.propertyFinderAR.substring(0, 2000).trim();
+        }
       }
       if (generatedContent.propertyFinderTitleEN) {
         generatedContent.propertyFinderTitleEN = generatedContent.propertyFinderTitleEN.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
+        // Limit to 50 characters
+        if (generatedContent.propertyFinderTitleEN.length > 50) {
+          generatedContent.propertyFinderTitleEN = generatedContent.propertyFinderTitleEN.substring(0, 50).trim();
+        }
       }
       if (generatedContent.propertyFinderTitleAR) {
         generatedContent.propertyFinderTitleAR = generatedContent.propertyFinderTitleAR.replace(emojiRegex, '').replace(/\s+/g, ' ').trim();
+        // Limit to 50 characters
+        if (generatedContent.propertyFinderTitleAR.length > 50) {
+          generatedContent.propertyFinderTitleAR = generatedContent.propertyFinderTitleAR.substring(0, 50).trim();
+        }
       }
       
       // Build contact blocks
